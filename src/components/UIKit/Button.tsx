@@ -89,7 +89,7 @@ const styles = {
         ],
         primary: [
             'text-white [--btn-hover-overlay:var(--color-white)]/10 [--btn-bg:var(--color-primary-500)] [--btn-border:var(--color-primary-600)]/90',
-            '[--btn-icon:var(--color-primary-300)] data-active:[--btn-icon:var(--color-primary-200)] data-hover:[--btn-icon:var(--color-primary-200)]',
+            '[--btn-icon:var(--color-white)] data-active:[--btn-icon:var(--color-gray-100)] data-hover:[--btn-icon:var(--color-gray-100)]',
         ],
         cyan: [
             'text-cyan-950 [--btn-bg:var(--color-cyan-300)] [--btn-border:var(--color-cyan-400)]/80 [--btn-hover-overlay:var(--color-white)]/25',

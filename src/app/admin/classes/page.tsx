@@ -64,7 +64,7 @@ export default function ClassesPage() {
                     </p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <Button color="primary" onClick={() => setIsImportOpen(true)}>
+                    <Button outline onClick={() => setIsImportOpen(true)}>
                         <ArrowUpTrayIcon data-slot="icon" />
                         Import CSV
                     </Button>
