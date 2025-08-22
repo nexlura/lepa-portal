@@ -1,47 +1,117 @@
-import { UserGroupIcon, PlusIcon } from '@heroicons/react/24/outline';
+'use client'
+
+import { useMemo, useState } from 'react'
+import { UserGroupIcon, PlusIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline'
+
+import { Button } from '@/components/UIKit/Button';
+import { ImportStudentsModal, EditStudentModal } from '@/components/Students'
+import type { MinimalStudent } from '@/components/Students/ImportStudentsModal'
+import type { EditStudentFormData } from '@/components/Students/EditStudentModal'
+
+interface StudentRecord {
+    id: number
+    name: string
+    gender?: string
+    dateOfBirth?: string
+    email?: string
+    phone?: string
+    address?: string
+    city?: string
+    state?: string
+    postalCode?: string
+    grade: string
+    classSection?: string
+    enrollmentDate: string
+    previousSchool?: string
+    guardianName?: string
+    guardianRelationship?: string
+    guardianEmail?: string
+    guardianPhone?: string
+    status: 'Pending' | 'Enrolled'
+}
 
 export default function StudentsPage() {
-    const students = [
-        {
-            id: 1,
-            name: 'John Doe',
-            email: 'john.doe@example.com',
-            grade: 'Grade 10',
-            status: 'Active',
-            enrollmentDate: '2024-01-15',
-        },
-        {
-            id: 2,
-            name: 'Sarah Smith',
-            email: 'sarah.smith@example.com',
-            grade: 'Grade 11',
-            status: 'Active',
-            enrollmentDate: '2024-01-10',
-        },
-        {
-            id: 3,
-            name: 'Michael Johnson',
-            email: 'michael.johnson@example.com',
-            grade: 'Grade 9',
-            status: 'Pending',
-            enrollmentDate: '2024-01-20',
-        },
-    ];
+
+
+    const [students, setStudents] = useState<StudentRecord[]>([])
+
+    const [showImportModal, setShowImportModal] = useState(false)
+
+    const [editTarget, setEditTarget] = useState<StudentRecord | null>(null)
+    const [showEditModal, setShowEditModal] = useState(false)
+
+    const handleImportStudents = (rows: MinimalStudent[]) => {
+        const startId = Math.max(0, ...students.map(s => s.id)) + 1
+        const imported: StudentRecord[] = rows.map((r, idx) => ({
+            id: startId + idx,
+            name: r.name,
+            dateOfBirth: r.dateOfBirth,
+            grade: r.grade,
+            gender: r.gender,
+            email: r.email,
+            guardianName: r.guardianName,
+            guardianPhone: r.guardianPhone,
+            enrollmentDate: new Date().toISOString().split('T')[0],
+            status: 'Pending'
+        }))
+        setStudents(prev => [...prev, ...imported])
+        setShowImportModal(false)
+    }
+
+    const handleEditStudent = (updated: EditStudentFormData) => {
+        if (!editTarget) return
+        setStudents(prev => prev.map(s => {
+            if (s.id !== editTarget.id) return s
+            return {
+                ...s,
+                name: updated.fullName,
+                gender: updated.gender ?? s.gender,
+                dateOfBirth: updated.dateOfBirth ?? s.dateOfBirth,
+                email: updated.email ?? s.email,
+                phone: updated.phone ?? s.phone,
+                address: updated.address ?? s.address,
+                city: updated.city ?? s.city,
+                state: updated.state ?? s.state,
+                postalCode: updated.postalCode ?? s.postalCode,
+                grade: updated.grade ?? s.grade,
+                classSection: updated.classSection ?? s.classSection,
+                enrollmentDate: updated.enrollmentDate ?? s.enrollmentDate,
+                previousSchool: updated.previousSchool ?? s.previousSchool,
+                guardianName: updated.guardianName ?? s.guardianName,
+                guardianRelationship: updated.guardianRelationship ?? s.guardianRelationship,
+                guardianEmail: updated.guardianEmail ?? s.guardianEmail,
+                guardianPhone: updated.guardianPhone ?? s.guardianPhone,
+            }
+        }))
+        setShowEditModal(false)
+        setEditTarget(null)
+    }
+
+    const stats = useMemo(() => {
+        const total = students.length
+        const pending = students.filter(s => s.status === 'Pending').length
+        const grades = new Set(students.map(s => s.grade).filter(Boolean))
+        return { total, pending, grades: grades.size }
+    }, [students])
 
     return (
         <div className="space-y-6">
-            {/* Page header */}
+            {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Students</h1>
-                    <p className="mt-1 text-sm text-gray-500">
-                        Manage all student records and information.
-                    </p>
+                    <h1 className="text-2xl font-bold text-gray-900">Student Admissions</h1>
+                    <p className="mt-1 text-sm text-gray-500">Admit students individually or by CSV import. Complete minimal imports later.</p>
                 </div>
-                <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                    <PlusIcon className="h-4 w-4 mr-2" />
-                    Add Student
-                </button>
+                <div className="flex gap-3">
+                    <Button outline onClick={() => setShowImportModal(true)}>
+                        <ArrowDownTrayIcon className="h-4 w-4 mr-2" />
+                        Import CSV
+                    </Button>
+                    <Button color="primary" href="/admin/students/admissions/new">
+                        <PlusIcon className="h-4 w-4 mr-2 text-white" />
+                        Admit Student
+                    </Button>
+                </div>
             </div>
 
             {/* Stats */}
@@ -54,27 +124,8 @@ export default function StudentsPage() {
                             </div>
                             <div className="ml-5 w-0 flex-1">
                                 <dl>
-                                    <dt className="text-sm font-medium text-gray-500 truncate">
-                                        Total Students
-                                    </dt>
-                                    <dd className="text-lg font-medium text-gray-900">1,234</dd>
-                                </dl>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div className="bg-white overflow-hidden shadow rounded-lg">
-                    <div className="p-5">
-                        <div className="flex items-center">
-                            <div className="flex-shrink-0">
-                                <UserGroupIcon className="h-6 w-6 text-green-400" />
-                            </div>
-                            <div className="ml-5 w-0 flex-1">
-                                <dl>
-                                    <dt className="text-sm font-medium text-gray-500 truncate">
-                                        Active Students
-                                    </dt>
-                                    <dd className="text-lg font-medium text-gray-900">1,180</dd>
+                                    <dt className="text-sm font-medium text-gray-500 truncate">Total Admissions</dt>
+                                    <dd className="text-lg font-medium text-gray-900">{stats.total}</dd>
                                 </dl>
                             </div>
                         </div>
@@ -88,10 +139,23 @@ export default function StudentsPage() {
                             </div>
                             <div className="ml-5 w-0 flex-1">
                                 <dl>
-                                    <dt className="text-sm font-medium text-gray-500 truncate">
-                                        Pending Applications
-                                    </dt>
-                                    <dd className="text-lg font-medium text-gray-900">54</dd>
+                                    <dt className="text-sm font-medium text-gray-500 truncate">Pending</dt>
+                                    <dd className="text-lg font-medium text-gray-900">{stats.pending}</dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div className="bg-white overflow-hidden shadow rounded-lg">
+                    <div className="p-5">
+                        <div className="flex items-center">
+                            <div className="flex-shrink-0">
+                                <UserGroupIcon className="h-6 w-6 text-blue-400" />
+                            </div>
+                            <div className="ml-5 w-0 flex-1">
+                                <dl>
+                                    <dt className="text-sm font-medium text-gray-500 truncate">Grades</dt>
+                                    <dd className="text-lg font-medium text-gray-900">{stats.grades}</dd>
                                 </dl>
                             </div>
                         </div>
@@ -99,59 +163,45 @@ export default function StudentsPage() {
                 </div>
             </div>
 
-            {/* Students table */}
+            {/* Table */}
             <div className="bg-white shadow rounded-lg">
                 <div className="px-4 py-5 sm:p-6">
-                    <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-                        Recent Students
-                    </h3>
+                    <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Pending Admissions</h3>
                     <div className="overflow-x-auto">
                         <table className="min-w-full divide-y divide-gray-200">
                             <thead className="bg-gray-50">
                                 <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Name
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Email
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Grade
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Status
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Enrollment Date
-                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Grade</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">DOB</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Guardian</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th className="px-6 py-3"></th>
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
-                                {students.map((student) => (
-                                    <tr key={student.id} className="hover:bg-gray-50">
+                                {students.map((s) => (
+                                    <tr key={s.id} className="hover:bg-gray-50">
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="text-sm font-medium text-gray-900">
-                                                {student.name}
-                                            </div>
+                                            <div className="text-sm font-medium text-gray-900">{s.name}</div>
+                                            <div className="text-xs text-gray-500">{s.email || '-'}</div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="text-sm text-gray-500">{student.email}</div>
+                                            <div className="text-sm text-gray-900">{s.grade || '-'}</div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="text-sm text-gray-900">{student.grade}</div>
+                                            <div className="text-sm text-gray-500">{s.dateOfBirth || '-'}</div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <span
-                                                className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${student.status === 'Active'
-                                                        ? 'bg-green-100 text-green-800'
-                                                        : 'bg-yellow-100 text-yellow-800'
-                                                    }`}
-                                            >
-                                                {student.status}
-                                            </span>
+                                            <div className="text-sm text-gray-500">{s.guardianName || '-'} {s.guardianPhone ? `(${s.guardianPhone})` : ''}</div>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {student.enrollmentDate}
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">{s.status}</span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            <Button onClick={() => { setEditTarget(s); setShowEditModal(true) }}>
+                                                Edit
+                                            </Button>
                                         </td>
                                     </tr>
                                 ))}
@@ -160,6 +210,33 @@ export default function StudentsPage() {
                     </div>
                 </div>
             </div>
+
+            {/* Individual admission moved to dedicated page */}
+            <ImportStudentsModal open={showImportModal} onClose={setShowImportModal} onSubmit={handleImportStudents} />
+            <EditStudentModal
+                open={showEditModal}
+                onClose={(o) => { if (!o) setEditTarget(null); setShowEditModal(o) }}
+                initialData={editTarget ? {
+                    fullName: editTarget.name,
+                    gender: editTarget.gender,
+                    dateOfBirth: editTarget.dateOfBirth,
+                    email: editTarget.email,
+                    phone: editTarget.phone,
+                    address: editTarget.address,
+                    city: editTarget.city,
+                    state: editTarget.state,
+                    postalCode: editTarget.postalCode,
+                    grade: editTarget.grade,
+                    classSection: editTarget.classSection,
+                    enrollmentDate: editTarget.enrollmentDate,
+                    previousSchool: editTarget.previousSchool,
+                    guardianName: editTarget.guardianName,
+                    guardianRelationship: editTarget.guardianRelationship,
+                    guardianEmail: editTarget.guardianEmail,
+                    guardianPhone: editTarget.guardianPhone,
+                } : null}
+                onSubmit={handleEditStudent}
+            />
         </div>
-    );
+    )
 } 
