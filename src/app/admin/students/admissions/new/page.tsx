@@ -79,7 +79,7 @@ export default function NewStudentAdmissionPage() {
     }
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-8 pb-6">
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900">New Student Admission</h1>
@@ -205,10 +205,7 @@ export default function NewStudentAdmissionPage() {
                     </div>
                 </section>
 
-                <div className="flex justify-end gap-3">
-                    <Button plain type="button" onClick={() => router.back()}>Cancel</Button>
-                    <Button color="primary" type="submit">Submit Admission</Button>
-                </div>
+
             </form>
         </div>
     )
