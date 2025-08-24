@@ -2,8 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { UserGroupIcon, PlusIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline'
-
-import { Button } from '@/components/UIKit/Button';
+import { Button } from '@/components/UIKit/Button'
 import { ImportStudentsModal, EditStudentModal } from '@/components/Students'
 import type { MinimalStudent } from '@/components/Students/ImportStudentsModal'
 import type { EditStudentFormData } from '@/components/Students/EditStudentModal'
@@ -30,9 +29,7 @@ interface StudentRecord {
     status: 'Pending' | 'Enrolled'
 }
 
-export default function StudentsPage() {
-
-
+export default function StudentAdmissionsPage() {
     const [students, setStudents] = useState<StudentRecord[]>([])
 
     const [showImportModal, setShowImportModal] = useState(false)
