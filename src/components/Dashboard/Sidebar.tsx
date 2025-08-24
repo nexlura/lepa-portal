@@ -39,7 +39,7 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
 
             {/* Sidebar */}
             <div
-                className={`fixed sm:rounded-lg inset-y-0 left-0 sm:my-4 lg:ml-4 z-50 w-64 transform bg-gradient-to-br from-primary-50 to-secondary-50 transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'
+                className={`fixed sm:rounded-lg inset-y-0 left-0 sm:my-4 lg:ml-4 w-64 transform bg-gradient-to-br from-primary-100 to-secondary-100 transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'
                     }`}
             >
                 <div className="flex h-full flex-col">
@@ -65,7 +65,7 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
                                     key={item.name}
                                     href={item.href}
                                     className={`group flex text-accent-900 items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${isActive
-                                        ? 'bg-primary-100'
+                                        ? 'bg-primary-200'
                                         : 'hover:bg-primary-50 hover:text-gray-900'
                                         }`}
                                 >
@@ -84,7 +84,7 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
                         <Link
                             href={'/admin/settings'}
                             className={`group flex text-accent-900 items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${'/admin/settings' === pathname
-                                ? 'bg-primary-100'
+                                ? 'bg-primary-200'
                                 : 'hover:bg-primary-50 hover:text-gray-900'
                                 }`}
                         >
