@@ -23,11 +23,11 @@ const ImportCsvModal = ({
     const [error, setError] = useState<string | null>(null)
 
     const handleDownloadTemplate = () => {
-        const headers = ['name', 'teacher']
+        const headers = ['name', 'capacity']
         const sample = [
             headers.join(','),
-            'Class 1,Mr. David Chen',
-            'Class 2 ,Ms. Lisa Rodriguez',
+            'Class 1,40',
+            'Class 2 ,35',
         ].join('\n')
         const blob = new Blob([sample], { type: 'text/csv;charset=utf-8;' })
         const url = URL.createObjectURL(blob)
@@ -77,7 +77,7 @@ const ImportCsvModal = ({
         <Dialog size="md" open={open} onClose={onClose} className="relative z-20">
             <DialogTitle>Import Classes from CSV</DialogTitle>
             <DialogDescription>
-                Upload a CSV with headers: <span className="font-mono">name, teacher</span>.
+                Upload a CSV with headers: <span className="font-mono">name, capacity</span>.
             </DialogDescription>
             <DialogBody>
                 {error ? (

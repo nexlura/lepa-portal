@@ -54,11 +54,11 @@ const AddClassModal = ({
                         {errors.name ? <ErrorMessage>{errors.name}</ErrorMessage> : null}
                     </Field>
                     <Field className="sm:col-span-2">
-                        <Label className="text-sm/6 text-gray-900 font-medium">Teacher</Label>
+                        <Label className="text-sm/6 text-gray-900 font-medium">Capacity</Label>
                         <Input
-                            placeholder="e.g., Mr. David Chen"
-                            value={form.homeroomTeacher}
-                            onChange={(e) => setForm((f) => ({ ...f, homeroomTeacher: e.target.value }))}
+                            placeholder="e.g., 40"
+                            value={form.capacity}
+                            onChange={(e) => setForm((f) => ({ ...f, capacity: e.target.value }))}
                         />
                     </Field>
                 </div>
