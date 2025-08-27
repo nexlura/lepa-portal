@@ -3,7 +3,7 @@ type SchoolClass = {
     id: number
     name: string
     teacher?: string
-    capacity?: number
+    capacity?: string
     createdAt: string
 }
 

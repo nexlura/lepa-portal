@@ -4,27 +4,24 @@ import { Dialog, DialogActions, DialogBody, DialogDescription, DialogTitle } fro
 import { Field, Label } from '@/components/UIKit/Fieldset'
 import { Button } from '../UIKit/Button'
 
-interface TeacherData {
+interface ClassData {
     name: string
-    email: string
-    subject: string
-    phone?: string
-    department?: string
+    capacity: string
 }
 interface CSVValidationResult {
     isValid: boolean
-    teachers: TeacherData[]
+    classes: ClassData[]
     errors: string[]
 }
 
-const ImportTeachersModal = ({
+const ImportClassesModal = ({
     open,
     onClose,
     onSubmit,
 }: {
     open: boolean
     onClose: (open: boolean) => void
-    onSubmit: (teachers: TeacherData[]) => void
+    onSubmit: (classes: ClassData[]) => void
 }) => {
     const [validationResult, setValidationResult] = useState<CSVValidationResult | null>(null)
     const [isProcessing, setIsProcessing] = useState(false)
@@ -40,66 +37,59 @@ const ImportTeachersModal = ({
                 if (lines.length < 2) {
                     resolve({
                         isValid: false,
-                        teachers: [],
+                        classes: [],
                         errors: ['CSV file must have at least a header row and one data row']
                     })
                     return
                 }
 
                 const headers = lines[0].split(',').map(h => h.trim().toLowerCase())
-                const requiredHeaders = ['name', 'email', 'subject']
+                const requiredHeaders = ['name', 'capacity',]
                 const missingHeaders = requiredHeaders.filter(h => !headers.includes(h))
 
                 if (missingHeaders.length > 0) {
                     resolve({
                         isValid: false,
-                        teachers: [],
+                        classes: [],
                         errors: [`Missing required headers: ${missingHeaders.join(', ')}`]
                     })
                     return
                 }
 
-                const teachers: TeacherData[] = []
+                const classes: ClassData[] = []
                 const errors: string[] = []
 
                 for (let i = 1; i < lines.length; i++) {
                     const line = lines[i]
                     const values = line.split(',').map(v => v.trim())
 
-                    if (values.length < 3) {
+                    if (values.length < 2) {
                         errors.push(`Row ${i + 1}: Insufficient data`)
                         continue
                     }
 
-                    const teacher: TeacherData = {
+                    const klass: ClassData = {
                         name: values[headers.indexOf('name')] || '',
-                        email: values[headers.indexOf('email')] || '',
-                        subject: values[headers.indexOf('subject')] || '',
-                        phone: headers.includes('phone') ? values[headers.indexOf('phone')] || '' : '',
-                        department: headers.includes('department') ? values[headers.indexOf('department')] || '' : ''
+                        capacity: values[headers.indexOf('capacity')] || '',
                     }
 
                     // Validate required fields
-                    if (!teacher.name.trim()) {
+                    if (!klass.name.trim()) {
                         errors.push(`Row ${i + 1}: Name is required`)
                     }
-                    if (!teacher.email.trim()) {
-                        errors.push(`Row ${i + 1}: Email is required`)
-                    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(teacher.email)) {
-                        errors.push(`Row ${i + 1}: Invalid email format`)
-                    }
-                    if (!teacher.subject.trim()) {
-                        errors.push(`Row ${i + 1}: Subject is required`)
+                    if (!klass.capacity.trim()) {
+                        errors.push(`Row ${i + 1}: Capacity is required`)
                     }
 
-                    if (teacher.name.trim() && teacher.email.trim() && teacher.subject.trim()) {
-                        teachers.push(teacher)
+                    // Add the class to the classes array if it's valid
+                    if (klass.name.trim() && klass.capacity.trim()) {
+                        classes.push(klass)
                     }
                 }
 
                 resolve({
                     isValid: errors.length === 0,
-                    teachers,
+                    classes,
                     errors
                 })
             }
@@ -114,7 +104,7 @@ const ImportTeachersModal = ({
         if (!file.name.endsWith('.csv')) {
             setValidationResult({
                 isValid: false,
-                teachers: [],
+                classes: [],
                 errors: ['Please select a valid CSV file']
             })
             return
@@ -128,7 +118,7 @@ const ImportTeachersModal = ({
         } catch {
             setValidationResult({
                 isValid: false,
-                teachers: [],
+                classes: [],
                 errors: ['Error processing CSV file']
             })
         } finally {
@@ -137,8 +127,8 @@ const ImportTeachersModal = ({
     }
 
     const handleSubmit = () => {
-        if (validationResult?.isValid && validationResult.teachers.length > 0) {
-            onSubmit(validationResult.teachers)
+        if (validationResult?.isValid && validationResult.classes.length > 0) {
+            onSubmit(validationResult.classes)
             handleClose()
         }
     }
@@ -153,21 +143,21 @@ const ImportTeachersModal = ({
     }
 
     const downloadTemplate = () => {
-        const csvContent = 'name,email,subject,phone,department\nDr. Emily Wilson,emily.wilson@lepa.edu,Mathematics,+1 (555) 123-4567,STEM\nMr. David Chen,david.chen@lepa.edu,Science,+1 (555) 234-5678,STEM'
+        const csvContent = 'name,capacity\nClass 4,40\nClass 5,35'
         const blob = new Blob([csvContent], { type: 'text/csv' })
         const url = window.URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url
-        a.download = 'teachers_template.csv'
+        a.download = 'classes_template.csv'
         a.click()
         window.URL.revokeObjectURL(url)
     }
 
     return (
         <Dialog size="lg" open={open} onClose={handleClose} className="relative z-20">
-            <DialogTitle>Import Teachers from CSV</DialogTitle>
+            <DialogTitle>Import Classess from CSV</DialogTitle>
             <DialogDescription>
-                Upload a CSV file to import multiple teachers at once.
+                Upload a CSV file to import multiple classes at once.
                 <button
                     onClick={downloadTemplate}
                     className="ml-2 text-blue-600 hover:text-blue-800 underline"
@@ -190,7 +180,7 @@ const ImportTeachersModal = ({
                             />
                         </div>
                         <p className="mt-2 text-sm text-gray-500">
-                            The CSV should include columns for: name, email, subject (required), phone, department (optional)
+                            The CSV should include columns for: name, capacity,  (required)
                         </p>
                     </Field>
 
@@ -209,7 +199,7 @@ const ImportTeachersModal = ({
                                 <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
                                     <div className="flex items-center justify-between">
                                         <span>CSV file is valid!</span>
-                                        <span className="font-medium">{validationResult.teachers.length} teachers found</span>
+                                        <span className="font-medium">{validationResult.classes.length} classes found</span>
                                     </div>
                                 </div>
                             ) : (
@@ -225,19 +215,19 @@ const ImportTeachersModal = ({
                                 </div>
                             )}
 
-                            {/* Preview of valid teachers */}
-                            {validationResult.isValid && validationResult.teachers.length > 0 && (
+                            {/* Preview of valid classes */}
+                            {validationResult.isValid && validationResult.classes.length > 0 && (
                                 <div className="bg-gray-50 rounded-lg p-4">
-                                    <h4 className="font-medium text-gray-900 mb-3">Preview of teachers to be imported:</h4>
+                                    <h4 className="font-medium text-gray-900 mb-3">Preview of classes to be imported:</h4>
                                     <div className="space-y-2 max-h-40 overflow-y-auto">
-                                        {validationResult.teachers.slice(0, 5).map((teacher, index) => (
+                                        {validationResult.classes.slice(0, 5).map((klass, index) => (
                                             <div key={index} className="text-sm text-gray-600">
-                                                <span className="font-medium">{teacher.name}</span> - {teacher.email} ({teacher.subject})
+                                                <span className="font-medium">{klass.name}</span> - {klass.capacity}
                                             </div>
                                         ))}
-                                        {validationResult.teachers.length > 5 && (
+                                        {validationResult.classes.length > 5 && (
                                             <div className="text-sm text-gray-500 italic">
-                                                ... and {validationResult.teachers.length - 5} more
+                                                ... and {validationResult.classes.length - 5} more
                                             </div>
                                         )}
                                     </div>
@@ -252,13 +242,13 @@ const ImportTeachersModal = ({
                 <Button
                     color="primary"
                     onClick={handleSubmit}
-                    disabled={!validationResult?.isValid || validationResult.teachers.length === 0}
+                    disabled={!validationResult?.isValid || validationResult.classes.length === 0}
                 >
-                    Import {validationResult?.teachers.length || 0} Teachers
+                    Import {validationResult?.classes.length || 0} Classes
                 </Button>
             </DialogActions>
         </Dialog>
     )
 }
 
-export default ImportTeachersModal 
+export default ImportClassesModal 

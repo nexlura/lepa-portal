@@ -8,40 +8,40 @@ import {
 } from '@heroicons/react/24/outline'
 
 import { Button } from '@/components/UIKit/Button'
-import ImportCsvModal from '@/components/Classes/ImportModal'
 import AddClassModal from '@/components/Classes/AddClassModal'
 import ClassesTable from '@/components/Classes/ClassesTable'
+import ImportClassesModal from '@/components/Classes/ImportClassesModal'
 
 
-type SchoolClass = {
+export type Klass = {
     id: number
     name: string
+    capacity: string
     teacher?: string
-    capacity?: number
     createdAt: string
 }
 
 export default function ClassesPage() {
-    const [classes, setClasses] = useState<SchoolClass[]>([
+    const [classes, setClasses] = useState<Klass[]>([
         {
             id: 1,
             name: 'Class 1',
             teacher: '',
-            capacity: 0,
+            capacity: '0',
             createdAt: '2024-01-12',
         },
         {
             id: 2,
             name: 'Class 2',
             teacher: 'Mr. Yolo',
-            capacity: 35,
+            capacity: '35',
             createdAt: '2024-01-12',
         },
         {
             id: 3,
             name: 'Class 3',
             teacher: 'Ms. Mensah',
-            capacity: 20,
+            capacity: '20',
             createdAt: '2024-01-12',
         },
     ])
@@ -49,8 +49,43 @@ export default function ClassesPage() {
     const [isAddOpen, setIsAddOpen] = useState(false)
     const [isImportOpen, setIsImportOpen] = useState(false)
 
+    const handleImportClasses = (importedClasses: {
+        name: string
+        capacity: string
+        teacher?: string
+    }[]) => {
+        const newClasses: Klass[] = importedClasses.map((classData, index) => ({
+            id: Math.max(...classes.map(t => t.id)) + index + 1,
+            name: classData.name,
+            capacity: classData.capacity,
+            teacher: classData.teacher,
+            createdAt: new Date().toISOString().split('T')[0]
+        }))
+
+        setClasses(prev => [...prev, ...newClasses])
+        setIsImportOpen(false)
+    }
+
+    const handleAddClass = (classData: {
+        name: string
+        capacity: string
+        teacher?: string
+    }) => {
+        const newClass: Klass = {
+            id: Math.max(...classes.map(t => t.id)) + 1,
+            name: classData.name,
+            capacity: classData.capacity,
+            teacher: classData.teacher,
+            createdAt: new Date().toISOString().split('T')[0]
+        }
+
+        setClasses(prev => [...prev, newClass])
+        setIsAddOpen(false)
+    }
+
     const totalCapacity = useMemo(
-        () => classes.reduce((sum, c) => sum + (c.capacity || 0), 0),
+
+        () => classes.reduce((sum, c) => sum + (Number(c.capacity) || 0), 0),
         [classes]
     )
 
@@ -121,46 +156,14 @@ export default function ClassesPage() {
             <AddClassModal
                 open={isAddOpen}
                 onClose={setIsAddOpen}
-                onSubmit={(data) => {
-                    setClasses((prev) => {
-                        const nextId = (prev.at(-1)?.id || 0) + 1
-                        return [
-                            ...prev,
-                            {
-                                id: nextId,
-                                name: data.name.trim(),
-                                grade: data.grade.trim(),
-                                section: data.section?.trim() || undefined,
-                                homeroomTeacher: data.homeroomTeacher?.trim() || undefined,
-                                capacity: data.capacity ? Number(data.capacity) : undefined,
-                                createdAt: new Date().toISOString().slice(0, 10),
-                            },
-                        ]
-                    })
-                    setIsAddOpen(false)
-                }}
+                onSubmit={handleAddClass}
             />
 
             {/* CSV Import Modal */}
-            <ImportCsvModal
-                open={isImportOpen}
+            <ImportClassesModal
                 onClose={setIsImportOpen}
-                onImport={(rows) => {
-                    setClasses((prev) => {
-                        let nextId = (prev.at(-1)?.id || 0)
-                        const toAdd: SchoolClass[] = rows.map((r) => ({
-                            id: ++nextId,
-                            name: r.name?.trim() || 'Untitled Class',
-                            grade: r.grade?.trim() || '-',
-                            section: r.section?.trim() || undefined,
-                            homeroomTeacher: r.homeroomTeacher?.trim() || undefined,
-                            capacity: r.capacity ? Number(r.capacity) : undefined,
-                            createdAt: new Date().toISOString().slice(0, 10),
-                        }))
-                        return [...prev, ...toAdd]
-                    })
-                    setIsImportOpen(false)
-                }}
+                onSubmit={handleImportClasses}
+                open={isImportOpen}
             />
         </div>
     )

@@ -14,25 +14,20 @@ const AddClassModal = ({
     onClose: (open: boolean) => void
     onSubmit: (data: {
         name: string
-        grade: string
-        section?: string
-        homeroomTeacher?: string
-        capacity?: string
+        capacity: string
+        teacher?: string
     }) => void
 }) => {
     const [form, setForm] = useState({
         name: '',
-        grade: '',
-        section: '',
-        homeroomTeacher: '',
         capacity: '',
+        teacher: '',
     })
     const [errors, setErrors] = useState<{ name?: string; grade?: string }>({})
 
     const validate = () => {
         const next: { name?: string; grade?: string } = {}
         if (!form.name.trim()) next.name = 'Class name is required'
-        if (!form.grade.trim()) next.grade = 'Grade is required'
         setErrors(next)
         return Object.keys(next).length === 0
     }
