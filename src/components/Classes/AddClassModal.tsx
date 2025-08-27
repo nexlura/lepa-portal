@@ -14,25 +14,20 @@ const AddClassModal = ({
     onClose: (open: boolean) => void
     onSubmit: (data: {
         name: string
-        grade: string
-        section?: string
-        homeroomTeacher?: string
-        capacity?: string
+        capacity: string
+        teacher?: string
     }) => void
 }) => {
     const [form, setForm] = useState({
         name: '',
-        grade: '',
-        section: '',
-        homeroomTeacher: '',
         capacity: '',
+        teacher: '',
     })
     const [errors, setErrors] = useState<{ name?: string; grade?: string }>({})
 
     const validate = () => {
         const next: { name?: string; grade?: string } = {}
         if (!form.name.trim()) next.name = 'Class name is required'
-        if (!form.grade.trim()) next.grade = 'Grade is required'
         setErrors(next)
         return Object.keys(next).length === 0
     }
@@ -54,11 +49,11 @@ const AddClassModal = ({
                         {errors.name ? <ErrorMessage>{errors.name}</ErrorMessage> : null}
                     </Field>
                     <Field className="sm:col-span-2">
-                        <Label className="text-sm/6 text-gray-900 font-medium">Teacher</Label>
+                        <Label className="text-sm/6 text-gray-900 font-medium">Capacity</Label>
                         <Input
-                            placeholder="e.g., Mr. David Chen"
-                            value={form.homeroomTeacher}
-                            onChange={(e) => setForm((f) => ({ ...f, homeroomTeacher: e.target.value }))}
+                            placeholder="e.g., 40"
+                            value={form.capacity}
+                            onChange={(e) => setForm((f) => ({ ...f, capacity: e.target.value }))}
                         />
                     </Field>
                 </div>
