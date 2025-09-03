@@ -1,7 +1,7 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import { UserGroupIcon, PlusIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline'
+import { useState } from 'react'
+import { PlusIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline'
 import { Button } from '@/components/UIKit/Button'
 import { ImportStudentsModal, EditStudentModal } from '@/components/Students'
 import type { MinimalStudent } from '@/components/Students/ImportStudentsModal'
@@ -84,13 +84,6 @@ export default function StudentAdmissionsPage() {
         setEditTarget(null)
     }
 
-    const stats = useMemo(() => {
-        const total = students.length
-        const pending = students.filter(s => s.status === 'Pending').length
-        const grades = new Set(students.map(s => s.grade).filter(Boolean))
-        return { total, pending, grades: grades.size }
-    }, [students])
-
     return (
         <div className="space-y-6">
             {/* Header */}
@@ -110,60 +103,10 @@ export default function StudentAdmissionsPage() {
                     </Button>
                 </div>
             </div>
-
-            {/* Stats */}
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-                <div className="bg-white overflow-hidden shadow rounded-lg">
-                    <div className="p-5">
-                        <div className="flex items-center">
-                            <div className="flex-shrink-0">
-                                <UserGroupIcon className="h-6 w-6 text-gray-400" />
-                            </div>
-                            <div className="ml-5 w-0 flex-1">
-                                <dl>
-                                    <dt className="text-sm font-medium text-gray-500 truncate">Total Admissions</dt>
-                                    <dd className="text-lg font-medium text-gray-900">{stats.total}</dd>
-                                </dl>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div className="bg-white overflow-hidden shadow rounded-lg">
-                    <div className="p-5">
-                        <div className="flex items-center">
-                            <div className="flex-shrink-0">
-                                <UserGroupIcon className="h-6 w-6 text-yellow-400" />
-                            </div>
-                            <div className="ml-5 w-0 flex-1">
-                                <dl>
-                                    <dt className="text-sm font-medium text-gray-500 truncate">Pending</dt>
-                                    <dd className="text-lg font-medium text-gray-900">{stats.pending}</dd>
-                                </dl>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div className="bg-white overflow-hidden shadow rounded-lg">
-                    <div className="p-5">
-                        <div className="flex items-center">
-                            <div className="flex-shrink-0">
-                                <UserGroupIcon className="h-6 w-6 text-blue-400" />
-                            </div>
-                            <div className="ml-5 w-0 flex-1">
-                                <dl>
-                                    <dt className="text-sm font-medium text-gray-500 truncate">Grades</dt>
-                                    <dd className="text-lg font-medium text-gray-900">{stats.grades}</dd>
-                                </dl>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             {/* Table */}
             <div className="bg-white shadow rounded-lg">
                 <div className="px-4 py-5 sm:p-6">
-                    <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Pending Admissions</h3>
+                    {/* <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Admissions</h3> */}
                     <div className="overflow-x-auto">
                         <table className="min-w-full divide-y divide-gray-200">
                             <thead className="bg-gray-50">

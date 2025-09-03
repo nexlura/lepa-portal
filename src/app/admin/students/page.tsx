@@ -99,8 +99,10 @@ export default function StudentsPage() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Student Admissions</h1>
-                    <p className="mt-1 text-sm text-gray-500">Admit students individually or by CSV import. Complete minimal imports later.</p>
+                    <h1 className="text-2xl font-bold text-gray-900">Students</h1>
+                    <p className="mt-1 text-sm text-gray-500">
+                        Manage all student records and information.
+                    </p>
                 </div>
                 <div className="flex gap-3">
                     <Button outline onClick={() => setShowImportModal(true)}>

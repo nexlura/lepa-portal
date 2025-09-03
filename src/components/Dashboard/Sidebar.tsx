@@ -35,8 +35,8 @@ const navigation: NavigationItem[] = [
         name: 'Admissions',
         icon: ClipboardDocumentListIcon,
         subItems: [
-            { name: 'Admission Form', href: '/admin/students/admissions/new' },
-            { name: 'Applicants', href: '/admin/students/admissions' },
+            { name: 'Admission Form', href: '/admin/admissions/new' },
+            { name: 'Applicants', href: '/admin/admissions' },
         ]
     },
     { name: 'Classes', href: '/admin/classes', icon: BookOpenIcon },
