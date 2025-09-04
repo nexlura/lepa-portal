@@ -1,13 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import { PlusIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline'
+import { PlusIcon, ArrowDownTrayIcon, Cog6ToothIcon } from '@heroicons/react/24/outline'
 import { Button } from '@/components/UIKit/Button'
-import { ImportStudentsModal, EditStudentModal } from '@/components/Students'
+import { ImportStudentsModal } from '@/components/Students'
 import type { MinimalStudent } from '@/components/Students/ImportStudentsModal'
-import type { EditStudentFormData } from '@/components/Students/EditStudentModal'
+import { Dialog, DialogActions, DialogBody, DialogDescription, DialogTitle } from '@/components/UIKit/Dialog'
+import AdmissionsTable from '@/components/Admissions/AdmissionTable'
 
-interface StudentRecord {
+export interface StudentRecord {
     id: number
     name: string
     gender?: string
@@ -34,8 +35,8 @@ export default function StudentAdmissionsPage() {
 
     const [showImportModal, setShowImportModal] = useState(false)
 
-    const [editTarget, setEditTarget] = useState<StudentRecord | null>(null)
-    const [showEditModal, setShowEditModal] = useState(false)
+    const [viewTarget, setViewTarget] = useState<StudentRecord | null>(null)
+    const [showViewModal, setShowViewModal] = useState(false)
 
     const handleImportStudents = (rows: MinimalStudent[]) => {
         const startId = Math.max(0, ...students.map(s => s.id)) + 1
@@ -53,35 +54,6 @@ export default function StudentAdmissionsPage() {
         }))
         setStudents(prev => [...prev, ...imported])
         setShowImportModal(false)
-    }
-
-    const handleEditStudent = (updated: EditStudentFormData) => {
-        if (!editTarget) return
-        setStudents(prev => prev.map(s => {
-            if (s.id !== editTarget.id) return s
-            return {
-                ...s,
-                name: updated.fullName,
-                gender: updated.gender ?? s.gender,
-                dateOfBirth: updated.dateOfBirth ?? s.dateOfBirth,
-                email: updated.email ?? s.email,
-                phone: updated.phone ?? s.phone,
-                address: updated.address ?? s.address,
-                city: updated.city ?? s.city,
-                state: updated.state ?? s.state,
-                postalCode: updated.postalCode ?? s.postalCode,
-                grade: updated.grade ?? s.grade,
-                classSection: updated.classSection ?? s.classSection,
-                enrollmentDate: updated.enrollmentDate ?? s.enrollmentDate,
-                previousSchool: updated.previousSchool ?? s.previousSchool,
-                guardianName: updated.guardianName ?? s.guardianName,
-                guardianRelationship: updated.guardianRelationship ?? s.guardianRelationship,
-                guardianEmail: updated.guardianEmail ?? s.guardianEmail,
-                guardianPhone: updated.guardianPhone ?? s.guardianPhone,
-            }
-        }))
-        setShowEditModal(false)
-        setEditTarget(null)
     }
 
     return (
@@ -104,79 +76,66 @@ export default function StudentAdmissionsPage() {
                 </div>
             </div>
             {/* Table */}
-            <div className="bg-white shadow rounded-lg">
-                <div className="px-4 py-5 sm:p-6">
-                    {/* <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Admissions</h3> */}
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
-                                <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Grade</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">DOB</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Guardian</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th className="px-6 py-3"></th>
-                                </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                                {students.map((s) => (
-                                    <tr key={s.id} className="hover:bg-gray-50">
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="text-sm font-medium text-gray-900">{s.name}</div>
-                                            <div className="text-xs text-gray-500">{s.email || '-'}</div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="text-sm text-gray-900">{s.grade || '-'}</div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="text-sm text-gray-500">{s.dateOfBirth || '-'}</div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="text-sm text-gray-500">{s.guardianName || '-'} {s.guardianPhone ? `(${s.guardianPhone})` : ''}</div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">{s.status}</span>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <Button onClick={() => { setEditTarget(s); setShowEditModal(true) }}>
-                                                Edit
-                                            </Button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+            <AdmissionsTable
+                students={students}
+                setViewTarget={setViewTarget}
+                setShowViewModal={setShowViewModal}
+            />
 
             {/* Individual admission moved to dedicated page */}
             <ImportStudentsModal open={showImportModal} onClose={setShowImportModal} onSubmit={handleImportStudents} />
-            <EditStudentModal
-                open={showEditModal}
-                onClose={(o) => { if (!o) setEditTarget(null); setShowEditModal(o) }}
-                initialData={editTarget ? {
-                    fullName: editTarget.name,
-                    gender: editTarget.gender,
-                    dateOfBirth: editTarget.dateOfBirth,
-                    email: editTarget.email,
-                    phone: editTarget.phone,
-                    address: editTarget.address,
-                    city: editTarget.city,
-                    state: editTarget.state,
-                    postalCode: editTarget.postalCode,
-                    grade: editTarget.grade,
-                    classSection: editTarget.classSection,
-                    enrollmentDate: editTarget.enrollmentDate,
-                    previousSchool: editTarget.previousSchool,
-                    guardianName: editTarget.guardianName,
-                    guardianRelationship: editTarget.guardianRelationship,
-                    guardianEmail: editTarget.guardianEmail,
-                    guardianPhone: editTarget.guardianPhone,
-                } : null}
-                onSubmit={handleEditStudent}
-            />
+
+            {/* Applicant View Modal */}
+            <Dialog size="xl" open={showViewModal} onClose={(o) => { if (!o) setViewTarget(null); setShowViewModal(o) }} className="relative z-20">
+                <DialogTitle>Applicant Details</DialogTitle>
+                <DialogDescription>Review the applicant information and proceed when ready.</DialogDescription>
+                <DialogBody>
+                    {viewTarget && (
+                        <div className="grid grid-cols-1 sm:grid-cols-12 gap-6">
+                            {/* Photo */}
+                            <div className="sm:col-span-3 flex items-start">
+                                <div className="h-24 w-24 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 text-xl font-semibold select-none">
+                                    {viewTarget.name?.split(' ').map(p => p[0]).slice(0, 2).join('') || 'A'}
+                                </div>
+                            </div>
+                            {/* Top-right status */}
+                            <div className="sm:col-span-9 flex items-start justify-between">
+                                <div>
+                                    <h3 className="text-lg font-semibold text-gray-900">{viewTarget.name}</h3>
+                                    <p className="text-sm text-gray-500">{viewTarget.email || viewTarget.phone || 'No contact provided'}</p>
+                                </div>
+                                <span className="inline-flex px-3 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800 h-fit">{viewTarget.status}</span>
+                            </div>
+                            {/* Details grid */}
+                            <div className="sm:col-span-12 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <div className="text-xs uppercase text-gray-500">Gender</div>
+                                    <div className="text-sm text-gray-900">{viewTarget.gender || '-'}</div>
+                                </div>
+                                <div>
+                                    <div className="text-xs uppercase text-gray-500">Date of Birth</div>
+                                    <div className="text-sm text-gray-900">{viewTarget.dateOfBirth || '-'}</div>
+                                </div>
+                                <div>
+                                    <div className="text-xs uppercase text-gray-500">Application Date</div>
+                                    <div className="text-sm text-gray-900">{viewTarget.enrollmentDate || '-'}</div>
+                                </div>
+                                <div>
+                                    <div className="text-xs uppercase text-gray-500">Applying for Grade</div>
+                                    <div className="text-sm text-gray-900">{viewTarget.grade || '-'}</div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </DialogBody>
+                <DialogActions>
+                    <Button plain onClick={() => { setShowViewModal(false); setViewTarget(null) }}>Close</Button>
+                    <Button color="primary" onClick={() => { /* placeholder for processing flow */ }}>
+                        <Cog6ToothIcon className="h-4 w-4 mr-2" />
+                        Process applicant
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </div>
     )
 } 
