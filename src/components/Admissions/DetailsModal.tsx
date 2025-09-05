@@ -17,7 +17,7 @@ export default function DetailsModal({ viewTarget, showViewModal, setShowViewMod
         <Dialog open={showViewModal} onClose={setShowViewModal} className="relative z-10">
             <DialogBackdrop
                 transition
-                className="fixed inset-0 hidden bg-gray-500/75 transition-opacity data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in md:block"
+                className="fixed inset-0 hidden bg-zinc-950/25 transition-opacity data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in md:block"
             />
 
             <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
@@ -27,7 +27,7 @@ export default function DetailsModal({ viewTarget, showViewModal, setShowViewMod
                         className="flex w-full transform text-left text-base transition data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in md:my-8 md:max-w-xl md:px-4 data-closed:md:translate-y-0 data-closed:md:scale-95 lg:max-w-3xl"
                     >
                         {viewTarget && (
-                            <div className="relative flex flex-col w-full items-center overflow-hidden bg-white px-4 pt-14 pb-8 shadow-2xl sm:px-6 sm:pt-8 md:p-6 lg:p-8">
+                            <div className="relative flex flex-col w-full items-center rounded-lg overflow-hidden bg-white px-4 pt-14 pb-8 shadow-2xl sm:px-6 sm:pt-8 md:p-6 lg:p-8">
                                 {/* close button */}
                                 {/* <button
                                     type="button"
@@ -51,7 +51,7 @@ export default function DetailsModal({ viewTarget, showViewModal, setShowViewMod
                                                 </div>
                                                 <div>
                                                     <h3 className="text-lg font-semibold text-gray-900">{viewTarget.name}</h3>
-                                                    <p className="text-sm text-gray-500">{viewTarget.email || viewTarget.phone || 'No contact provided'}</p>
+                                                    <p className="text-sm text-gray-500">Application ID: APL291</p>
                                                 </div>
                                             </div>
                                             {/* Details Grid */}
@@ -69,12 +69,16 @@ export default function DetailsModal({ viewTarget, showViewModal, setShowViewMod
                                                     <div className="text-sm text-gray-900">{viewTarget.dateOfBirth || '-'}</div>
                                                 </div>
                                                 <div>
-                                                    <div className="text-xs capitalize text-gray-500">Application Date</div>
-                                                    <div className="text-sm text-gray-900">{viewTarget.enrollmentDate || '-'}</div>
+                                                    <div className="text-xs capitalize text-gray-500">Address</div>
+                                                    <div className="text-sm text-gray-900">{viewTarget.address || '-'}</div>
                                                 </div>
                                                 <div>
-                                                    <div className="text-xs capitalize text-gray-500">Applying for Grade</div>
-                                                    <div className="text-sm text-gray-900">{viewTarget.grade || '-'}</div>
+                                                    <div className="text-xs capitalize text-gray-500">Parent Name</div>
+                                                    <div className="text-sm text-gray-900">{viewTarget.guardianName || '-'}</div>
+                                                </div>
+                                                <div>
+                                                    <div className="text-xs capitalize text-gray-500">Parent Contact</div>
+                                                    <div className="text-sm text-gray-900">{viewTarget.guardianPhone || '-'}</div>
                                                 </div>
                                             </div>
                                         </div>
@@ -90,16 +94,16 @@ export default function DetailsModal({ viewTarget, showViewModal, setShowViewMod
                                             </div>
                                             <div className="sm:col-span-12 grid grid-cols-1 sm:grid-cols-1 gap-4 px-4 py-5 border-1 border-gray-300 rounded-lg">
                                                 <div>
-                                                    <div className="text-xs capitalize text-gray-500">Name</div>
-                                                    <div className="text-sm text-gray-900">{viewTarget.name || '-'}</div>
-                                                </div>
-                                                <div>
                                                     <div className="text-xs capitalize text-gray-500">Applying for Grade</div>
                                                     <div className="text-sm text-gray-900">{viewTarget.grade || '-'}</div>
                                                 </div>
                                                 <div>
-                                                    <div className="text-xs capitalize text-gray-500">Applying for Grade</div>
-                                                    <div className="text-sm text-gray-900">{viewTarget.grade || '-'}</div>
+                                                    <div className="text-xs capitalize text-gray-500">Method of Applying</div>
+                                                    <div className="text-sm text-gray-900">CSV Import</div>
+                                                </div>
+                                                <div>
+                                                    <div className="text-xs capitalize text-gray-500">Application Date</div>
+                                                    <div className="text-sm text-gray-900">{viewTarget.enrollmentDate || '-'}</div>
                                                 </div>
                                             </div>
 
