@@ -4,6 +4,8 @@ import { Dialog, DialogBackdrop, DialogPanel } from '@headlessui/react'
 import { StudentRecord } from '@/app/admin/admissions/page'
 import { Cog6ToothIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { Button } from '../UIKit/Button'
+import { useRouter } from 'next/navigation'
+
 interface DetailsModalProps {
     showViewModal: boolean,
     setShowViewModal: (o: boolean) => void,
@@ -11,7 +13,16 @@ interface DetailsModalProps {
     setViewTarget: (o: StudentRecord | null) => void
 }
 
-export default function DetailsModal({ viewTarget, showViewModal, setShowViewModal }: DetailsModalProps) {
+export default function DetailsModal({ viewTarget, showViewModal, setShowViewModal, setViewTarget }: DetailsModalProps) {
+    const router = useRouter()
+
+    const handleProcessApplicant = () => {
+        if (viewTarget) {
+            setShowViewModal(false)
+            setViewTarget(null)
+            router.push(`/admin/admissions/process/${viewTarget.id}`)
+        }
+    }
 
     return (
         <Dialog open={showViewModal} onClose={setShowViewModal} className="relative z-10">
@@ -111,7 +122,7 @@ export default function DetailsModal({ viewTarget, showViewModal, setShowViewMod
                                     </div>
                                 </div>
                                 <div className='w-full mt-8 flex justify-end'>
-                                    <Button color="primary" onClick={() => { /* placeholder for processing flow */ }}>
+                                    <Button color="primary" onClick={handleProcessApplicant}>
                                         <Cog6ToothIcon className="h-4 w-4 mr-2" />
                                         Process Applicant
                                     </Button>
@@ -124,4 +135,3 @@ export default function DetailsModal({ viewTarget, showViewModal, setShowViewMod
         </Dialog>
     )
 }
-
