@@ -16,7 +16,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     };
 
     return (
-        <div className="h-screen flex overflow-hidden bg-white-50">
+        <div className="h-screen flex overflow-hidden bg-gray-50">
             {/* Sidebar */}
             <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
 

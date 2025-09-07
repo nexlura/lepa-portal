@@ -12,7 +12,7 @@ interface HeaderProps {
 export default function Header({ onSidebarToggle }: HeaderProps) {
 
     return (
-        <header className="bg-white sm:py-3">
+        <header className="sm:py-3">
             <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 h-16">
                 {/* Left side - Mobile menu button */}
                 <div className="flex items-center lg:hidden">
