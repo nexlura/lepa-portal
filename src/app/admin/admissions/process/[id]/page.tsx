@@ -6,7 +6,7 @@ import { XMarkIcon } from '@heroicons/react/24/outline'
 import { Button } from '@/components/UIKit/Button'
 import { StudentRecord } from '@/app/admin/admissions/page'
 import VerticalStepper from '@/components/Admissions/VerticalStepper'
-import ApplicantTabs from '@/components/Admissions/ApplicantTabs'
+import ApplicantTabs from '@/components/Admissions/ApplicantsTabs'
 
 // Mock data - in real app this would come from API
 export const mockStudent: StudentRecord = {
