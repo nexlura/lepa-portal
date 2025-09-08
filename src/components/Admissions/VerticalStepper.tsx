@@ -11,7 +11,6 @@ const admissionSteps = [
     { id: 1, name: 'Application Review', description: 'Review submitted application', completed: true },
     { id: 2, name: 'Document Verification', description: 'Verify required documents', completed: true },
     { id: 3, name: 'Interview', description: 'Conduct student interview', completed: false },
-    { id: 4, name: 'Assessment', description: 'Academic assessment', completed: false },
     { id: 5, name: 'Final Decision', description: 'Make admission decision', completed: false },
 ]
 

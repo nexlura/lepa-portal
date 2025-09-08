@@ -82,7 +82,7 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
 
             {/* Sidebar */}
             <div
-                className={`fixed sm:rounded-lg inset-y-0 left-0 sm:my-4 lg:ml-4 w-64 transform bg-gradient-to-br from-primary-100 to-secondary-100 transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'
+                className={`fixed sm:rounded-lg inset-y-0 left-0 sm:my-4 bg-white lg:ml-4 w-64 transform  transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'
                     }`}
             >
                 <div className="flex h-full flex-col">
