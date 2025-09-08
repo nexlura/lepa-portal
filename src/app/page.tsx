@@ -6,6 +6,7 @@ import { Button } from '@/components/UIKit/Button'
 import { Input } from '@/components/UIKit/Input'
 import { Field, Label } from '@/components/UIKit/Fieldset'
 import { PhoneIcon, EnvelopeIcon } from '@heroicons/react/24/outline'
+import { WordmarkLogo } from '@/components/Logo'
 
 export default function AuthPage() {
   const router = useRouter()
@@ -51,27 +52,25 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="relative min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         {/* Logo */}
-        <div className="flex justify-center">
-          <div className="flex items-center space-x-2">
-            <div className="h-10 w-10 bg-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-xl">L</span>
-            </div>
-            <h1 className="text-3xl font-bold text-gray-900">Lepa</h1>
+        <div className="absolute top-6 sm:top-8 left-5 sm:left-16">
+          <div className=" flex items-center">
+            <WordmarkLogo />
           </div>
         </div>
 
-        <h2 className="mt-6 text-center text-2xl font-bold text-gray-900">
-          Welcome back
+        <h2 className="mt-6 text-center text-3xl font-medium text-gray-900">
+          {authMethod === 'phone' ? 'Sign in with phone' : 'Sign in with email'}
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          Sign in to your account to continue
+          Fast, secure, and hassle-free admissions.
         </p>
+
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+      <div className="mt-3 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="py-8 px-4 sm:px-10">
           {authMethod === 'phone' ? (
             <form className="space-y-6" onSubmit={handlePhoneSubmit}>
