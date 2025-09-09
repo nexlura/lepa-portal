@@ -2,10 +2,10 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Button } from '@/components/UIKit/Button'
-import { Input } from '@/components/UIKit/Input'
-import { Field, Label } from '@/components/UIKit/Fieldset'
 import { PhoneIcon, EnvelopeIcon } from '@heroicons/react/24/outline'
+
+import { Button } from '@/components/UIKit/Button'
+import { Field, Label } from '@/components/UIKit/Fieldset'
 import { WordmarkLogo } from '@/components/Logo'
 
 export default function AuthPage() {

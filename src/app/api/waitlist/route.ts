@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { getSupabaseServerClient } from '@/lib/supabase/server';
+import { getSupabaseServerClient } from '@/app/lib/supabase/server';
 
 const WaitlistSchema = z.object({
   schoolName: z.string().min(2, 'School name is required'),
