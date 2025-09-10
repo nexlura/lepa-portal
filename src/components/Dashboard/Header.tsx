@@ -5,11 +5,7 @@ import {
     Bars3Icon,
 } from '@heroicons/react/24/outline';
 
-interface HeaderProps {
-    onSidebarToggle: () => void;
-}
-
-export default function Header({ onSidebarToggle }: HeaderProps) {
+export default function Header() {
 
     return (
         <header className="sm:py-3">
@@ -17,7 +13,6 @@ export default function Header({ onSidebarToggle }: HeaderProps) {
                 {/* Left side - Mobile menu button */}
                 <div className="flex items-center lg:hidden">
                     <button
-                        onClick={onSidebarToggle}
                         className="px-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100"
                     >
                         <Bars3Icon className="h-6 w-6" />

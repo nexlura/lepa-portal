@@ -2,39 +2,55 @@ import NextAuth from 'next-auth';
 import { authConfig } from './auth.config';
 import Credentials from 'next-auth/providers/credentials';
 import { z } from 'zod';
-import type { User } from '@/app/lib/definitions';
-import bcrypt from 'bcrypt';
-// import postgres from 'postgres';
+import type { User as NextAuthUser } from '@auth/core/types';
 
-// const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
+declare module 'next-auth' {
+  interface User {
+    role: string;
+  }
 
-// async function getUser(email: string): Promise<User | undefined> {
-//   try {
-//     const user = await sql<User[]>`SELECT * FROM users WHERE email=${email}`;
-//     return user[0];
-//   } catch (error) {
-//     console.error('Failed to fetch user:', error);
-//     throw new Error('Failed to fetch user.');
-//   }
-// }
+  interface Session {
+    user: {
+      role: string;
+      email?: string | null;
+      name?: string | null;
+    };
+  }
+}
+// import type { User } from '@/app/lib/definitions';
+import { postModel } from '@/app/lib/supabase/connector';
 
 export const { auth, signIn, signOut } = NextAuth({
   ...authConfig,
   providers: [
     Credentials({
-      async authorize(credentials) {
+      async authorize(credentials): Promise<NextAuthUser | null> {
         const parsedCredentials = z
-          .object({ email: z.string().email(), password: z.string().min(6) })
+          .object({ email: z.email(), password: z.string().min(6) })
           .safeParse(credentials);
 
-        // if (parsedCredentials.success) {
-        //   const { email, password } = parsedCredentials.data;
-        //   const user = await getUser(email);
-        //   if (!user) return null;
-        //   const passwordsMatch = await bcrypt.compare(password, user.password);
-        //   if (passwordsMatch) return user;
-        // }
-        console.log(parsedCredentials);
+        if (!parsedCredentials.success) {
+          return null;
+        }
+
+        const { email, password } = parsedCredentials.data;
+
+        try {
+          const result = await postModel('auth/login', {
+            email,
+            password,
+          });
+
+          if (result) {
+            return {
+              id: email, // NextAuth requires an `id`
+              email,
+              role: 'admin',
+            };
+          }
+        } catch (error) {
+          console.error('Authorize error:', error);
+        }
         return null;
       },
     }),

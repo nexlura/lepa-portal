@@ -1,6 +1,3 @@
-'use client';
-
-import { useState } from 'react';
 import Sidebar from './Sidebar';
 import Header from './Header';
 
@@ -9,21 +6,16 @@ interface DashboardLayoutProps {
 }
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
-    const [sidebarOpen, setSidebarOpen] = useState(false);
-
-    const toggleSidebar = () => {
-        setSidebarOpen(!sidebarOpen);
-    };
 
     return (
         <div className="h-screen flex overflow-hidden bg-gray-50">
             {/* Sidebar */}
-            <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
+            <Sidebar isOpen={true} />
 
             {/* Main content area */}
             <div className="flex-1 flex flex-col overflow-hidden">
                 {/* Header */}
-                <Header onSidebarToggle={toggleSidebar} />
+                <Header />
 
                 {/* Main content */}
                 <main className="flex-1 overflow-y-auto">
