@@ -39,7 +39,7 @@ type RequestMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
 // Axios instance setup
 const axiosInstance = axios.create({
-  baseURL: `/api/`,
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api',
   withCredentials: true,
 });
 

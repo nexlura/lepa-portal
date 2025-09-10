@@ -6,7 +6,7 @@ import { Button } from '@/components/UIKit/Button'
 import { Field, Label } from '@/components/UIKit/Fieldset'
 import { useRouter } from 'next/navigation'
 import { Dispatch, SetStateAction, useState } from 'react'
-import { postModel } from '@/app/lib/supabase/connector'
+import { postModel } from '@/app/lib/connector'
 
 interface PhoneFormProps {
     isLoading: boolean

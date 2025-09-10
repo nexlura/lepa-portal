@@ -1,8 +1,10 @@
 import NextAuth from 'next-auth';
-import { authConfig } from './auth.config';
-import Credentials from 'next-auth/providers/credentials';
 import { z } from 'zod';
+import Credentials from 'next-auth/providers/credentials';
+
+import { authConfig } from './auth.config';
 import type { User as NextAuthUser } from '@auth/core/types';
+import { postModel } from '@/app/lib/connector';
 
 declare module 'next-auth' {
   interface User {
@@ -17,8 +19,6 @@ declare module 'next-auth' {
     };
   }
 }
-// import type { User } from '@/app/lib/definitions';
-import { postModel } from '@/app/lib/supabase/connector';
 
 export const { auth, signIn, signOut } = NextAuth({
   ...authConfig,
@@ -36,16 +36,19 @@ export const { auth, signIn, signOut } = NextAuth({
         const { email, password } = parsedCredentials.data;
 
         try {
-          const result = await postModel('auth/login', {
+          const resp = await postModel('auth/login', {
             email,
             password,
           });
 
-          if (result) {
+          console.log('resp', resp);
+
+          if (resp) {
             return {
               id: email, // NextAuth requires an `id`
               email,
-              role: 'admin',
+              name: 'Ms. Jane Doe',
+              role: 'Admin',
             };
           }
         } catch (error) {
@@ -55,4 +58,15 @@ export const { auth, signIn, signOut } = NextAuth({
       },
     }),
   ],
+
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) token.role = (user as any).role;
+      return token;
+    },
+    async session({ session, token }) {
+      if (token) session.user.role = (token as any).role ?? 'User';
+      return session;
+    },
+  },
 });

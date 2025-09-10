@@ -5,7 +5,20 @@ import {
     Bars3Icon,
 } from '@heroicons/react/24/outline';
 
+import { useSession } from 'next-auth/react';
+import { useEffect } from 'react';
+
 export default function Header() {
+
+    const { data: session, status } = useSession();
+
+    useEffect(() => {
+        console.log('session', session?.user);
+
+
+
+    }, [session])
+
 
     return (
         <header className="sm:py-3">
@@ -35,8 +48,12 @@ export default function Header() {
                     {/* User avatar and menu */}
                     <div className="flex items-center space-x-3">
                         <div className="flex flex-col items-end">
-                            <span className="text-sm font-medium text-gray-900">Admin User</span>
-                            <span className="text-xs text-gray-500">admin@lepa.com</span>
+                            <span className="text-sm font-medium text-gray-900">
+                                {session?.user && session.user.role}
+                            </span>
+                            <span className="text-xs text-gray-500">
+                                {session?.user && session.user.name}
+                            </span>
                         </div>
                         <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center">
                             <span className="text-white text-sm font-medium">A</span>

@@ -5,7 +5,7 @@ import { PhoneIcon } from '@heroicons/react/24/outline'
 import { Button } from '@/components/UIKit/Button'
 import { Field, Label } from '@/components/UIKit/Fieldset'
 import { Dispatch, SetStateAction, useState } from 'react'
-import { postModel } from '@/app/lib/supabase/connector'
+import { postModel } from '@/app/lib/connector'
 import { useSearchParams } from 'next/navigation';
 
 

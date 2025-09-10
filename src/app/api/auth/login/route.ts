@@ -5,7 +5,9 @@ export async function POST() {
   //make login request to API server
   try {
     const data = {
-      exists: true,
+      first_name: 'jane',
+      last_name: 'doe',
+      role: 'Admin',
     };
 
     await setTimeout(() => {}, 2000);
