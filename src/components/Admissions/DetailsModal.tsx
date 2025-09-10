@@ -1,7 +1,7 @@
 'use client'
 
 import { Dialog, DialogBackdrop, DialogPanel } from '@headlessui/react'
-import { StudentRecord } from '@/app/admin/admissions/page'
+import { StudentRecord } from '@/app/dashboard/admissions/page'
 import { Cog6ToothIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { Button } from '../UIKit/Button'
 import { useRouter } from 'next/navigation'
@@ -20,7 +20,7 @@ export default function DetailsModal({ viewTarget, showViewModal, setShowViewMod
         if (viewTarget) {
             setShowViewModal(false)
             setViewTarget(null)
-            router.push(`/admin/admissions/process/${viewTarget.id}`)
+            router.push(`/dashboard/admissions/process/${viewTarget.id}`)
         }
     }
 

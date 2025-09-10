@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { CheckIcon, XMarkIcon } from '@heroicons/react/24/outline'
 
 import { Button } from '@/components/UIKit/Button'
-import { mockStudent } from '@/app/admin/admissions/process/[id]/page'
+import { mockStudent } from '@/app/dashboard/admissions/process/[id]/page'
 
 const admissionSteps = [
     { id: 1, name: 'Application Review', description: 'Review submitted application', completed: true },
@@ -22,13 +22,13 @@ const VerticalStepper = () => {
     const handleEnroll = () => {
         // Handle enrollment logic
         console.log('Enrolling student:', mockStudent.id)
-        router.push('/admin/admissions')
+        router.push('/dashboard/admissions')
     }
 
     const handleReject = () => {
         // Handle rejection logic
         console.log('Rejecting student:', mockStudent.id)
-        router.push('/admin/admissions')
+        router.push('/dashboard/admissions')
     }
 
     return (

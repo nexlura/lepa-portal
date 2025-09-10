@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation'
 import { XMarkIcon } from '@heroicons/react/24/outline'
 
 import { Button } from '@/components/UIKit/Button'
-import { StudentRecord } from '@/app/admin/admissions/page'
+import { StudentRecord } from '@/app/dashboard/admissions/page'
 import VerticalStepper from '@/components/Admissions/VerticalStepper'
 import ApplicantTabs from '@/components/Admissions/ApplicantsTabs'
 

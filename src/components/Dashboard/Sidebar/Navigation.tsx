@@ -15,18 +15,18 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 
 const navigation: NavigationItem[] = [
-    { name: 'Dashboard', href: '/admin', icon: HomeIcon },
+    { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
     {
         name: 'Admissions',
         icon: ClipboardDocumentListIcon,
         subItems: [
-            { name: 'Admission Form', href: '/admin/admissions/new' },
-            { name: 'Applicants', href: '/admin/admissions' },
+            { name: 'Admission Form', href: '/dashboard/admissions/new' },
+            { name: 'Applicants', href: '/dashboard/admissions' },
         ]
     },
-    { name: 'Classes', href: '/admin/classes', icon: BookOpenIcon },
-    { name: 'Teachers', href: '/admin/teachers', icon: AcademicCapIcon },
-    { name: 'Students', href: '/admin/students', icon: UserGroupIcon },
+    { name: 'Classes', href: '/dashboard/classes', icon: BookOpenIcon },
+    { name: 'Teachers', href: '/dashboard/teachers', icon: AcademicCapIcon },
+    { name: 'Students', href: '/dashboard/students', icon: UserGroupIcon },
 ];
 
 const SidebarNavigation = () => {

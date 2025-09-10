@@ -48,7 +48,7 @@ const EmailForm = ({ email, setEmail, switchToPhone, formAction, errorMessage, i
         }
     }
 
-    const callbackUrl = searchParams.get('callbackUrl') || '/admin';
+    const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
 
     if (showPassword) {
         return (

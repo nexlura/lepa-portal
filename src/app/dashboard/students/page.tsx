@@ -109,7 +109,7 @@ export default function StudentsPage() {
                         <ArrowDownTrayIcon className="h-4 w-4 mr-2" />
                         Import CSV
                     </Button>
-                    <Button color="primary" href="/admin/students/admissions/new">
+                    <Button color="primary" href="/dashboard/students/admissions/new">
                         <PlusIcon className="h-4 w-4 mr-2 text-white" />
                         Admit Student
                     </Button>

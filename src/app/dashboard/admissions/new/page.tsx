@@ -75,7 +75,7 @@ export default function NewStudentAdmissionPage() {
         e.preventDefault()
         if (!validate()) return
         // TODO: persist to backend when available
-        router.push('/admin/students/admissions')
+        router.push('/dashboard/students/admissions')
     }
 
     return (

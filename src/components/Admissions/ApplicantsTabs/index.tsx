@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { UserIcon, DocumentTextIcon, AcademicCapIcon } from '@heroicons/react/24/outline'
 
-import { mockDocuments, mockStudent } from '@/app/admin/admissions/process/[id]/page'
+import { mockDocuments, mockStudent } from '@/app/dashboard/admissions/process/[id]/page'
 import PersonalDetailsTab from './PersonalDetailsTab'
 import ParentTab from './ParentTab'
 import DocumentTab from './DocumentTab'

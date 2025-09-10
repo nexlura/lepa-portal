@@ -9,7 +9,7 @@ const SettingsNavigation = () => {
 
     return (
         <Link
-            href={'/admin/settings'}
+            href={'/dashboard/settings'}
             className={`group flex text-gray-500 items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${'/admin/settings' === pathname
                 ? 'bg-primary-200 text-gray-900'
                 : 'hover:bg-primary-50 hover:text-gray-900'

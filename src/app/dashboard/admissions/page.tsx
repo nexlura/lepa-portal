@@ -6,7 +6,6 @@ import { Button } from '@/components/UIKit/Button'
 import { ImportStudentsModal } from '@/components/Students'
 import type { MinimalStudent } from '@/components/Students/ImportStudentsModal'
 import AdmissionsTable from '@/components/Admissions/AdmissionTable'
-import ApplicantDetailsModal from '@/components/Admissions/ApplicantDetailsModal'
 import DetailsModal from '@/components/Admissions/DetailsModal'
 
 export interface StudentRecord {
@@ -70,7 +69,7 @@ export default function StudentAdmissionsPage() {
                         <ArrowDownTrayIcon className="h-4 w-4 mr-2" />
                         Import CSV
                     </Button>
-                    <Button color="primary" href="/admin/students/admissions/new">
+                    <Button color="primary" href="/dashboard/students/admissions/new">
                         <PlusIcon className="h-4 w-4 mr-2 text-white" />
                         Admit Student
                     </Button>

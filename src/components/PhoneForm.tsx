@@ -33,7 +33,7 @@ const PhoneForm = ({ isLoading, phoneNumber, setIsLoading, setPhoneNumber, switc
             } else if (resp?.exists) {
                 setVerified(true)
                 // Placeholder: navigate or prompt OTP in future
-                router.push('/admin')
+                router.push('/dashboard')
             } else {
                 setLocalError('No account found for this phone number.')
             }

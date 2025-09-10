@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { useActionState } from 'react';
 import { authenticate } from '@/app/lib/actions';
-// import { useSearchParams } from 'next/navigation';
 
 import { WordmarkLogo } from '@/components/Logo'
 import PhoneForm from '@/components/PhoneForm'
@@ -14,7 +13,6 @@ export default function AuthPage() {
   const [phoneNumber, setPhoneNumber] = useState('')
   const [email, setEmail] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  // const searchParams = useSearchParams();
 
   const switchToEmail = () => {
     setAuthMethod('email')
@@ -26,7 +24,6 @@ export default function AuthPage() {
     setEmail('')
   }
 
-  // const callbackUrl = searchParams.get('callbackUrl') || '/admin';
   const [errorMessage, formAction, isPending] = useActionState(
     authenticate,
     undefined,
