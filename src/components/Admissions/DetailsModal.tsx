@@ -110,7 +110,7 @@ export default function DetailsModal({ viewTarget, showViewModal, setShowViewMod
                                                 </div>
                                                 <div>
                                                     <div className="text-xs capitalize text-gray-500">Method of Applying</div>
-                                                    <div className="text-sm text-gray-900">CSV Import</div>
+                                                    <div className="text-sm text-gray-900">Batch Import</div>
                                                 </div>
                                                 <div>
                                                     <div className="text-xs capitalize text-gray-500">Application Date</div>
