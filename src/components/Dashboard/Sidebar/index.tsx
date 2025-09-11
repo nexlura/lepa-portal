@@ -4,7 +4,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 import SidebarNavigation from './Navigation';
-import { signOut } from '../../../../auth';
+import { signOut } from '../../../auth';
 import SettingsNavigation from './SettingsNavigation';
 
 interface SidebarProps {

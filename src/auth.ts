@@ -1,10 +1,11 @@
 import NextAuth from 'next-auth';
 import { z } from 'zod';
 import Credentials from 'next-auth/providers/credentials';
-
-import { authConfig } from './auth.config';
+import type { JWT } from 'next-auth/jwt';
 import type { User as NextAuthUser } from '@auth/core/types';
+
 import { postModel } from '@/app/lib/connector';
+import { authConfig } from './auth.config';
 
 declare module 'next-auth' {
   interface User {
@@ -17,6 +18,12 @@ declare module 'next-auth' {
       email?: string | null;
       name?: string | null;
     };
+  }
+}
+
+declare module 'next-auth/jwt' {
+  interface JWT {
+    role?: string;
   }
 }
 
@@ -60,12 +67,13 @@ export const { auth, signIn, signOut } = NextAuth({
   ],
 
   callbacks: {
+    ...(authConfig.callbacks ?? {}),
     async jwt({ token, user }) {
-      if (user) token.role = (user as any).role;
-      return token;
+      if (user) token.role = (user as NextAuthUser & { role: string }).role;
+      return token as JWT;
     },
     async session({ session, token }) {
-      if (token) session.user.role = (token as any).role ?? 'User';
+      if (token) session.user.role = (token as JWT).role ?? 'User';
       return session;
     },
   },

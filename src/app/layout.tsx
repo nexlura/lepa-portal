@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Merriweather } from "next/font/google";
 
-import { auth } from "../../auth";
+import { auth } from "../auth";
 import "./globals.css";
 import Provider from "@/components/Provider";
 
