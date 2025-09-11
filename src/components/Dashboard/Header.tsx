@@ -6,17 +6,22 @@ import {
 } from '@heroicons/react/24/outline';
 
 import { useSession } from 'next-auth/react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function Header() {
+    const { data: session } = useSession();
 
-    const { data: session, status } = useSession();
+    const [currentUser, setCurrentUser] = useState<{
+        role: string;
+        email?: string | null;
+        name?: string | null
+    } | null>()
+
 
     useEffect(() => {
-        console.log('session', session?.user);
-
-
-
+        if (session?.user) {
+            setCurrentUser(session.user)
+        }
     }, [session])
 
 
@@ -49,10 +54,10 @@ export default function Header() {
                     <div className="flex items-center space-x-3">
                         <div className="flex flex-col items-end">
                             <span className="text-sm font-medium text-gray-900">
-                                {session?.user && session.user.role}
+                                {currentUser && currentUser.role}
                             </span>
                             <span className="text-xs text-gray-500">
-                                {session?.user && session.user.name}
+                                {currentUser && currentUser.name}
                             </span>
                         </div>
                         <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center">

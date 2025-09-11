@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import { Inter, Merriweather } from "next/font/google";
-import { SessionProvider } from "next-auth/react";
 
 import { auth } from "../../auth";
 import "./globals.css";
-import FeedbackProvider from "@/context/feedback";
+import Provider from "@/components/Provider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -36,11 +35,9 @@ export default async function RootLayout({
       <body
         className={`${inter.variable} ${merriweather.variable} antialiased h-full`}
       >
-        <SessionProvider session={session}>
-          <FeedbackProvider>
-            {children}
-          </FeedbackProvider>
-        </SessionProvider>
+        <Provider session={session}>
+          {children}
+        </Provider>
       </body>
     </html>
   );
