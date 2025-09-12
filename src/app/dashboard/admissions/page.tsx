@@ -1,12 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { PlusIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline'
+import { PlusIcon, ArrowDownTrayIcon, ClipboardDocumentListIcon } from '@heroicons/react/24/outline'
 import { Button } from '@/components/UIKit/Button'
 import { ImportStudentsModal } from '@/components/Students'
 import type { MinimalStudent } from '@/components/Students/ImportStudentsModal'
 import AdmissionsTable from '@/components/Admissions/AdmissionTable'
 import DetailsModal from '@/components/Admissions/DetailsModal'
+import EmptyState from '@/components/EmptyState'
 
 export interface StudentRecord {
     id: number
@@ -54,6 +55,30 @@ export default function StudentAdmissionsPage() {
         }))
         setStudents(prev => [...prev, ...imported])
         setShowImportModal(false)
+    }
+
+    if (students.length < 1) {
+        return (
+            <>
+                <EmptyState
+                    heading='No Addmissions Found'
+                    subHeading='Get started by importing addmissions data'
+                    button={
+                        <Button onClick={() => setShowImportModal(true)} color='primary'>
+                            <ArrowDownTrayIcon className="h-4 w-4 mr-2" />
+                            Import Admissions
+                        </Button>
+                    }
+                    icon={<ClipboardDocumentListIcon className='size-12 text-gray-500' />}
+                />
+                {/* Individual admission moved to dedicated page */}
+                <ImportStudentsModal
+                    open={showImportModal}
+                    onClose={setShowImportModal}
+                    onSubmit={handleImportStudents}
+                />
+            </>
+        )
     }
 
     return (
