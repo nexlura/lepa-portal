@@ -1,9 +1,10 @@
-import { useActionState } from 'react';
+import { HTMLInputTypeAttribute, useActionState, useState } from 'react';
 
 import { authenticate } from '@/app/lib/actions';
 import { Button } from '@/components/UIKit/Button'
 import { Field, Label } from '@/components/UIKit/Fieldset'
 import { useSearchParams } from 'next/navigation';
+import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 
 
 const PasswordForm = (props: { credential: string }) => {
@@ -12,6 +13,9 @@ const PasswordForm = (props: { credential: string }) => {
         authenticate,
         undefined,
     );
+
+    const [inputType, setInputType] = useState<HTMLInputTypeAttribute | undefined>('password')
+
 
     const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
 
@@ -25,11 +29,33 @@ const PasswordForm = (props: { credential: string }) => {
                     <input
                         id="password"
                         name="password"
-                        type="password"
+                        type={inputType}
                         autoFocus
                         required
                         className="col-start-1 row-start-1 block w-full rounded-md py-3 pr-3 pl-4 text-base text-gray-900 outline-1 -outline-offset-1 outline-zinc-950/20 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-gray-800 sm:text-sm/6"
                     />
+                    {inputType === 'password' ? (
+                        <button
+                            type='button'
+                            onClick={() => setInputType('text')}
+                            className='cursor-pointer self-center justify-self-end col-start-1 row-start-1 mr-3'>
+                            <EyeSlashIcon
+                                aria-hidden="true"
+                                className=" size-5  text-gray-400 sm:size-4"
+                            />
+                        </button>
+                    ) : (
+                        <button
+                            type='button'
+                            onClick={() => setInputType('password')}
+                            className='cursor-pointer self-center justify-self-end col-start-1 row-start-1 mr-3'>
+                            <EyeIcon
+                                aria-hidden="true"
+                                className=" size-5  text-gray-400 sm:size-4"
+                            />
+                        </button>
+                    )}
+
                 </div>
             </Field>
 
