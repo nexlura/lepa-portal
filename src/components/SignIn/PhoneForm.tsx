@@ -1,51 +1,56 @@
 'use client'
 
+import { useState } from 'react'
 import { EnvelopeIcon } from '@heroicons/react/24/outline'
 
 import { Button } from '@/components/UIKit/Button'
 import { Field, Label } from '@/components/UIKit/Fieldset'
-import { useRouter } from 'next/navigation'
-import { Dispatch, SetStateAction, useState } from 'react'
 import { postModel } from '@/app/lib/connector'
+import PasswordForm from './PasswordForm'
+import { SignInFormProps } from '@/app/page'
 
-interface PhoneFormProps {
-    isLoading: boolean
-    phoneNumber: string
-    setIsLoading: Dispatch<SetStateAction<boolean>>
-    setPhoneNumber: Dispatch<SetStateAction<string>>
-    switchToEmail: () => void
-}
-
-const PhoneForm = ({ isLoading, phoneNumber, setIsLoading, setPhoneNumber, switchToEmail }: PhoneFormProps) => {
-    const router = useRouter()
+const PhoneForm = ({ setAuthMethod, setShowPassword, showPassword }: SignInFormProps) => {
     const [localError, setLocalError] = useState<string | null>(null)
-    const [verified, setVerified] = useState(false)
+    const [isLoading, setIsLoading] = useState(false)
+    const [phoneNumber, setPhoneNumber] = useState('')
 
-    const handlePhoneSubmit = async (e: React.FormEvent) => {
+
+    const urlEndpoint = 'auth/verify-email'
+
+    const handleVerifyPhone = async (e: React.FormEvent) => {
         e.preventDefault()
         setLocalError(null)
         setIsLoading(true)
-
         try {
-            const resp = await postModel<{ exists: boolean } | string>('auth/verify-identifier', { phone: phoneNumber })
+            const resp = await postModel<{ exists: boolean } | string>(`${urlEndpoint}`, { phoneNumber })
+
             if (typeof resp === 'string') {
                 setLocalError(resp)
             } else if (resp?.exists) {
-                setVerified(true)
-                // Placeholder: navigate or prompt OTP in future
-                router.push('/dashboard')
+                setShowPassword(true)
             } else {
-                setLocalError('No account found for this phone number.')
+                setLocalError('No account found for this email.')
             }
-        } catch {
-            setLocalError('Unable to verify phone. Please try again.')
+        } catch (err) {
+            setLocalError('Unable to verify email. Please try again.')
         } finally {
             setIsLoading(false)
         }
     }
 
+    const switchToEmail = () => {
+        setAuthMethod('email')
+        setPhoneNumber('')
+    }
+
+    if (showPassword) {
+        return (
+            <PasswordForm credential={phoneNumber} />
+        )
+    }
+
     return (
-        <form className="space-y-6" onSubmit={handlePhoneSubmit}>
+        <form className="space-y-6" onSubmit={handleVerifyPhone}>
             <Field>
                 <Label htmlFor="phone">Phone Number</Label>
                 <div className="mt-2 grid grid-cols-1">
@@ -77,9 +82,8 @@ const PhoneForm = ({ isLoading, phoneNumber, setIsLoading, setPhoneNumber, switc
                     color="primary"
                     className="w-full h-12 items-center"
                     disabled={isLoading}
-
                 >
-                    {isLoading ? 'Submitting' : (verified ? 'Verified' : 'Continue')}
+                    {isLoading ? 'Submitting' : 'Continue'}
                 </Button>
             </div>
 
