@@ -1,21 +1,29 @@
 'use client'
 
 import { PhoneIcon } from '@heroicons/react/24/outline'
+import { SetStateAction, Dispatch, useState } from 'react'
 
 import { Button } from '@/components/UIKit/Button'
 import { Field, Label } from '@/components/UIKit/Fieldset'
-import { useState } from 'react'
 import { postModel } from '@/app/lib/connector'
 import PasswordForm from './PasswordForm'
 import { SignInFormProps } from '@/app/page'
 
+interface EmailFormProps extends SignInFormProps {
+    email: string
+    setEmail: Dispatch<SetStateAction<string>>
+}
 
-const EmailForm = ({ setAuthMethod, setShowPassword, showPassword }: SignInFormProps) => {
+const EmailForm = ({
+    showPassword,
+    email,
+    setAuthMethod,
+    setShowPassword,
+    setEmail
+}: EmailFormProps) => {
 
     const [localError, setLocalError] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(false)
-    const [email, setEmail] = useState('')
-
 
     const urlEndpoint = 'auth/verify-email'
 

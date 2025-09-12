@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { SetStateAction, Dispatch, useState } from 'react'
 import { EnvelopeIcon } from '@heroicons/react/24/outline'
 
 import { Button } from '@/components/UIKit/Button'
@@ -9,11 +9,21 @@ import { postModel } from '@/app/lib/connector'
 import PasswordForm from './PasswordForm'
 import { SignInFormProps } from '@/app/page'
 
-const PhoneForm = ({ setAuthMethod, setShowPassword, showPassword }: SignInFormProps) => {
+interface PhoneFormProps extends SignInFormProps {
+    phoneNumber: string
+    setPhoneNumber: Dispatch<SetStateAction<string>>
+}
+
+const PhoneForm = ({
+    showPassword,
+    phoneNumber,
+    setAuthMethod,
+    setShowPassword,
+    setPhoneNumber
+
+}: PhoneFormProps) => {
     const [localError, setLocalError] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(false)
-    const [phoneNumber, setPhoneNumber] = useState('')
-
 
     const urlEndpoint = 'auth/verify-email'
 
@@ -27,6 +37,7 @@ const PhoneForm = ({ setAuthMethod, setShowPassword, showPassword }: SignInFormP
             if (typeof resp === 'string') {
                 setLocalError(resp)
             } else if (resp?.exists) {
+                setPhoneNumber(`232${phoneNumber}`)
                 setShowPassword(true)
             } else {
                 setLocalError('No account found for this email.')
@@ -60,6 +71,7 @@ const PhoneForm = ({ setAuthMethod, setShowPassword, showPassword }: SignInFormP
                         type="tel"
                         required
                         value={phoneNumber}
+                        autoFocus
                         onChange={(e) => setPhoneNumber(e.target.value)}
                         className="col-start-1 row-start-1 block w-full rounded-md py-3 pr-3 pl-14 text-base text-gray-900 outline-1 -outline-offset-1 outline-zinc-950/20 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-gray-800 sm:text-sm/6"
                     />

@@ -5,6 +5,7 @@ import { SetStateAction, Dispatch, useState } from 'react'
 import { WordmarkLogo } from '@/components/Logo'
 import EmailForm from '@/components/SignIn/EmailForm'
 import PhoneForm from '@/components/SignIn/PhoneForm';
+import { formatPhoneNumber } from '@/utils';
 
 export interface SignInFormProps {
   showPassword: boolean
@@ -15,7 +16,8 @@ export interface SignInFormProps {
 export default function AuthPage() {
   const [authMethod, setAuthMethod] = useState<'phone' | 'email'>('phone')
   const [showPassword, setShowPassword] = useState(false)
-
+  const [email, setEmail] = useState('')
+  const [phoneNumber, setPhoneNumber] = useState('')
 
   return (
     <div className="relative min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
@@ -30,9 +32,17 @@ export default function AuthPage() {
         <h2 className="mt-6 text-center text-3xl font-medium text-gray-900">
           {authMethod === 'phone' ? 'Sign in with phone' : 'Sign in with email'}
         </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
-          {showPassword ? 'Enter your password to continue signing in.' : 'Fast, secure, and hassle-free admissions.'}
-        </p>
+        {showPassword ? (
+          <p className="mt-2 text-center text-sm text-gray-600">
+            Enter password for <span className='text-primary-700'>
+              {email || formatPhoneNumber(phoneNumber)}
+            </span> to sign in.
+          </p>
+        ) : (
+          <p className="mt-2 text-center text-sm text-gray-600">
+            Fast, secure, and hassle-free admissions.
+          </p>
+        )}
 
       </div>
 
@@ -40,14 +50,20 @@ export default function AuthPage() {
         <div className="py-8 px-4 sm:px-10">
           {authMethod === 'phone' ? (
             <PhoneForm
+              showPassword={showPassword}
+              phoneNumber={phoneNumber}
+              setPhoneNumber={setPhoneNumber}
               setAuthMethod={setAuthMethod}
               setShowPassword={setShowPassword}
-              showPassword={showPassword} />
+            />
           ) : (
             <EmailForm
+              email={email}
+              showPassword={showPassword}
+              setEmail={setEmail}
               setAuthMethod={setAuthMethod}
               setShowPassword={setShowPassword}
-              showPassword={showPassword} />
+            />
           )}
 
           {/* Additional Info */}
