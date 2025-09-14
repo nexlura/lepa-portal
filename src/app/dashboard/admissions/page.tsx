@@ -61,8 +61,8 @@ export default function StudentAdmissionsPage() {
         return (
             <>
                 <EmptyState
-                    heading='No Addmissions Found'
-                    subHeading='Get started by importing addmissions data'
+                    heading='No Admissions Found'
+                    subHeading='Get started by importing admissions data'
                     button={
                         <Button onClick={() => setShowImportModal(true)} color='primary'>
                             <ArrowDownTrayIcon className="h-4 w-4 mr-2" />

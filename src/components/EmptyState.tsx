@@ -21,7 +21,7 @@ const EmptyListItem = ({
   icon,
 }: EmptyListItem) => {
   return (
-    <div className="h-[calc(100vh-200px)] flex items-center justify-center">
+    <div className="h-[calc(100vh-300px)] flex items-center justify-center">
       <div className="text-center">
         <div className="inline-flex justify-center ">{icon}</div>
         <h3 className="mt-2 text-sm font-semibold text-gray-900">{heading}</h3>

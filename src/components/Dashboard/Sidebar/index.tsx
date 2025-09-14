@@ -62,7 +62,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                             <button
                                 className="group flex w-full items-center px-3 py-2 text-sm font-medium text-accent-900 rounded-md hover:bg-primary-50 hover:text-gray-900 transition-colors"
                             >
-                                <ArrowRightEndOnRectangleIcon className="mr-3 h-5 w-5 text-accent-900 group-hover:text-gray-500" />
+                                <ArrowRightEndOnRectangleIcon className="mr-3 h-5 w-5" />
                                 Logout
                             </button>
                         </form>
