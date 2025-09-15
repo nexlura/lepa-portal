@@ -20,7 +20,7 @@ const data = [
 
 const AdmissionTimeline = () => {
     return (
-        <div className="w-full h-96 p-4 bg-white rounded-2xl shadow">
+        <div className="w-full h-80 p-4 bg-white rounded-2xl shadow">
             <h2 className="text-xl font-semibold mb-4">Admission Timeline</h2>
             <ResponsiveContainer width="100%" height="85%">
                 <BarChart
