@@ -10,13 +10,13 @@ const data = [
 
 
 ];
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+const COLORS = ['#b3e5ef', '#67cbdf', '#5bb3c3', '#3f8b9b', '#1a3d44', '#000'];
 
 const AdmissionByClass = () => {
     return (
         <div className="bg-white h-72 shadow rounded-lg p-6">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Admissions by Class</h3>
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" style={{ paddingBottom: 26 }}>
                 <PieChart>
                     <Pie
                         data={data}

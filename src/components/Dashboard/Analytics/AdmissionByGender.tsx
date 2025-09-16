@@ -6,7 +6,7 @@ const data = [
 ];
 
 const RADIAN = Math.PI / 180;
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+const COLORS = ['#67cbdf', '#317787'];
 
 const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) => {
     const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
@@ -20,15 +20,15 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, per
     );
 };
 
-export default function Example() {
+const AdmissionByGender = () => {
     return (
         <div className="bg-white h-72 shadow rounded-lg p-6">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Admissions by Gender</h3>
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" style={{ paddingBottom: 5 }}>
                 <PieChart width={400} height={400}>
                     <Pie
                         data={data}
-                        cx="50%"
+                        cx="35%"
                         cy="50%"
                         labelLine={false}
                         label={renderCustomizedLabel}
@@ -52,3 +52,5 @@ export default function Example() {
         </div>
     );
 }
+
+export default AdmissionByGender

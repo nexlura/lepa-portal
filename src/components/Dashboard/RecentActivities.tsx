@@ -3,7 +3,7 @@ import { ClockIcon } from "@heroicons/react/24/outline"
 const RecentActivities = () => {
     return (
         <div className="bg-white shadow rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
+            <div className="px-4 py-5 sm:px-6 sm:py-5 ">
                 <div className="flex items-center mb-4">
                     <ClockIcon className="h-5 w-5 text-gray-400 mr-2" />
                     <h3 className="text-lg leading-6 font-medium text-gray-900">
@@ -48,7 +48,7 @@ const RecentActivities = () => {
                                     ) : null}
                                     <div className="relative flex space-x-3">
                                         <div>
-                                            <span className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center ring-8 ring-white">
+                                            <span className="h-8 w-8 rounded-full bg-primary-500 flex items-center justify-center ring-8 ring-white">
                                                 <span className="text-white text-xs font-medium">
                                                     {activity.type.charAt(0).toUpperCase()}
                                                 </span>

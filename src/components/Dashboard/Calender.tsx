@@ -23,7 +23,7 @@ const Calendar = () => {
             <div
                 key={day}
                 className={`h-8 flex items-center justify-center text-sm rounded ${isToday
-                    ? 'bg-blue-500 text-white font-semibold'
+                    ? 'bg-primary-500 text-white font-semibold'
                     : 'text-gray-700 hover:bg-gray-100'
                     }`}
             >

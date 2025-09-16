@@ -10,20 +10,6 @@ import AdmissionsByGender from '@/components/Dashboard/Analytics/AdmissionByGend
 export default function AdminDashboard() {
     // Sample data for charts
 
-    const genderData = [
-        { label: 'Male', count: 678, percentage: 55 },
-        { label: 'Female', count: 556, percentage: 45 },
-    ];
-
-    const classAdmissions = [
-        { class: 'Class 1', students: 45, capacity: 50 },
-        { class: 'Class 2', students: 42, capacity: 50 },
-        { class: 'Class 3', students: 48, capacity: 50 },
-        { class: 'Class 4', students: 38, capacity: 50 },
-        { class: 'Class 5', students: 35, capacity: 50 },
-        { class: 'Class 6', students: 40, capacity: 50 },
-    ];
-
     return (
         <div className="space-y-6">
             {/* Page header */}
@@ -37,12 +23,11 @@ export default function AdminDashboard() {
             {/* Two-column layout */}
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
                 {/* Main content - Left column (3/4 width) */}
-                <div className="lg:col-span-3 space-y-6">
+                <div className="lg:col-span-3 space-y-6 ">
                     {/* Stats grid */}
                     <DashboardStats />
 
-                    {/* Charts Grid */}
-                    <div className="grid grid-cols-1 gap-6">
+                    <div className="grid grid-cols-1 gap-6 ">
                         {/* Admission Timeline Chart */}
                         <AdmissionTimeline />
                     </div>
@@ -50,7 +35,6 @@ export default function AdminDashboard() {
                         {/* Admission by Class Chart */}
                         <AdmissionByClass />
                         <AdmissionsByGender />
-
                     </div>
                 </div>
 

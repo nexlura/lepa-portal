@@ -21,7 +21,9 @@ const data = [
 const AdmissionTimeline = () => {
     return (
         <div className="w-full h-80 p-4 bg-white rounded-2xl shadow">
-            <h2 className="text-xl font-semibold mb-4">Admission Timeline</h2>
+            <h2 className="text-lg font-medium text-gray-900 mb-4">
+                Admission Timeline
+            </h2>
             <ResponsiveContainer width="100%" height="85%">
                 <BarChart
                     width={400}
@@ -38,7 +40,7 @@ const AdmissionTimeline = () => {
                     <XAxis dataKey="month" />
                     <YAxis />
                     <Tooltip />
-                    <Bar dataKey="admissions" fill="#82ca9d" activeBar={<Rectangle fill="gold" stroke="purple" />} />
+                    <Bar dataKey="admissions" fill="#69C7D7" activeBar={<Rectangle fill="#839CD2" stroke="purple" />} />
                 </BarChart>
             </ResponsiveContainer>
         </div>
