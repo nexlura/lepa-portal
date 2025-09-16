@@ -1,12 +1,13 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { UserGroupIcon, PlusIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline'
+import { UserGroupIcon, PlusIcon, ArrowDownTrayIcon, ClipboardDocumentListIcon } from '@heroicons/react/24/outline'
 
 import { Button } from '@/components/UIKit/Button';
 import { ImportStudentsModal, EditStudentModal } from '@/components/Students'
 import type { MinimalStudent } from '@/components/Students/ImportStudentsModal'
 import type { EditStudentFormData } from '@/components/Students/EditStudentModal'
+import EmptyState from '@/components/EmptyState';
 
 interface StudentRecord {
     id: number
@@ -93,6 +94,31 @@ export default function StudentsPage() {
         const grades = new Set(students.map(s => s.grade).filter(Boolean))
         return { total, pending, grades: grades.size }
     }, [students])
+
+
+    if (students.length < 1) {
+        return (
+            <>
+                <EmptyState
+                    heading='No Students Found'
+                    subHeading='Get started by importing admissions data'
+                    button={
+                        <Button onClick={() => setShowImportModal(true)} color='primary'>
+                            <ArrowDownTrayIcon className="h-4 w-4 mr-2" />
+                            Import Admissions
+                        </Button>
+                    }
+                    icon={<ClipboardDocumentListIcon className='size-12 text-gray-500' />}
+                />
+                {/* Individual admission moved to dedicated page */}
+                <ImportStudentsModal
+                    open={showImportModal}
+                    onClose={setShowImportModal}
+                    onSubmit={handleImportStudents}
+                />
+            </>
+        )
+    }
 
     return (
         <div className="space-y-6">
