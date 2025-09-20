@@ -1,14 +1,14 @@
 'use client'
 
 import { useMemo, useState, useEffect } from 'react'
-import { ArrowDownTrayIcon, MagnifyingGlassIcon, FunnelIcon, ClipboardDocumentListIcon } from '@heroicons/react/24/outline'
-import { useRouter } from 'next/navigation'
+import { ArrowDownTrayIcon, ClipboardDocumentListIcon } from '@heroicons/react/24/outline'
 
 import { Button } from '@/components/UIKit/Button';
 import { ImportStudentsModal } from '@/components/Students'
 import type { MinimalStudent } from '@/components/Students/ImportStudentsModal'
 import EmptyState from '@/components/EmptyState';
 import StudentTable from '@/components/Students/StudentTable';
+import StudentTableControls from '@/components/Students/StudentTable/TableControls';
 
 interface StudentRecord {
     id: number
@@ -36,11 +36,8 @@ export default function StudentsPage() {
 
 
     const [students, setStudents] = useState<StudentRecord[]>([])
-
     const [showImportModal, setShowImportModal] = useState(false)
 
-    const [editTarget, setEditTarget] = useState<StudentRecord | null>(null)
-    const [showEditModal, setShowEditModal] = useState(false)
 
     // UI state: search, filters, sorting, pagination
     const [search, setSearch] = useState('')
@@ -49,9 +46,7 @@ export default function StudentsPage() {
     const [sortBy, setSortBy] = useState<'name' | 'grade' | 'dateOfBirth' | 'enrollmentDate'>('name')
     const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc')
     const [page, setPage] = useState(1)
-    const [pageSize, setPageSize] = useState(10)
-
-    const router = useRouter()
+    const pageSize = 10
 
     // Load and persist to localStorage so the detail page can read
     useEffect(() => {
@@ -62,7 +57,6 @@ export default function StudentsPage() {
                 setStudents(parsed)
             }
         } catch { /* ignore */ }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     useEffect(() => {
@@ -172,51 +166,29 @@ export default function StudentsPage() {
 
     return (
         <div className="space-y-6">
-
-            {/* Controls */}
-
-
-            {/* Table */}
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-900">Students</h1>
+                    <p className="mt-1 text-sm text-gray-500">
+                        Manage all student records and information.
+                    </p>
+                </div>
+            </div>
             <div className="bg-white shadow rounded-lg">
                 <div className="px-4 py-5 sm:p-6">
-                    <div className='flex justify-between items-center mb-5'>
-                        <h3 className="text-lg leading-6 font-medium text-gray-900 ">All Students</h3>
-                        <div className="px-4 sm:px-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                            <div className="flex items-center gap-2 w-full sm:w-auto">
-                                <div className="relative bg-gray-100 w-full sm:w-80 rounded-md">
-                                    <MagnifyingGlassIcon className="pointer-events-none absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-                                    <input
-                                        value={search}
-                                        onChange={(e) => { setSearch(e.target.value); setPage(1) }}
-                                        placeholder="Search by name, email, grade, guardian..."
-                                        className="w-full rounded-md border-gray-300 pl-10 pr-3 py-2 text-sm focus:border-primary-500 focus:ring-primary-500"
-                                    />
-                                </div>
-                                <FunnelIcon className="h-5 w-5 text-gray-400 hidden sm:block" />
-                                <select
-                                    value={statusFilter}
-                                    onChange={(e) => { setStatusFilter(e.target.value as any); setPage(1) }}
-                                    className="rounded-md border-gray-300 py-2 px-2 text-sm focus:border-primary-500 focus:ring-primary-500"
-                                >
-                                    <option value="All">All status</option>
-                                    <option value="Pending">Pending</option>
-                                    <option value="Enrolled">Enrolled</option>
-                                </select>
-                                <select
-                                    value={gradeFilter}
-                                    onChange={(e) => { setGradeFilter(e.target.value); setPage(1) }}
-                                    className="rounded-md border-gray-300 py-2 px-2 text-sm focus:border-primary-500 focus:ring-primary-500"
-                                >
-                                    {gradeOptions.map(g => (
-                                        <option key={g} value={g}>{g === 'All' ? 'All grades' : g}</option>
-                                    ))}
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-
+                    {/* Controls */}
+                    <StudentTableControls
+                        search={search}
+                        statusFilter={statusFilter}
+                        gradeOptions={gradeOptions}
+                        gradeFilter={gradeFilter}
+                        setSearch={setSearch}
+                        setPage={setPage}
+                        setStatusFilter={setStatusFilter}
+                        setGradeFilter={setGradeFilter}
+                    />
                     <div className="overflow-x-auto">
+                        {/* Table */}
                         <StudentTable pagedRows={pagedRows} toggleSort={toggleSort} />
                     </div>
 
