@@ -1,9 +1,19 @@
-import { BuildingOffice2Icon, CalendarIcon, UserIcon } from "@heroicons/react/24/outline"
+import { BuildingOffice2Icon, CalendarIcon, UserIcon, ArrowTrendingUpIcon, UserGroupIcon } from "@heroicons/react/24/outline"
 
-import { StudentRecord } from "@/app/dashboard/admissions/page"
+interface StudentLikeRecord {
+    id: number
+    name: string
+    grade: string
+    classSection?: string
+    enrollmentDate: string
+    previousSchool?: string
+    transferredFromSchool?: string
+    promotedFromGrade?: string | number
+    currentTeacherName?: string
+}
 
 interface TopCardsProps {
-    student: StudentRecord
+    student: StudentLikeRecord
 }
 
 const TopCards = ({ student }: TopCardsProps) => {
@@ -23,12 +33,34 @@ const TopCards = ({ student }: TopCardsProps) => {
             {/* Academic details */}
             <div className="bg-white rounded-lg shadow p-6 lg:col-span-3">
                 <div className="text-base font-semibold text-gray-900 mb-3">Academic details</div>
-                <div className="flex flex-wrap gap-2">
-                    <span className="inline-flex items-center rounded-full bg-gray-900 text-white px-3 py-1 text-xs">{`Grade ${student.grade}${student.classSection ? ` - ${student.classSection}` : ''}`}</span>
-                    <span className="inline-flex items-center rounded-full bg-gray-100 text-gray-900 px-3 py-1 text-xs"><CalendarIcon className="h-4 w-4 mr-1" />Enrolled {student.enrollmentDate || '-'}</span>
-                    {student.previousSchool && (
-                        <span className="inline-flex items-center rounded-full bg-gray-100 text-gray-900 px-3 py-1 text-xs"><BuildingOffice2Icon className="h-4 w-4 mr-1" />{student.previousSchool}</span>
-                    )}
+                <div className="flex flex-col gap-y-2">
+                    <div className="flex gap-x-2">
+                        <span className="inline-flex items-center rounded-full bg-gray-100 text-gray-900 px-3 py-1 text-xs">
+                            <CalendarIcon className="h-4 w-4 mr-1" />Enrolled {student.enrollmentDate || '-'}
+                        </span>
+                        <span className="inline-flex items-center rounded-full bg-gray-900 text-white px-3 py-1 text-xs">
+                            {`Grade ${student.grade}${student.classSection ? ` - ${student.classSection}` : ''}`}
+                        </span>
+                    </div>
+                    <div className="flex gap-x-2">
+                        {/* {student.transferredFromSchool && (
+                        <span className="inline-flex items-center rounded-full bg-indigo-100 text-indigo-900 px-3 py-1 text-xs">
+                            <BuildingOffice2Icon className="h-4 w-4 mr-1" />
+                            Transferred from {student.transferredFromSchool}
+                        </span>
+                    )} */}
+                        {student.previousSchool && (
+                            <span className="inline-flex items-center rounded-full bg-gray-100 text-gray-900 px-3 py-1 text-xs"><BuildingOffice2Icon className="h-4 w-4 mr-1" />{student.previousSchool}</span>
+                        )}
+
+                        <span className="inline-flex items-center rounded-full bg-indigo-100 text-indigo-900 px-3 py-1 text-xs">
+                            <BuildingOffice2Icon className="h-4 w-4 mr-1" />
+                            Transferred from School One
+                        </span>
+                        {student.promotedFromGrade && (
+                            <span className="inline-flex items-center rounded-full bg-emerald-100 text-emerald-900 px-3 py-1 text-xs"><ArrowTrendingUpIcon className="h-4 w-4 mr-1" />Promoted from Grade {student.promotedFromGrade}</span>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

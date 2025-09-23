@@ -25,11 +25,15 @@ interface StudentRecord {
     classSection?: string
     enrollmentDate: string
     previousSchool?: string
+    transferredFromSchool?: string
+    promotedFromGrade?: string | number
+    currentTeacherName?: string
     guardianName?: string
     guardianRelationship?: string
     guardianEmail?: string
     guardianPhone?: string
     status: 'Pending' | 'Enrolled'
+    documents?: { id: string | number, name: string, url?: string, previewUrl?: string }[]
 }
 
 export default function StudentsPage() {
@@ -77,7 +81,8 @@ export default function StudentsPage() {
             guardianName: r.guardianName,
             guardianPhone: r.guardianPhone,
             enrollmentDate: new Date().toISOString().split('T')[0],
-            status: 'Pending'
+            status: 'Pending',
+            documents: []
         }))
         setStudents(prev => [...prev, ...imported])
         setShowImportModal(false)

@@ -3,8 +3,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
-import { ArrowLeftIcon, ChevronRightIcon, CalendarIcon, EnvelopeIcon, PhoneIcon, MapPinIcon, UserIcon, BuildingOffice2Icon } from '@heroicons/react/24/outline'
+import { ArrowLeftIcon, ChevronRightIcon, EnvelopeIcon, PhoneIcon, MapPinIcon } from '@heroicons/react/24/outline'
 import TopCards from '@/components/Students/StudentDetails/TopCards'
+import DocumentsList, { StudentDocument } from '@/components/Students/StudentDetails/DocumentsList'
 
 interface StudentRecord {
     id: number
@@ -21,11 +22,15 @@ interface StudentRecord {
     classSection?: string
     enrollmentDate: string
     previousSchool?: string
+    transferredFromSchool?: string
+    promotedFromGrade?: string | number
+    currentTeacherName?: string
     guardianName?: string
     guardianRelationship?: string
     guardianEmail?: string
     guardianPhone?: string
     status: 'Pending' | 'Enrolled'
+    documents?: StudentDocument[]
 }
 
 export default function StudentDetailsPage() {
@@ -89,7 +94,7 @@ export default function StudentDetailsPage() {
             <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
                 {/* Contact and personal info */}
                 <div className="bg-white rounded-lg shadow p-6 space-y-4 lg:col-span-2">
-                    <div className="text-base font-semibold text-gray-900">Student information</div>
+                    <div className="text-base font-semibold text-gray-900">Student Information</div>
                     <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
                         <div>
                             <dt className="text-xs text-gray-500">Full name</dt>
@@ -119,24 +124,31 @@ export default function StudentDetailsPage() {
                         </div>
                     </dl>
 
-                    <div className="pt-2">
-                        <div className="text-sm font-medium text-gray-900">Guardian</div>
-                        <div className="text-sm text-gray-700">{student.guardianName || '-'}{student.guardianRelationship ? ` (${student.guardianRelationship})` : ''}</div>
-                        <div className="text-xs text-gray-500">{student.guardianEmail || ''}{student.guardianPhone ? ` • ${student.guardianPhone}` : ''}</div>
+                    <div className="pt-4">
+                        <div className="text-base font-semibold text-gray-900">Guardian Information</div>
+                        <dl className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+                            <div>
+                                <dt className="text-xs text-gray-500">Name</dt>
+                                <dd className="text-sm text-gray-900">{student.guardianName || '-'}</dd>
+                            </div>
+                            <div>
+                                <dt className="text-xs text-gray-500">Relationship</dt>
+                                <dd className="text-sm text-gray-900">{student.guardianRelationship || '-'}</dd>
+                            </div>
+                            <div>
+                                <dt className="text-xs text-gray-500">Email</dt>
+                                <dd className="text-sm text-gray-900">{student.guardianEmail || '-'}</dd>
+                            </div>
+                            <div>
+                                <dt className="text-xs text-gray-500">Phone</dt>
+                                <dd className="text-sm text-gray-900">{student.guardianPhone || '-'}</dd>
+                            </div>
+                        </dl>
                     </div>
                 </div>
 
-                {/* Right rail (placeholders for attendance/QR) */}
-                <div className="space-y-5">
-                    <div className="bg-white rounded-lg shadow p-6">
-                        <div className="text-sm font-semibold text-gray-900 mb-2">Attendance</div>
-                        <div className="text-xs text-gray-500">Coming soon</div>
-                    </div>
-                    <div className="bg-white rounded-lg shadow p-6 flex flex-col items-center">
-                        <div className="text-sm font-semibold text-gray-900 mb-3">Create ABC Id</div>
-                        <div className="h-28 w-28 bg-gray-200 rounded" />
-                    </div>
-                </div>
+                {/* Right rail: Documents */}
+                <DocumentsList documents={student.documents || []} />
             </div>
         </div>
     )
