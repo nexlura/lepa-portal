@@ -148,7 +148,10 @@ export default function StudentDetailsPage() {
                 </div>
 
                 {/* Right rail: Documents */}
-                <DocumentsList documents={student.documents || []} />
+                <DocumentsList documents={[
+                    { id: '01', name: 'Transcript', previewUrl: '/', url: '/' },
+                    { id: '01', name: 'Birth Certificate', previewUrl: '/', url: '/' }
+                ]} />
             </div>
         </div>
     )

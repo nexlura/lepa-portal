@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { DocumentIcon, EyeIcon, ArrowDownTrayIcon, XMarkIcon } from "@heroicons/react/24/outline"
+import { DocumentIcon, EyeIcon, ArrowDownTrayIcon, XMarkIcon, DocumentTextIcon } from "@heroicons/react/24/outline"
 
 export interface StudentDocument {
     id: string | number
@@ -37,26 +37,55 @@ const DocumentsList = ({ documents }: DocumentsListProps) => {
             ) : (
                 <ul className="divide-y divide-gray-100">
                     {documents.map(doc => (
-                        <li key={doc.id} className="py-3 flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <DocumentIcon className="h-5 w-5 text-gray-400" />
-                                <span className="text-sm text-gray-900">{doc.name}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <button
-                                    className="inline-flex items-center text-xs text-gray-600 hover:text-gray-900"
-                                    onClick={() => setPreviewDoc(doc)}
-                                    disabled={!doc.previewUrl && !doc.url}
-                                >
-                                    <EyeIcon className="h-4 w-4 mr-1" /> Preview
-                                </button>
-                                <button
-                                    className="inline-flex items-center text-xs text-gray-600 hover:text-gray-900"
-                                    onClick={() => handleDownload(doc)}
-                                    disabled={!doc.previewUrl && !doc.url}
-                                >
-                                    <ArrowDownTrayIcon className="h-4 w-4 mr-1" /> Download
-                                </button>
+                        // <li key={doc.id} className="py-3 flex items-center justify-between">
+                        //     <div className="flex items-center gap-3">
+                        //         <DocumentIcon className="h-5 w-5 text-gray-400" />
+                        //         <span className="text-sm text-gray-900">{doc.name}</span>
+                        //     </div>
+                        //     <div className="flex items-center gap-2">
+                        //         <button
+                        //             className="inline-flex items-center text-xs text-gray-600 hover:text-gray-900"
+                        //             onClick={() => setPreviewDoc(doc)}
+                        //             disabled={!doc.previewUrl && !doc.url}
+                        //         >
+                        //             <EyeIcon className="h-4 w-4 mr-1" /> Preview
+                        //         </button>
+                        //         <button
+                        //             className="inline-flex items-center text-xs text-gray-600 hover:text-gray-900"
+                        //             onClick={() => handleDownload(doc)}
+                        //             disabled={!doc.previewUrl && !doc.url}
+                        //         >
+                        //             <ArrowDownTrayIcon className="h-4 w-4 mr-1" /> Download
+                        //         </button>
+                        //     </div>
+                        // </li>
+                        <li key={doc.id} className="border border-gray-200 rounded-lg p-2 my-2">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center">
+                                    <DocumentTextIcon className="h-8 w-8 text-gray-400 mr-3" />
+                                    <div>
+                                        <p className="text-sm font-medium text-gray-900">{doc.name}</p>
+                                        <p className="text-xs text-gray-500">
+                                            Uploaded on 12-05-10 • 2mb
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        className="inline-flex items-center text-xs text-gray-600 hover:text-gray-900"
+                                        onClick={() => setPreviewDoc(doc)}
+                                        disabled={!doc.previewUrl && !doc.url}
+                                    >
+                                        <EyeIcon className="h-4 w-4 mr-1" />
+                                    </button>
+                                    <button
+                                        className="inline-flex items-center text-xs text-gray-600 hover:text-gray-900"
+                                        onClick={() => handleDownload(doc)}
+                                        disabled={!doc.previewUrl && !doc.url}
+                                    >
+                                        <ArrowDownTrayIcon className="h-4 w-4 mr-1" />
+                                    </button>
+                                </div>
                             </div>
                         </li>
                     ))}
