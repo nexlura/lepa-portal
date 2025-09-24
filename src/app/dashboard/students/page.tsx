@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from 'react'
 import { UserGroupIcon, PlusIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline'
-import { Button } from '@/components/UIKit/Button'
+
+import { Button } from '@/components/UIKit/Button';
 import { ImportStudentsModal, EditStudentModal } from '@/components/Students'
 import type { MinimalStudent } from '@/components/Students/ImportStudentsModal'
 import type { EditStudentFormData } from '@/components/Students/EditStudentModal'
@@ -29,7 +30,9 @@ interface StudentRecord {
     status: 'Pending' | 'Enrolled'
 }
 
-export default function StudentAdmissionsPage() {
+export default function StudentsPage() {
+
+
     const [students, setStudents] = useState<StudentRecord[]>([])
 
     const [showImportModal, setShowImportModal] = useState(false)
@@ -96,15 +99,17 @@ export default function StudentAdmissionsPage() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Student Admissions</h1>
-                    <p className="mt-1 text-sm text-gray-500">Admit students individually or by CSV import. Complete minimal imports later.</p>
+                    <h1 className="text-2xl font-bold text-gray-900">Students</h1>
+                    <p className="mt-1 text-sm text-gray-500">
+                        Manage all student records and information.
+                    </p>
                 </div>
                 <div className="flex gap-3">
                     <Button outline onClick={() => setShowImportModal(true)}>
                         <ArrowDownTrayIcon className="h-4 w-4 mr-2" />
                         Import CSV
                     </Button>
-                    <Button color="primary" href="/admin/students/admissions/new">
+                    <Button color="primary" href="/dashboard/students/admissions/new">
                         <PlusIcon className="h-4 w-4 mr-2 text-white" />
                         Admit Student
                     </Button>

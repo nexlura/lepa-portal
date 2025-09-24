@@ -5,19 +5,32 @@ import {
     Bars3Icon,
 } from '@heroicons/react/24/outline';
 
-interface HeaderProps {
-    onSidebarToggle: () => void;
-}
+import { useSession } from 'next-auth/react';
+import { useEffect, useState } from 'react';
 
-export default function Header({ onSidebarToggle }: HeaderProps) {
+export default function Header() {
+    const { data: session } = useSession();
+
+    const [currentUser, setCurrentUser] = useState<{
+        role: string;
+        email?: string | null;
+        name?: string | null
+    } | null>()
+
+
+    useEffect(() => {
+        if (session?.user) {
+            setCurrentUser(session.user)
+        }
+    }, [session])
+
 
     return (
-        <header className="bg-white sm:py-3">
+        <header className="sm:py-3">
             <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 h-16">
                 {/* Left side - Mobile menu button */}
                 <div className="flex items-center lg:hidden">
                     <button
-                        onClick={onSidebarToggle}
                         className="px-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100"
                     >
                         <Bars3Icon className="h-6 w-6" />
@@ -40,8 +53,12 @@ export default function Header({ onSidebarToggle }: HeaderProps) {
                     {/* User avatar and menu */}
                     <div className="flex items-center space-x-3">
                         <div className="flex flex-col items-end">
-                            <span className="text-sm font-medium text-gray-900">Admin User</span>
-                            <span className="text-xs text-gray-500">admin@lepa.com</span>
+                            <span className="text-sm font-medium text-gray-900">
+                                {currentUser && currentUser.role}
+                            </span>
+                            <span className="text-xs text-gray-500">
+                                {currentUser && currentUser.name}
+                            </span>
                         </div>
                         <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center">
                             <span className="text-white text-sm font-medium">A</span>

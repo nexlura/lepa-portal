@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Inter, Merriweather } from "next/font/google";
+
+import { auth } from "../auth";
 import "./globals.css";
-import FeedbackProvider from "@/context/feedback";
+import Provider from "@/components/Provider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -21,19 +23,21 @@ export const metadata: Metadata = {
   description: "The mordern solution for schools to manage admissions",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await auth(); // fetch session on server
+
   return (
     <html lang="en" className="h-full bg-white">
       <body
         className={`${inter.variable} ${merriweather.variable} antialiased h-full`}
       >
-        <FeedbackProvider>
+        <Provider session={session}>
           {children}
-        </FeedbackProvider>
+        </Provider>
       </body>
     </html>
   );
