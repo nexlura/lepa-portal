@@ -1,4 +1,4 @@
-import { BuildingOffice2Icon, CalendarIcon, UserIcon, ArrowTrendingUpIcon, UserGroupIcon } from "@heroicons/react/24/outline"
+import { BuildingOffice2Icon, CalendarIcon, UserIcon, ArrowTrendingUpIcon, UserGroupIcon, BookOpenIcon } from "@heroicons/react/24/outline"
 
 interface StudentLikeRecord {
     id: number
@@ -39,7 +39,7 @@ const TopCards = ({ student }: TopCardsProps) => {
                             <CalendarIcon className="h-4 w-4 mr-1" />Enrolled {student.enrollmentDate || '-'}
                         </span>
                         <span className="inline-flex items-center rounded-full bg-gray-900 text-white px-3 py-1 text-xs">
-                            {`Grade ${student.grade}${student.classSection ? ` - ${student.classSection}` : ''}`}
+                            <BookOpenIcon className="h-4 w-4 mr-1" /> {`${student.grade}${student.classSection ? ` - ${student.classSection}` : ''}`}
                         </span>
                     </div>
                     <div className="flex gap-x-2">

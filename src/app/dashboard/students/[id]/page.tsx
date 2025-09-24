@@ -3,9 +3,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
-import { ArrowLeftIcon, ChevronRightIcon, EnvelopeIcon, PhoneIcon, MapPinIcon } from '@heroicons/react/24/outline'
+import { ArrowLeftIcon, ChevronRightIcon, ShieldExclamationIcon } from '@heroicons/react/24/outline'
 import TopCards from '@/components/Students/StudentDetails/TopCards'
 import DocumentsList, { StudentDocument } from '@/components/Students/StudentDetails/DocumentsList'
+import PersonalInfoSection from '@/components/Students/StudentDetails/PersonalInfo'
+import Breadcrumbs from '@/components/Students/StudentDetails/BreadCrumbs'
 
 interface StudentRecord {
     id: number
@@ -33,7 +35,7 @@ interface StudentRecord {
     documents?: StudentDocument[]
 }
 
-export default function StudentDetailsPage() {
+const StudentDetailsPage = () => {
     const params = useParams()
     const router = useRouter()
     const [student, setStudent] = useState<StudentRecord | null>(null)
@@ -77,14 +79,14 @@ export default function StudentDetailsPage() {
 
     return (
         <div className="space-y-6">
-            {/* Breadcrumbs */}
-            <nav className="flex items-center text-sm text-gray-500" aria-label="Breadcrumb">
-                <Link href="/dashboard" className="hover:text-gray-900">Dashboard</Link>
-                <ChevronRightIcon className="mx-2 h-4 w-4" />
-                <Link href="/dashboard/students" className="hover:text-gray-900">Students</Link>
-                <ChevronRightIcon className="mx-2 h-4 w-4" />
-                <span className="text-gray-900">{student.name}</span>
-            </nav>
+            <div className='w-full flex justify-between items-center'>
+                {/* Breadcrumbs */}
+                <Breadcrumbs student={student} />
+
+                <Link href="/dashboard" className=" text-primary-800 hover:text-primary-900 text-sm flex items-center gap-x-1.5">
+                    Access Information <span><ShieldExclamationIcon className='w-6 h-6' /></span>
+                </Link>
+            </div>
 
 
             {/* Top cards */}
@@ -93,59 +95,7 @@ export default function StudentDetailsPage() {
             {/* Details grid */}
             <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
                 {/* Contact and personal info */}
-                <div className="bg-white rounded-lg shadow p-6 space-y-4 lg:col-span-2">
-                    <div className="text-base font-semibold text-gray-900">Student Information</div>
-                    <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
-                        <div>
-                            <dt className="text-xs text-gray-500">Full name</dt>
-                            <dd className="text-sm text-gray-900">{student.name}</dd>
-                        </div>
-                        <div>
-                            <dt className="text-xs text-gray-500">Gender</dt>
-                            <dd className="text-sm text-gray-900">{student.gender || '-'}</dd>
-                        </div>
-                        <div>
-                            <dt className="text-xs text-gray-500">Date of birth</dt>
-                            <dd className="text-sm text-gray-900">{student.dateOfBirth || '-'}</dd>
-                        </div>
-                        <div>
-                            <dt className="text-xs text-gray-500">Email</dt>
-                            <dd className="text-sm text-gray-900 inline-flex items-center"><EnvelopeIcon className="h-4 w-4 mr-1 text-gray-400" />{student.email || '-'}</dd>
-                        </div>
-                        <div>
-                            <dt className="text-xs text-gray-500">Phone</dt>
-                            <dd className="text-sm text-gray-900 inline-flex items-center"><PhoneIcon className="h-4 w-4 mr-1 text-gray-400" />{student.phone || '-'}</dd>
-                        </div>
-                        <div>
-                            <dt className="text-xs text-gray-500">Address</dt>
-                            <dd className="text-sm text-gray-900 inline-flex items-start"><MapPinIcon className="h-4 w-4 mr-1 mt-0.5 text-gray-400" />
-                                <span>{student.address || '-'}{student.city ? `, ${student.city}` : ''}{student.state ? `, ${student.state}` : ''}{student.postalCode ? `, ${student.postalCode}` : ''}</span>
-                            </dd>
-                        </div>
-                    </dl>
-
-                    <div className="pt-4">
-                        <div className="text-base font-semibold text-gray-900">Guardian Information</div>
-                        <dl className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
-                            <div>
-                                <dt className="text-xs text-gray-500">Name</dt>
-                                <dd className="text-sm text-gray-900">{student.guardianName || '-'}</dd>
-                            </div>
-                            <div>
-                                <dt className="text-xs text-gray-500">Relationship</dt>
-                                <dd className="text-sm text-gray-900">{student.guardianRelationship || '-'}</dd>
-                            </div>
-                            <div>
-                                <dt className="text-xs text-gray-500">Email</dt>
-                                <dd className="text-sm text-gray-900">{student.guardianEmail || '-'}</dd>
-                            </div>
-                            <div>
-                                <dt className="text-xs text-gray-500">Phone</dt>
-                                <dd className="text-sm text-gray-900">{student.guardianPhone || '-'}</dd>
-                            </div>
-                        </dl>
-                    </div>
-                </div>
+                <PersonalInfoSection student={student} />
 
                 {/* Right rail: Documents */}
                 <DocumentsList documents={[
@@ -155,4 +105,6 @@ export default function StudentDetailsPage() {
             </div>
         </div>
     )
-} 
+}
+
+export default StudentDetailsPage
