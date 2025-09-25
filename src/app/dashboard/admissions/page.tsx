@@ -1,12 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { PlusIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline'
+import { PlusIcon, ArrowDownTrayIcon, ClipboardDocumentListIcon } from '@heroicons/react/24/outline'
 import { Button } from '@/components/UIKit/Button'
 import { ImportStudentsModal } from '@/components/Students'
 import type { MinimalStudent } from '@/components/Students/ImportStudentsModal'
 import AdmissionsTable from '@/components/Admissions/AdmissionTable'
 import DetailsModal from '@/components/Admissions/DetailsModal'
+import EmptyState from '@/components/EmptyState'
 
 export interface StudentRecord {
     id: number
@@ -56,6 +57,30 @@ export default function StudentAdmissionsPage() {
         setShowImportModal(false)
     }
 
+    if (students.length < 1) {
+        return (
+            <>
+                <EmptyState
+                    heading='No Admissions Found'
+                    subHeading='Get started by importing admissions data'
+                    button={
+                        <Button onClick={() => setShowImportModal(true)} color='primary'>
+                            <ArrowDownTrayIcon className="h-4 w-4 mr-2" />
+                            Import Admissions
+                        </Button>
+                    }
+                    icon={<ClipboardDocumentListIcon className='size-12 text-gray-500' />}
+                />
+                {/* Individual admission moved to dedicated page */}
+                <ImportStudentsModal
+                    open={showImportModal}
+                    onClose={setShowImportModal}
+                    onSubmit={handleImportStudents}
+                />
+            </>
+        )
+    }
+
     return (
         <div className="space-y-6">
             {/* Header */}
@@ -67,7 +92,7 @@ export default function StudentAdmissionsPage() {
                 <div className="flex gap-3">
                     <Button outline onClick={() => setShowImportModal(true)}>
                         <ArrowDownTrayIcon className="h-4 w-4 mr-2" />
-                        Import CSV
+                        Batch Import
                     </Button>
                     <Button color="primary" href="/dashboard/students/admissions/new">
                         <PlusIcon className="h-4 w-4 mr-2 text-white" />

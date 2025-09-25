@@ -1,0 +1,56 @@
+import { Cell, Legend, Pie, PieChart, ResponsiveContainer } from 'recharts';
+
+const data = [
+    { name: 'Boys', value: 400 },
+    { name: 'Girls', value: 300 },
+];
+
+const RADIAN = Math.PI / 180;
+const COLORS = ['#67cbdf', '#317787'];
+
+const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) => {
+    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+    const x = cx + radius * Math.cos(-(midAngle ?? 0) * RADIAN);
+    const y = cy + radius * Math.sin(-(midAngle ?? 0) * RADIAN);
+
+    return (
+        <text x={x} y={y} fill="white" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central">
+            {`${((percent ?? 1) * 100).toFixed(0)}%`}
+        </text>
+    );
+};
+
+const AdmissionByGender = () => {
+    return (
+        <div className="bg-white h-72 shadow rounded-lg p-6">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Admissions by Gender</h3>
+            <ResponsiveContainer width="100%" height="100%" style={{ paddingBottom: 5 }}>
+                <PieChart width={400} height={400}>
+                    <Pie
+                        data={data}
+                        cx="35%"
+                        cy="50%"
+                        labelLine={false}
+                        label={renderCustomizedLabel}
+                        outerRadius={80}
+                        fill="#8884d8"
+                        dataKey="value"
+                    >
+                        {data.map((entry, index) => (
+                            <Cell key={`cell-${entry.name}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                    </Pie>
+                    <Legend
+                        layout="vertical"
+                        verticalAlign="middle"
+                        align="right"
+                        iconSize={10}
+                        wrapperStyle={{ paddingLeft: 20 }}
+                    />
+                </PieChart>
+            </ResponsiveContainer>
+        </div>
+    );
+}
+
+export default AdmissionByGender

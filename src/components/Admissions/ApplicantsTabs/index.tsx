@@ -3,9 +3,9 @@ import { UserIcon, DocumentTextIcon, AcademicCapIcon } from '@heroicons/react/24
 
 import { mockDocuments, mockStudent } from '@/app/dashboard/admissions/process/[id]/page'
 import PersonalDetailsTab from './PersonalDetailsTab'
-import ParentTab from './ParentTab'
 import DocumentTab from './DocumentTab'
 import TabNavigation from './TabHeader'
+import GuardianTab from './Guardian'
 
 const ApplicantTabs = () => {
     const [activeTab, setActiveTab] = useState('personal')
@@ -37,7 +37,7 @@ const ApplicantTabs = () => {
 
     const tabs = [
         { id: 'personal', name: 'Personal Details', icon: UserIcon },
-        { id: 'parent', name: 'Parent', icon: DocumentTextIcon },
+        { id: 'guardian', name: 'Guardian', icon: DocumentTextIcon },
         { id: 'documents', name: 'Documents', icon: AcademicCapIcon },
     ]
 
@@ -53,8 +53,8 @@ const ApplicantTabs = () => {
                         <PersonalDetailsTab personalData={personalData} setPersonalData={setPersonalData} />
                     )}
 
-                    {activeTab === 'parent' && (
-                        <ParentTab parentData={parentData} setParentData={setParentData} />
+                    {activeTab === 'guardian' && (
+                        <GuardianTab guardianData={parentData} setGuardianData={setParentData} />
                     )}
 
                     {activeTab === 'documents' && (
