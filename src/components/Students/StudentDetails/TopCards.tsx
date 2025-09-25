@@ -20,9 +20,9 @@ const TopCards = ({ student }: TopCardsProps) => {
     return (
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-5">
             {/* Profile */}
-            <div className="bg-white rounded-lg shadow p-6 flex items-center gap-4 lg:col-span-2">
-                <div className="h-20 w-20 rounded-full bg-green-200 flex items-center justify-center">
-                    <UserIcon className="h-8 w-8 text-green-700" />
+            <div className="bg-gradient-to-br from-primary-100 to-secondary-100 rounded-lg shadow p-6 flex items-center gap-4 lg:col-span-2">
+                <div className="h-20 w-20 rounded-full bg-accent-500 flex items-center justify-center">
+                    <UserIcon className="h-8 w-8 text-white" />
                 </div>
                 <div className="space-y-1">
                     <div className="text-lg font-semibold text-gray-900">{student.name}</div>
