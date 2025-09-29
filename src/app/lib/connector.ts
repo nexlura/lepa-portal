@@ -7,7 +7,7 @@ export const invokeInternalAPIRoute = (route: string): string =>
   `http://localhost:3000/api/${route}`;
 
 // Backend host for external API
-export const getAPIBackendHost = (): string => 'http://localhost:8000';
+export const getAPIBackendHost = (): string => 'http://localhost:8081';
 
 // Extract JSON from NextRequest
 export const getRequestBodyJSON = async (
@@ -84,18 +84,24 @@ const sendRequest = async <T = any>(
 };
 
 // API Helpers
-export const getModel = async <T = any>(path: string): Promise<T | null> =>
-  await sendRequest<T>('GET', path);
+export const getModel = async <T = any>(
+  path: string,
+  config: AxiosRequestConfig = {}
+): Promise<T | null> => await sendRequest<T>('GET', path, null, config);
 
 export const postModel = async <T = any>(
   path: string,
-  body: Record<string, any> | null = null
-): Promise<T | null> => await sendRequest<T>('POST', path, body);
+  body: Record<string, any> | null = null,
+  config: AxiosRequestConfig = {}
+): Promise<T | null> => await sendRequest<T>('POST', path, body, config);
 
 export const patchModel = async <T = any>(
   path: string,
-  body: Record<string, any> | null = null
-): Promise<T | null> => await sendRequest<T>('PATCH', path, body);
+  body: Record<string, any> | null = null,
+  config: AxiosRequestConfig = {}
+): Promise<T | null> => await sendRequest<T>('PATCH', path, body, config);
 
-export const deleteModel = async <T = any>(path: string): Promise<T | null> =>
-  await sendRequest<T>('DELETE', path);
+export const deleteModel = async <T = any>(
+  path: string,
+  config: AxiosRequestConfig = {}
+): Promise<T | null> => await sendRequest<T>('DELETE', path, null, config);

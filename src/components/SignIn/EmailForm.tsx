@@ -5,7 +5,7 @@ import { SetStateAction, Dispatch, useState } from 'react'
 
 import { Button } from '@/components/UIKit/Button'
 import { Field, Label } from '@/components/UIKit/Fieldset'
-import { postModel } from '@/app/lib/connector'
+import { invokeInternalAPIRoute } from '@/app/lib/connector'
 import PasswordForm from './PasswordForm'
 import { SignInFormProps } from '@/app/page'
 
@@ -25,24 +25,42 @@ const EmailForm = ({
     const [localError, setLocalError] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(false)
 
-    const urlEndpoint = 'auth/verify-email'
+    const url = invokeInternalAPIRoute('auth/verify-email')
 
     const handleVerifyEmail = async (e: React.FormEvent) => {
         e.preventDefault()
         setLocalError(null)
         setIsLoading(true)
         try {
-            const resp = await postModel<{ exists: boolean } | string>(`${urlEndpoint}`, { email })
+            // const resp = await postModel<{ exists: boolean } | string>(`${urlEndpoint}`, { email })
 
-            if (typeof resp === 'string') {
-                setLocalError(resp)
-            } else if (resp?.exists) {
+            const resp = await fetch(url, {
+                method: 'POST', // Specify the method as POST
+                headers: {
+                    'Content-Type': 'application/json' // Indicate that the body is JSON
+                },
+                body: JSON.stringify({ email }) // Convert the JavaScript object to a JSON string
+            });
+
+            if (!resp.ok) {
+                // Handle HTTP errors
+                const errorData = await resp.json();
+                throw new Error(`HTTP error! Status: ${resp.status}, Message: ${errorData.message || 'Unknown error'}`);
+            }
+
+            const responseData = await resp.json(); // Parse the JSON response
+
+            if (typeof responseData === 'string') {
+                setLocalError(responseData)
+            } else if (responseData?.exists) {
                 setShowPassword(true)
             } else {
                 setLocalError('No account found for this email.')
             }
-        } catch (err) {
+        } catch (error) {
+            console.error('Error during POST request:', error);
             setLocalError('Unable to verify email. Please try again.')
+            throw error; // Re-throw the error for further handling
         } finally {
             setIsLoading(false)
         }
