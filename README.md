@@ -1,36 +1,85 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Lepa
 
-## Getting Started
+A modern school management portal built with Next.js 15, React 19, Tailwind CSS 4, and NextAuth. It provides admissions management, student records, detail views with breadcrumbs, CSV import, search/sort/filter/pagination, and document previews.
 
-First, run the development server:
+## Prerequisites
+
+- Node.js 18+ (recommend 20+)
+- yarn
+
+## Clone the repository
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/nexlura/lepa-portal.git
+cd lepa-portal
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Install dependencies
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Choose one package manager and stick to it for the project.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+# with yarn (yarn.lock present)
+yarn install
+```
 
-## Learn More
+## Environment variables
 
-To learn more about Next.js, take a look at the following resources:
+Create a `.env.local` at the project root with the following variables:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+# NextAuth (required)
+NEXTAUTH_URL=http://localhost:3000
+# You can generate this using the command below
+NEXTAUTH_SECRET=replace-with-generated-secret
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Generate a NextAuth secret
 
-## Deploy on Vercel
+Use one of the following to generate a secure `NEXTAUTH_SECRET`:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+# OpenSSL (recommended)
+openssl rand -base64 32
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# or Node
+node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+```
+
+Copy the output and set `NEXTAUTH_SECRET` in `.env.local`.
+
+## Development
+
+```bash
+# run dev server with Turbopack (configured in package.json)
+yarn dev
+```
+
+Then open `http://localhost:3000`.
+
+## Production build
+
+```bash
+# build
+yarn build
+# start production server
+yarn start
+```
+
+## Linting
+
+```bash
+yarn lint
+```
+
+## Project structure (high-level)
+
+- `src/app/dashboard/students/page.tsx`: Students list with CSV import, search, filters, sort, pagination, and row navigation.
+- `src/app/dashboard/students/[id]/page.tsx`: Student details page with breadcrumbs and document list.
+- `src/components/Students/StudentDetails/TopCards.tsx`: Header cards for a student (profile + academic details).
+- `src/components/Students/StudentDetails/DocumentsList.tsx`: Documents list with preview and download.
+
+## Deployment notes
+
+- Ensure `.env` values for production (e.g., `NEXTAUTH_URL` to your domain and a strong `NEXTAUTH_SECRET`).
+- If using a DB or OAuth providers, configure corresponding env vars in your hosting platform (Vercel, etc.).
