@@ -44,11 +44,11 @@ export const { auth, signIn, signOut } = NextAuth({
 
         try {
           const resp = await postModel('auth/login', {
-            email,
+            identifier: email,
             password,
           });
 
-          console.log('resp', resp);
+          console.log('resp', resp, email);
 
           if (resp) {
             return {
