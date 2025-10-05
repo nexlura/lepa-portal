@@ -2,6 +2,8 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { NextRequest } from 'next/server';
 
+const API_HOST = process.env.NEXT_PUBLIC_API_URL;
+
 // Local API route
 export const invokeInternalAPIRoute = (route: string): string =>
   `http://localhost:3000/api/${route}`;
@@ -39,8 +41,11 @@ type RequestMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
 // Axios instance setup
 const axiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api',
+  baseURL: `${API_HOST}/api/v1` || 'http://localhost:3000/api',
   withCredentials: true,
+  headers: {
+    'X-Custom-Header': 'schoolA.lepa.com',
+  },
 });
 
 // Base request handler

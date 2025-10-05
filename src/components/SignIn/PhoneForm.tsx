@@ -5,7 +5,7 @@ import { EnvelopeIcon } from '@heroicons/react/24/outline'
 
 import { Button } from '@/components/UIKit/Button'
 import { Field, Label } from '@/components/UIKit/Fieldset'
-import { postModel } from '@/app/lib/connector'
+import { postModel } from '@/lib/connector'
 import PasswordForm from './PasswordForm'
 import { SignInFormProps } from '@/app/page'
 

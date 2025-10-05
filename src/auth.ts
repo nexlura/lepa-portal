@@ -4,7 +4,7 @@ import Credentials from 'next-auth/providers/credentials';
 import type { JWT } from 'next-auth/jwt';
 import type { User as NextAuthUser } from '@auth/core/types';
 
-import { postModel } from '@/app/lib/connector';
+import { postModel } from '@/lib/connector';
 import { authConfig } from './auth.config';
 
 declare module 'next-auth' {
@@ -50,7 +50,7 @@ export const { auth, signIn, signOut } = NextAuth({
 
           console.log('resp', resp, email);
 
-          if (resp) {
+          if (resp.data) {
             return {
               id: email, // NextAuth requires an `id`
               email,

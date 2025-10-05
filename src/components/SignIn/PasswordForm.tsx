@@ -1,6 +1,6 @@
 import { HTMLInputTypeAttribute, useActionState, useState } from 'react';
 
-import { authenticate } from '@/app/lib/actions';
+import { authenticate } from '@/lib/actions';
 import { Button } from '@/components/UIKit/Button'
 import { Field, Label } from '@/components/UIKit/Fieldset'
 import { useSearchParams } from 'next/navigation';

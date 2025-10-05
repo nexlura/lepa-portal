@@ -5,7 +5,7 @@ import { SetStateAction, Dispatch, useState } from 'react'
 
 import { Button } from '@/components/UIKit/Button'
 import { Field, Label } from '@/components/UIKit/Fieldset'
-import { invokeInternalAPIRoute } from '@/app/lib/connector'
+import { invokeInternalAPIRoute } from '@/lib/connector'
 import PasswordForm from './PasswordForm'
 import { SignInFormProps } from '@/app/page'
 
