@@ -8,6 +8,7 @@ import { Field, Label } from '@/components/UIKit/Fieldset'
 import { invokeInternalAPIRoute } from '@/lib/connector'
 import PasswordForm from './PasswordForm'
 import { SignInFormProps } from '@/app/page'
+import FormSubmitFeedback from '../FormAlert'
 
 interface EmailFormProps extends SignInFormProps {
     email: string
@@ -79,6 +80,9 @@ const EmailForm = ({
 
     return (
         <form className="space-y-6" onSubmit={handleVerifyEmail}>
+            {localError && (
+                <FormSubmitFeedback msg={localError} />
+            )}
             <Field>
                 <Label htmlFor="email">Email Address</Label>
                 <div className="mt-2 grid grid-cols-1">
@@ -93,10 +97,6 @@ const EmailForm = ({
                     />
                 </div>
             </Field>
-
-            {localError && (
-                <p className="text-sm text-red-600">{localError}</p>
-            )}
 
             <div>
                 <Button

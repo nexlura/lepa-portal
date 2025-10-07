@@ -5,6 +5,7 @@ import { Button } from '@/components/UIKit/Button'
 import { Field, Label } from '@/components/UIKit/Fieldset'
 import { useSearchParams } from 'next/navigation';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import FormSubmitFeedback from '../FormAlert';
 
 
 const PasswordForm = (props: { credential: string }) => {
@@ -22,6 +23,9 @@ const PasswordForm = (props: { credential: string }) => {
 
     return (
         <form className="space-y-6" action={formAction}>
+            {errorMessage && (
+                <FormSubmitFeedback msg={errorMessage} />
+            )}
             <input type="hidden" name="email" value={props.credential} />
             <Field>
                 <Label htmlFor="password">Password</Label>
@@ -58,10 +62,6 @@ const PasswordForm = (props: { credential: string }) => {
 
                 </div>
             </Field>
-
-            {errorMessage && (
-                <p className="text-sm text-red-600">{errorMessage}</p>
-            )}
 
             <div>
                 <input type="hidden" name="redirectTo" value={callbackUrl} />

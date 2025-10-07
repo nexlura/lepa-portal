@@ -8,6 +8,7 @@ import { Field, Label } from '@/components/UIKit/Fieldset'
 import { postModel } from '@/lib/connector'
 import PasswordForm from './PasswordForm'
 import { SignInFormProps } from '@/app/page'
+import FormSubmitFeedback from '../FormAlert'
 
 interface PhoneFormProps extends SignInFormProps {
     phoneNumber: string
@@ -62,6 +63,9 @@ const PhoneForm = ({
 
     return (
         <form className="space-y-6" onSubmit={handleVerifyPhone}>
+            {localError && (
+                <FormSubmitFeedback msg={localError} />
+            )}
             <Field>
                 <Label htmlFor="phone">Phone Number</Label>
                 <div className="mt-2 grid grid-cols-1">
@@ -83,10 +87,6 @@ const PhoneForm = ({
                     </div>
                 </div>
             </Field>
-
-            {localError && (
-                <p className="text-sm text-red-600">{localError}</p>
-            )}
 
             <div>
                 <Button

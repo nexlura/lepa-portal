@@ -6,6 +6,7 @@ import { WordmarkLogo } from '@/components/Logo'
 import EmailForm from '@/components/SignIn/EmailForm'
 import PhoneForm from '@/components/SignIn/PhoneForm';
 import { formatPhoneNumber } from '@/utils';
+import FormAlert from '@/components/FormAlert';
 
 export interface SignInFormProps {
   showPassword: boolean
@@ -43,7 +44,6 @@ export default function AuthPage() {
             Fast, secure, and hassle-free admissions.
           </p>
         )}
-
       </div>
 
       <div className="mt-3 sm:mx-auto sm:w-full sm:max-w-md">
