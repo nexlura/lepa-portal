@@ -2,6 +2,7 @@
 
 import { PhoneIcon } from '@heroicons/react/24/outline'
 import { SetStateAction, Dispatch, useState } from 'react'
+import axios from 'axios'
 
 import { Button } from '@/components/UIKit/Button'
 import { Field, Label } from '@/components/UIKit/Fieldset'
@@ -33,37 +34,37 @@ const EmailForm = ({
         setLocalError(null)
         setIsLoading(true)
         try {
-            // const resp = await postModel<{ exists: boolean } | string>(`${urlEndpoint}`, { email })
+            const resp = await axios.post(
+                url,
+                { email }, // Axios automatically stringifies this
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                }
+            );
 
-            const resp = await fetch(url, {
-                method: 'POST', // Specify the method as POST
-                headers: {
-                    'Content-Type': 'application/json' // Indicate that the body is JSON
-                },
-                body: JSON.stringify({ email }) // Convert the JavaScript object to a JSON string
-            });
-
-            if (!resp.ok) {
-                // Handle HTTP errors
-                const errorData = await resp.json();
-                throw new Error(`HTTP error! Status: ${resp.status}, Message: ${errorData.message || 'Unknown error'}`);
-            }
-
-            const responseData = await resp.json(); // Parse the JSON response
-
-            if (typeof responseData === 'string') {
-                setLocalError(responseData)
-            } else if (responseData?.exists) {
-                setShowPassword(true)
-            } else {
-                setLocalError('No account found for this email.')
+            // If successful (status 200–299)
+            if (resp.status >= 200 && resp.status < 300) {
+                setShowPassword(true);
             }
         } catch (error) {
             console.error('Error during POST request:', error);
-            setLocalError('Unable to verify email. Please try again.')
-            throw error; // Re-throw the error for further handling
+
+            if (axios.isAxiosError(error)) {
+                // If backend provided an error message
+                const errorMessage =
+                    error.response?.data?.message ||
+                    `Request failed with status ${error.response?.status || 'Unknown'}`;
+                setLocalError(errorMessage);
+            } else {
+                // Network or unexpected error
+                setLocalError('Unable to verify email. Please try again.');
+            }
+
+            throw error; // Re-throw for higher-level handling if needed
         } finally {
-            setIsLoading(false)
+            setIsLoading(false);
         }
     }
 

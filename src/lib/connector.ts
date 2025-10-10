@@ -8,6 +8,10 @@ const API_HOST = process.env.NEXT_PUBLIC_API_URL;
 export const invokeInternalAPIRoute = (route: string): string =>
   `http://localhost:3000/api/${route}`;
 
+// Local API route
+export const invokeExternalAPIRoute = (route: string): string =>
+  `${API_HOST}/api/v1/${route}`;
+
 // Backend host for external API
 export const getAPIBackendHost = (): string => 'http://localhost:8081';
 
