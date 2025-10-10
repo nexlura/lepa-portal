@@ -1,8 +1,10 @@
 'use client'
 
 import { PhoneIcon } from '@heroicons/react/24/outline'
-import { SetStateAction, Dispatch, useState } from 'react'
+import { SetStateAction, Dispatch, useState, ChangeEvent } from 'react'
 import axios from 'axios'
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+
 
 import { Button } from '@/components/UIKit/Button'
 import { Field, Label } from '@/components/UIKit/Fieldset'
@@ -23,11 +25,27 @@ const EmailForm = ({
     setShowPassword,
     setEmail
 }: EmailFormProps) => {
+    const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
 
     const [localError, setLocalError] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(false)
 
     const url = invokeInternalAPIRoute('auth/verify-email')
+
+    const updateEmail = (newEmail: string) => {
+        const params = new URLSearchParams(searchParams);
+        params.set('email', newEmail);
+
+        // Update the URL without refreshing the page
+        router.push(`${pathname}?${params.toString()}`);
+    };
+
+    const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
+        setEmail(e.target.value)
+        updateEmail(e.target.value)
+    }
 
     const handleVerifyEmail = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -93,7 +111,7 @@ const EmailForm = ({
                         type="email"
                         autoFocus
                         value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        onChange={handleEmailChange}
                         className="col-start-1 row-start-1 block w-full rounded-md py-3 pr-3 pl-4 text-base text-gray-900 outline-1 -outline-offset-1 outline-zinc-950/20 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-gray-800 sm:text-sm/6"
                     />
                 </div>
