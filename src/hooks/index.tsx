@@ -42,3 +42,24 @@ export function useAuthSwitcher() {
 
     return { switchAuthMethod };
 }
+
+
+export function usePasswordRedirect() {
+    const router = useRouter();
+
+    const redirectToPassword = (identifier: { email?: string; phone?: string }) => {
+        const params = new URLSearchParams();
+
+        // Add whichever identifier is available
+        if (identifier.email) {
+            params.set('email', identifier.email);
+        } else if (identifier.phone) {
+            params.set('phone', identifier.phone);
+        }
+
+        // Redirect to the password entry page
+        router.push(`/auth/password?${params.toString()}`);
+    };
+
+    return { redirectToPassword };
+}

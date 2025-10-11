@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { WordmarkLogo } from '@/components/Logo'
 import EmailForm from '@/components/SignIn/EmailForm'
 import PhoneForm from '@/components/SignIn/PhoneForm';
-import { useQueryKeys } from '@/app/hooks';
+import { useQueryKeys } from '@/hooks';
 import { formatPhoneNumber } from '@/utils';
 
 const AuthLoginPage = () => {

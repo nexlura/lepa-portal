@@ -9,7 +9,7 @@ import { Button } from '@/components/UIKit/Button'
 import { Field, Label } from '@/components/UIKit/Fieldset'
 import FormSubmitFeedback from '../FormAlert'
 import { invokeInternalAPIRoute } from '@/lib/connector';
-import { useAuthSwitcher } from '@/app/hooks';
+import { useAuthSwitcher } from '@/hooks';
 
 interface PhoneFormProps {
     phoneNumber: string

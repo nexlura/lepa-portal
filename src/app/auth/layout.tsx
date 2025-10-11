@@ -1,8 +1,9 @@
 'use client'
 
 import { WordmarkLogo } from '@/components/Logo'
-import { useQueryKeys } from '@/app/hooks';
-import { usePathname } from 'next/navigation';
+import { useQueryKeys } from '@/hooks';
+import { formatPhoneNumber } from '@/utils';
+import { usePathname, useSearchParams } from 'next/navigation';
 
 const AuthLayout = ({
     children,
@@ -10,11 +11,15 @@ const AuthLayout = ({
     children: React.ReactNode;
 }>) => {
     const queryKeys = useQueryKeys();
-    const isEmailParams = queryKeys.includes('email')
     const pathname = usePathname();
+    const searchParams = useSearchParams()
+
+    const isEmailParams = queryKeys.includes('email')
+
+    const email = searchParams.get('email');
+    const phoneNumber = searchParams.get('phone');
 
     const isVerifyRoute = pathname === '/auth/verify'
-
 
     return (
         <div className="relative min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
@@ -31,9 +36,10 @@ const AuthLayout = ({
                 </h2>
                 {!isVerifyRoute ? (
                     <p className="mt-2 text-center text-sm text-gray-600">
-                        {/* Enter password for <span className='text-primary-700'>
-                            {email || formatPhoneNumber(phoneNumber)}
-                        </span> to sign in. */}
+                        Enter password for <span className='text-primary-700'>
+                            {email && email}
+                            {phoneNumber && formatPhoneNumber(phoneNumber)}
+                        </span> to sign in.
                     </p>
                 ) : (
                     <p className="mt-2 text-center text-sm text-gray-600">

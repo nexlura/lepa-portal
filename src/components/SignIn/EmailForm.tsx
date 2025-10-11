@@ -9,7 +9,7 @@ import { Button } from '@/components/UIKit/Button'
 import { Field, Label } from '@/components/UIKit/Fieldset'
 import { invokeInternalAPIRoute } from '@/lib/connector'
 import FormSubmitFeedback from '../FormAlert'
-import { useAuthSwitcher } from '@/app/hooks';
+import { useAuthSwitcher, usePasswordRedirect } from '@/hooks';
 interface EmailFormProps {
     email: string
     setEmail: Dispatch<SetStateAction<string>>
@@ -23,11 +23,20 @@ const EmailForm = ({
     const pathname = usePathname();
     const searchParams = useSearchParams();
     const { switchAuthMethod } = useAuthSwitcher();
+    const { redirectToPassword } = usePasswordRedirect();
 
     const [localError, setLocalError] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(false)
 
     const url = invokeInternalAPIRoute('auth/verify-email')
+
+
+    const handleVerificationSuccess = () => {
+        // Example: redirect based on whichever identifier you have
+        redirectToPassword({ email: email });
+        // or
+        // redirectToPassword({ phone: '+23212345678' });
+    };
 
     const updateEmail = (newEmail: string) => {
         const params = new URLSearchParams(searchParams);
@@ -59,7 +68,7 @@ const EmailForm = ({
 
             // If successful (status 200–299)
             if (resp.status >= 200 && resp.status < 300) {
-                // setShowPassword(true);
+                handleVerificationSuccess()
             }
         } catch (error) {
             console.error('Error during POST request:', error);

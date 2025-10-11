@@ -4,8 +4,7 @@ import { useState } from 'react'
 
 import EmailForm from '@/components/SignIn/EmailForm'
 import PhoneForm from '@/components/SignIn/PhoneForm';
-import { useQueryKeys } from '@/app/hooks';
-import { useSearchParams } from 'next/navigation';
+import { useQueryKeys } from '@/hooks';
 
 const AuthVerifyPage = () => {
     const queryKeys = useQueryKeys();
