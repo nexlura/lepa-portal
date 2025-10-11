@@ -9,20 +9,14 @@ import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/UIKit/Button'
 import { Field, Label } from '@/components/UIKit/Fieldset'
 import { invokeInternalAPIRoute } from '@/lib/connector'
-import PasswordForm from './PasswordForm'
-import { SignInFormProps } from '@/app/page'
 import FormSubmitFeedback from '../FormAlert'
-
-interface EmailFormProps extends SignInFormProps {
+interface EmailFormProps {
     email: string
     setEmail: Dispatch<SetStateAction<string>>
 }
 
 const EmailForm = ({
-    showPassword,
     email,
-    setAuthMethod,
-    setShowPassword,
     setEmail
 }: EmailFormProps) => {
     const router = useRouter();
@@ -40,6 +34,20 @@ const EmailForm = ({
 
         // Update the URL without refreshing the page
         router.push(`${pathname}?${params.toString()}`);
+    };
+
+    const switchToPhone = () => {
+        const params = new URLSearchParams(searchParams);
+
+        // Remove the 'email' param completely
+        params.delete('email');
+        // Add the new 'phone' param
+        params.set('phone', '');
+
+        setEmail('');
+
+        // Update the URL (replace instead of push if you don't want history)
+        router.replace(`${pathname}?${params.toString()}`);
     };
 
     const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -64,7 +72,7 @@ const EmailForm = ({
 
             // If successful (status 200–299)
             if (resp.status >= 200 && resp.status < 300) {
-                setShowPassword(true);
+                // setShowPassword(true);
             }
         } catch (error) {
             console.error('Error during POST request:', error);
@@ -84,17 +92,6 @@ const EmailForm = ({
         } finally {
             setIsLoading(false);
         }
-    }
-
-    const switchToPhone = () => {
-        setAuthMethod('phone')
-        setEmail('')
-    }
-
-    if (showPassword) {
-        return (
-            <PasswordForm credential={email} />
-        )
     }
 
     return (

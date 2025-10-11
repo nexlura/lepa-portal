@@ -2,27 +2,27 @@
 
 import { SetStateAction, Dispatch, useState } from 'react'
 import { EnvelopeIcon } from '@heroicons/react/24/outline'
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 
 import { Button } from '@/components/UIKit/Button'
 import { Field, Label } from '@/components/UIKit/Fieldset'
 import { postModel } from '@/lib/connector'
-import PasswordForm from './PasswordForm'
-import { SignInFormProps } from '@/app/page'
 import FormSubmitFeedback from '../FormAlert'
 
-interface PhoneFormProps extends SignInFormProps {
+interface PhoneFormProps {
     phoneNumber: string
     setPhoneNumber: Dispatch<SetStateAction<string>>
 }
 
 const PhoneForm = ({
-    showPassword,
     phoneNumber,
-    setAuthMethod,
-    setShowPassword,
     setPhoneNumber
 
 }: PhoneFormProps) => {
+    const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
+
     const [localError, setLocalError] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(false)
 
@@ -39,7 +39,7 @@ const PhoneForm = ({
                 setLocalError(resp)
             } else if (resp?.exists) {
                 setPhoneNumber(`232${phoneNumber}`)
-                setShowPassword(true)
+                // setShowPassword(true)
             } else {
                 setLocalError('No account found for this email.')
             }
@@ -51,15 +51,20 @@ const PhoneForm = ({
     }
 
     const switchToEmail = () => {
-        setAuthMethod('email')
-        setPhoneNumber('')
-    }
+        const params = new URLSearchParams(searchParams);
 
-    if (showPassword) {
-        return (
-            <PasswordForm credential={phoneNumber} />
-        )
-    }
+        // Remove the 'phoneam completely
+        params.delete('phone');
+        // Add the new 'email' param
+        params.set('email', '')
+
+        setPhoneNumber('');
+
+        // Update the URL (replace instead of push if you don't want history)
+        router.replace(`${pathname}?${params.toString()}`);
+    };
+
+
 
     return (
         <form className="space-y-6" onSubmit={handleVerifyPhone}>
