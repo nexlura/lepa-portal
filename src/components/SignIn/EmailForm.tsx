@@ -5,11 +5,11 @@ import { SetStateAction, Dispatch, useState, ChangeEvent } from 'react'
 import axios from 'axios'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 
-
 import { Button } from '@/components/UIKit/Button'
 import { Field, Label } from '@/components/UIKit/Fieldset'
 import { invokeInternalAPIRoute } from '@/lib/connector'
 import FormSubmitFeedback from '../FormAlert'
+import { useAuthSwitcher } from '@/app/hooks';
 interface EmailFormProps {
     email: string
     setEmail: Dispatch<SetStateAction<string>>
@@ -22,6 +22,7 @@ const EmailForm = ({
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
+    const { switchAuthMethod } = useAuthSwitcher();
 
     const [localError, setLocalError] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(false)
@@ -36,20 +37,6 @@ const EmailForm = ({
         router.push(`${pathname}?${params.toString()}`);
     };
 
-    const switchToPhone = () => {
-        const params = new URLSearchParams(searchParams);
-
-        // Remove the 'email' param completely
-        params.delete('email');
-        // Add the new 'phone' param
-        params.set('phone', '');
-
-        setEmail('');
-
-        // Update the URL (replace instead of push if you don't want history)
-        router.replace(`${pathname}?${params.toString()}`);
-    };
-
     const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
         setEmail(e.target.value)
         updateEmail(e.target.value)
@@ -62,7 +49,7 @@ const EmailForm = ({
         try {
             const resp = await axios.post(
                 url,
-                { email }, // Axios automatically stringifies this
+                { identifier: email }, // Axios automatically stringifies this
                 {
                     headers: {
                         'Content-Type': 'application/json',
@@ -138,7 +125,7 @@ const EmailForm = ({
                         type="button"
                         outline
                         className="w-full h-12 items-center gap-x-4"
-                        onClick={switchToPhone}
+                        onClick={() => switchAuthMethod('email', 'phone', setEmail)}
                     >
                         <PhoneIcon className="h-4 w-4" />
                         Continue with Phone

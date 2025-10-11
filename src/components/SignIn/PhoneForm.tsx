@@ -1,13 +1,15 @@
 'use client'
 
-import { SetStateAction, Dispatch, useState } from 'react'
+import { SetStateAction, Dispatch, useState, ChangeEvent } from 'react'
 import { EnvelopeIcon } from '@heroicons/react/24/outline'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import axios from 'axios';
 
 import { Button } from '@/components/UIKit/Button'
 import { Field, Label } from '@/components/UIKit/Fieldset'
-import { postModel } from '@/lib/connector'
 import FormSubmitFeedback from '../FormAlert'
+import { invokeInternalAPIRoute } from '@/lib/connector';
+import { useAuthSwitcher } from '@/app/hooks';
 
 interface PhoneFormProps {
     phoneNumber: string
@@ -22,49 +24,64 @@ const PhoneForm = ({
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
+    const { switchAuthMethod } = useAuthSwitcher();
 
     const [localError, setLocalError] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(false)
 
-    const urlEndpoint = 'auth/verify-email'
+    const url = invokeInternalAPIRoute('auth/verify-email')
+
+    const updatePhone = (newPhone: string) => {
+        const params = new URLSearchParams(searchParams);
+        params.set('phone', newPhone);
+
+        // Update the URL without refreshing the page
+        router.push(`${pathname}?${params.toString()}`);
+    };
+
+    const handlePhoneChange = (e: ChangeEvent<HTMLInputElement>) => {
+        setPhoneNumber(e.target.value)
+        updatePhone(e.target.value)
+    }
 
     const handleVerifyPhone = async (e: React.FormEvent) => {
         e.preventDefault()
         setLocalError(null)
         setIsLoading(true)
         try {
-            const resp = await postModel<{ exists: boolean } | string>(`${urlEndpoint}`, { phoneNumber })
+            const resp = await axios.post(
+                url,
+                { identifier: phoneNumber }, // Axios automatically stringifies this
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                }
+            );
 
-            if (typeof resp === 'string') {
-                setLocalError(resp)
-            } else if (resp?.exists) {
-                setPhoneNumber(`232${phoneNumber}`)
-                // setShowPassword(true)
-            } else {
-                setLocalError('No account found for this email.')
+            // If successful (status 200–299)
+            if (resp.status >= 200 && resp.status < 300) {
+                // setShowPassword(true);
             }
-        } catch (err) {
-            setLocalError('Unable to verify email. Please try again.')
+        } catch (error) {
+            console.error('Error during POST request:', error);
+
+            if (axios.isAxiosError(error)) {
+                // If backend provided an error message
+                const errorMessage =
+                    error.response?.data?.message ||
+                    `Request failed with status ${error.response?.status || 'Unknown'}`;
+                setLocalError(errorMessage);
+            } else {
+                // Network or unexpected error
+                setLocalError('Unable to verify email. Please try again.');
+            }
+
+            throw error; // Re-throw for higher-level handling if needed
         } finally {
-            setIsLoading(false)
+            setIsLoading(false);
         }
     }
-
-    const switchToEmail = () => {
-        const params = new URLSearchParams(searchParams);
-
-        // Remove the 'phoneam completely
-        params.delete('phone');
-        // Add the new 'email' param
-        params.set('email', '')
-
-        setPhoneNumber('');
-
-        // Update the URL (replace instead of push if you don't want history)
-        router.replace(`${pathname}?${params.toString()}`);
-    };
-
-
 
     return (
         <form className="space-y-6" onSubmit={handleVerifyPhone}>
@@ -81,7 +98,7 @@ const PhoneForm = ({
                         required
                         value={phoneNumber}
                         autoFocus
-                        onChange={(e) => setPhoneNumber(e.target.value)}
+                        onChange={handlePhoneChange}
                         className="col-start-1 row-start-1 block w-full rounded-md py-3 pr-3 pl-14 text-base text-gray-900 outline-1 -outline-offset-1 outline-zinc-950/20 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-gray-800 sm:text-sm/6"
                     />
                     <div
@@ -117,7 +134,7 @@ const PhoneForm = ({
                         type="button"
                         outline
                         className="w-full h-12 items-center gap-x-4"
-                        onClick={switchToEmail}
+                        onClick={() => switchAuthMethod('phone', 'email', setPhoneNumber)}
                     >
                         <EnvelopeIcon className="h-4 w-4 " />
                         Continue with Email

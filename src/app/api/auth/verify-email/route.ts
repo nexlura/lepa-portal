@@ -3,9 +3,9 @@ import axios from 'axios';
 import { invokeExternalAPIRoute } from '@/lib/connector';
 
 export async function POST(req: NextRequest) {
-  const { email } = await req.json();
+  const { identifier } = await req.json();
 
-  const url = invokeExternalAPIRoute(`auth/verify-identifier/${email}`);
+  const url = invokeExternalAPIRoute(`auth/verify-identifier/${identifier}`);
 
   //make login request to API server
   try {
@@ -15,7 +15,6 @@ export async function POST(req: NextRequest) {
         'X-Custom-Header': 'schoolA.lepa.com',
       },
     });
-
     // Return data with original status
     return new Response(JSON.stringify(response.data), {
       status: response.status,
