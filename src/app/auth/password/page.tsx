@@ -13,11 +13,6 @@ const AuthPasswordPage = () => {
         <div className="py-8 px-4 sm:px-10">
             {email && <PasswordForm credential={email} />}
             {phone && <PasswordForm credential={phone} />}
-
-            {/* Additional Info */}
-            <div className="mt-6">
-
-            </div>
         </div>
     )
 }
