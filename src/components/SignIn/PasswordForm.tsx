@@ -1,14 +1,14 @@
 import { HTMLInputTypeAttribute, useActionState, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 
 import { authenticate } from '@/lib/actions';
 import { Button } from '@/components/UIKit/Button'
 import { Field, Label } from '@/components/UIKit/Fieldset'
-import { useSearchParams } from 'next/navigation';
-import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import FormSubmitFeedback from '../FormAlert';
 
 
-const PasswordForm = (props: { credential: string }) => {
+const PasswordForm = (props: { identifier: string }) => {
     const searchParams = useSearchParams()
     const [errorMessage, formAction, isPending] = useActionState(
         authenticate,
@@ -19,6 +19,8 @@ const PasswordForm = (props: { credential: string }) => {
 
 
     const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
+    const email = searchParams.get('email');
+    const phone = searchParams.get('phone');
 
 
     return (
@@ -26,7 +28,11 @@ const PasswordForm = (props: { credential: string }) => {
             {errorMessage && (
                 <FormSubmitFeedback msg={errorMessage} />
             )}
-            <input type="hidden" name="email" value={props.credential} />
+
+            {email && <input type="hidden" name="email" value={props.identifier} />}
+            {phone && <input type="hidden" name="email" value={`+232${props.identifier}`} />}
+
+
             <Field>
                 <Label htmlFor="password">Password</Label>
                 <div className="mt-2 grid grid-cols-1">

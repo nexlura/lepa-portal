@@ -9,7 +9,7 @@ import { Button } from '@/components/UIKit/Button'
 import { Field, Label } from '@/components/UIKit/Fieldset'
 import FormSubmitFeedback from '../FormAlert'
 import { invokeInternalAPIRoute } from '@/lib/connector';
-import { useAuthSwitcher } from '@/hooks';
+import { useAuthSwitcher, usePasswordRedirect } from '@/hooks';
 
 interface PhoneFormProps {
     phoneNumber: string
@@ -25,6 +25,7 @@ const PhoneForm = ({
     const pathname = usePathname();
     const searchParams = useSearchParams();
     const { switchAuthMethod } = useAuthSwitcher();
+    const { redirectToPassword } = usePasswordRedirect();
 
     const [localError, setLocalError] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(false)
@@ -44,6 +45,13 @@ const PhoneForm = ({
         updatePhone(e.target.value)
     }
 
+    const handleVerificationSuccess = () => {
+        // Example: redirect based on whichever identifier you have
+        redirectToPassword({ phone: phoneNumber });
+        // or
+        // redirectToPassword({ phone: '+23212345678' });
+    };
+
     const handleVerifyPhone = async (e: React.FormEvent) => {
         e.preventDefault()
         setLocalError(null)
@@ -51,7 +59,7 @@ const PhoneForm = ({
         try {
             const resp = await axios.post(
                 url,
-                { identifier: phoneNumber }, // Axios automatically stringifies this
+                { identifier: `+232${phoneNumber}` }, // Axios automatically stringifies this
                 {
                     headers: {
                         'Content-Type': 'application/json',
@@ -61,7 +69,7 @@ const PhoneForm = ({
 
             // If successful (status 200–299)
             if (resp.status >= 200 && resp.status < 300) {
-                // setShowPassword(true);
+                handleVerificationSuccess()
             }
         } catch (error) {
             console.error('Error during POST request:', error);

@@ -11,8 +11,8 @@ const AuthPasswordPage = () => {
 
     return (
         <div className="py-8 px-4 sm:px-10">
-            {email && <PasswordForm credential={email} />}
-            {phone && <PasswordForm credential={phone} />}
+            {email && <PasswordForm identifier={email} />}
+            {phone && <PasswordForm identifier={phone} />}
         </div>
     )
 }
