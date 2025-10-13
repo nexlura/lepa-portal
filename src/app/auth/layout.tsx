@@ -40,7 +40,7 @@ const AuthLayout = ({
                     <p className="mt-2 text-center text-sm text-gray-600">
                         Enter password for <span className='font-semibold text-primary-600'>
                             {email && email}
-                            {phoneNumber && formatPhoneNumber(`+232${phoneNumber}`)}
+                            {phoneNumber && formatPhoneNumber(phoneNumber)}
                         </span> to sign in.
                     </p>
                 ) : (

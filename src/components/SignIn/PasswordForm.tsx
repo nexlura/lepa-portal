@@ -30,7 +30,7 @@ const PasswordForm = (props: { identifier: string }) => {
             )}
 
             {email && <input type="hidden" name="email" value={props.identifier} />}
-            {phone && <input type="hidden" name="email" value={`+232${props.identifier}`} />}
+            {phone && <input type="hidden" name="email" value={props.identifier} />}
 
 
             <Field>

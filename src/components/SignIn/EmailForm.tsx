@@ -28,7 +28,7 @@ const EmailForm = ({
     const [localError, setLocalError] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(false)
 
-    const url = invokeInternalAPIRoute('auth/verify-email')
+    const url = invokeInternalAPIRoute('auth/verify')
 
 
     const handleVerificationSuccess = () => {
