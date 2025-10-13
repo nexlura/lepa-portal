@@ -102,10 +102,12 @@ const EmailForm = ({
                         id="email"
                         name="email"
                         type="email"
+                        required
                         autoFocus
                         value={email}
                         onChange={handleEmailChange}
                         className="col-start-1 row-start-1 block w-full rounded-md py-3 pr-3 pl-4 text-base text-gray-900 outline-1 -outline-offset-1 outline-zinc-950/20 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-gray-800 sm:text-sm/6"
+                        placeholder='Enter email address'
                     />
                 </div>
             </Field>

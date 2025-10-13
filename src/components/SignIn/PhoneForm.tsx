@@ -102,34 +102,40 @@ export default function PhoneForm({ phoneNumber, setPhoneNumber }: PhoneFormProp
                         className="block w-full rounded-md py-3 pr-3 pl-14 text-base text-gray-900 
               outline-1 -outline-offset-1 outline-zinc-950/20 placeholder:text-gray-400 
               focus:outline-2 focus:-outline-offset-2 focus:outline-gray-800 sm:text-sm/6"
-                        placeholder="Enter phone number"
+                        placeholder="23 456789"
                     />
                 </div>
             </Field>
 
-            <Button
-                type="submit"
-                color="primary"
-                className="w-full h-12 items-center"
-                disabled={isLoading}
-            >
-                {isLoading ? 'Verifying…' : 'Continue'}
-            </Button>
+            <div>
+                <Button
+                    type="submit"
+                    color="primary"
+                    className="w-full h-12 items-center"
+                    disabled={isLoading}
+                >
+                    {isLoading ? 'Verifying…' : 'Continue'}
+                </Button>
+            </div>
 
             <div className="mt-6">
-                <div className="flex justify-center text-sm text-gray-900">
-                    <span className="px-2 text-xs">OR</span>
+                <div className="relative">
+                    <div className="relative flex justify-center text-sm">
+                        <span className="px-2 text-xs text-gray-900">OR</span>
+                    </div>
                 </div>
 
-                <Button
-                    type="button"
-                    outline
-                    className="w-full h-12 items-center gap-x-4 mt-4"
-                    onClick={() => switchAuthMethod('phone', 'email', setPhoneNumber)}
-                >
-                    <EnvelopeIcon className="h-4 w-4" />
-                    Continue with Email
-                </Button>
+                <div className="mt-6">
+                    <Button
+                        type="button"
+                        outline
+                        className="w-full h-12 items-center gap-x-4"
+                        onClick={() => switchAuthMethod('phone', 'email', setPhoneNumber)}
+                    >
+                        <EnvelopeIcon className="h-4 w-4" />
+                        Continue with Email
+                    </Button>
+                </div>
             </div>
         </form>
     )
