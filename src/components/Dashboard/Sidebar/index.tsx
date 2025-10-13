@@ -56,7 +56,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                         <form
                             action={async () => {
                                 'use server';
-                                await signOut({ redirectTo: '/' });
+                                await signOut({ redirectTo: '/auth/verify?phone=' });
                             }}
                         >
                             <button

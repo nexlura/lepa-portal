@@ -56,7 +56,7 @@ const AuthLayout = ({
             {!isVerifyRoute && (
                 <div className="">
                     <p className="text-center text-sm/6 text-gray-500">
-                        {`Entered the wrong ${authMethod}? `}
+                        {`Entered the wrong ${authMethod == 'phone number' ? 'number' : authMethod}? `}
                         <a href="#" onClick={() => router.back()} className="font-semibold text-primary-600 hover:text-primary-500">
                             {`Re-enter ${authMethod}`}
                         </a>
