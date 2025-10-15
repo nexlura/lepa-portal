@@ -1,16 +1,12 @@
-import {
-    XMarkIcon,
-    ArrowRightEndOnRectangleIcon,
-} from '@heroicons/react/24/outline';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 
 import SidebarNavigation from './Navigation';
-import { signOut } from '../../../auth';
 import SettingsNavigation from './SettingsNavigation';
+import LogoutButton from '@/components/LogoutButton';
 
 interface SidebarProps {
     isOpen: boolean;
 }
-
 export interface NavigationItem {
     name: string;
     href?: string;
@@ -19,7 +15,6 @@ export interface NavigationItem {
 }
 
 export default function Sidebar({ isOpen }: SidebarProps) {
-
 
     return (
         <>
@@ -52,20 +47,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                     <SidebarNavigation />
                     <div className=" border-gray-200 p-4">
                         <SettingsNavigation />
-                        {/* Logout */}
-                        <form
-                            action={async () => {
-                                'use server';
-                                await signOut({ redirectTo: '/auth/verify?phone=' });
-                            }}
-                        >
-                            <button
-                                className="group flex w-full items-center px-3 py-2 text-sm font-medium text-accent-900 rounded-md hover:bg-primary-50 hover:text-gray-900 transition-colors"
-                            >
-                                <ArrowRightEndOnRectangleIcon className="mr-3 h-5 w-5" />
-                                Logout
-                            </button>
-                        </form>
+                        <LogoutButton />
                     </div>
                 </div>
             </div >

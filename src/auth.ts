@@ -12,6 +12,7 @@ declare module 'next-auth' {
     role: string;
     accessToken?: string;
     refreshToken?: string;
+    schoolName?: string; // ✅ added
   }
 
   interface Session {
@@ -21,6 +22,7 @@ declare module 'next-auth' {
       name?: string | null;
       accessToken?: string;
       refreshToken?: string;
+      schoolName?: string; // ✅ added
     };
   }
 }
@@ -30,6 +32,7 @@ declare module 'next-auth/jwt' {
     role?: string;
     accessToken?: string;
     refreshToken?: string;
+    schoolName?: string; // ✅ added
   }
 }
 
@@ -40,10 +43,15 @@ type BackendAuthUser = {
   roles?: string[];
 };
 
+type BackendAuthTenant = {
+  school_name?: string; // ✅ if your backend returns it
+};
+
 type APIAuthResponseData = {
   access_token: string;
   refresh_token: string;
   user: BackendAuthUser;
+  tenant: BackendAuthTenant;
 };
 
 type APIAuthResponse = {
@@ -60,11 +68,8 @@ export const { auth, signIn, signOut } = NextAuth({
           .object({ email: z.string().min(8), password: z.string().min(6) })
           .safeParse(credentials);
 
-        if (!parsedCredentials.success) {
-          return null;
-        }
+        if (!parsedCredentials.success) return null;
 
-        // Accept either email or phone + password from the form
         const raw = (credentials ?? {}) as Record<string, unknown>;
         const identifier =
           typeof raw.email === 'string' && raw.email.length > 0
@@ -98,23 +103,21 @@ export const { auth, signIn, signOut } = NextAuth({
             'access_token' in resp.data &&
             typeof resp.data.access_token === 'string'
           ) {
-            const role = resp.data.user?.roles?.[0] || 'User';
+            const user = resp.data.user;
+            const tenant = resp.data.tenant;
+            const role = user?.roles?.[0] || 'User';
             const name =
-              `${resp.data.user?.first_name ?? ''} ${
-                resp.data.user?.last_name ?? ''
-              }`.trim() || undefined;
+              `${user?.first_name ?? ''} ${user?.last_name ?? ''}`.trim() ||
+              undefined;
 
             return {
-              id: resp.data.user?.email,
-              email: resp.data.user?.email,
+              id: user?.email,
+              email: user?.email,
               name,
               role,
               accessToken: resp.data.access_token,
               refreshToken: resp.data.refresh_token,
-            } satisfies NextAuthUser & {
-              role: string;
-              accessToken?: string;
-              refreshToken?: string;
+              schoolName: tenant.school_name,
             };
           }
         } catch (error) {
@@ -133,20 +136,21 @@ export const { auth, signIn, signOut } = NextAuth({
           role?: string;
           accessToken?: string;
           refreshToken?: string;
+          schoolName?: string;
         };
         if (u.role) token.role = u.role;
         if (u.accessToken) token.accessToken = u.accessToken;
         if (u.refreshToken) token.refreshToken = u.refreshToken;
+        if (u.schoolName) token.schoolName = u.schoolName;
       }
       return token as JWT;
     },
     async session({ session, token }) {
       if (token) {
-        session.user.role = (token as JWT).role ?? 'User';
-        const at = (token as JWT).accessToken;
-        const rt = (token as JWT).refreshToken;
-        if (at) session.user.accessToken = at;
-        if (rt) session.user.refreshToken = rt;
+        session.user.role = token.role ?? 'User';
+        session.user.accessToken = token.accessToken;
+        session.user.refreshToken = token.refreshToken;
+        session.user.schoolName = token.schoolName;
       }
       return session;
     },

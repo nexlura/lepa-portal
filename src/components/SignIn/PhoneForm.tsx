@@ -53,9 +53,6 @@ export default function PhoneForm({ phoneNumber, setPhoneNumber }: PhoneFormProp
 
             const fullNumber = `${COUNTRY_CODE}${cleanedPhone}`
 
-            console.log('full', fullNumber);
-
-
             const resp = await axios.post(
                 verifyPhoneUrl,
                 { identifier: fullNumber },

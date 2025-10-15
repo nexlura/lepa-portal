@@ -16,12 +16,15 @@ export default function Header() {
         role: string;
         email?: string | null;
         name?: string | null
+        schoolName?: string | null
     } | null>()
 
 
     useEffect(() => {
         if (session?.user) {
             setCurrentUser(session.user)
+            console.log('current user', session.user);
+
         }
     }, [session])
 
