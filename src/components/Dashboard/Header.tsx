@@ -7,6 +7,7 @@ import {
 
 import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
+import Avatar from '../Avatar';
 
 export default function Header() {
     const { data: session } = useSession();
@@ -15,12 +16,15 @@ export default function Header() {
         role: string;
         email?: string | null;
         name?: string | null
+        schoolName?: string | null
     } | null>()
 
 
     useEffect(() => {
         if (session?.user) {
             setCurrentUser(session.user)
+            console.log('current user', session.user);
+
         }
     }, [session])
 
@@ -60,9 +64,7 @@ export default function Header() {
                                 {currentUser && currentUser.name}
                             </span>
                         </div>
-                        <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center">
-                            <span className="text-white text-sm font-medium">A</span>
-                        </div>
+                        {currentUser?.name && (<Avatar fullName={currentUser?.name} />)}
                     </div>
                 </div>
             </div>

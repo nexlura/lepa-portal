@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { CheckIcon, XMarkIcon } from '@heroicons/react/24/outline'
 
 import { Button } from '@/components/UIKit/Button'
-import { mockStudent } from '@/app/dashboard/admissions/process/[id]/page'
+import { StudentRecord } from '@/app/dashboard/admissions/page'
 
 const admissionSteps = [
     { id: 1, name: 'Application Review', description: 'Review submitted application', completed: true },
@@ -14,10 +14,34 @@ const admissionSteps = [
     { id: 5, name: 'Final Decision', description: 'Make admission decision', completed: false },
 ]
 
+
+// Mock data - in real app this would come from API
+const mockStudent: StudentRecord = {
+    id: 1,
+    name: 'John Doe',
+    gender: 'Male',
+    dateOfBirth: '2010-05-15',
+    email: 'john.doe@example.com',
+    phone: '+1234567890',
+    address: '123 Main St',
+    city: 'New York',
+    state: 'NY',
+    postalCode: '10001',
+    grade: 'Grade 5',
+    classSection: 'A',
+    enrollmentDate: '2024-01-15',
+    previousSchool: 'Elementary School',
+    guardianName: 'Jane Doe',
+    guardianRelationship: 'Mother',
+    guardianEmail: 'jane.doe@example.com',
+    guardianPhone: '+1234567891',
+    status: 'Pending'
+}
+
 const VerticalStepper = () => {
     const router = useRouter()
 
-    const [currentStep, setCurrentStep] = useState(3) // Currently on step 3
+    const [currentStep] = useState(3) // Currently on step 3
 
     const handleEnroll = () => {
         // Handle enrollment logic

@@ -2,12 +2,18 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { NextRequest } from 'next/server';
 
+const API_HOST = process.env.NEXT_PUBLIC_API_URL;
+
 // Local API route
 export const invokeInternalAPIRoute = (route: string): string =>
   `http://localhost:3000/api/${route}`;
 
+// Local API route
+export const invokeExternalAPIRoute = (route: string): string =>
+  `${API_HOST}/api/v1/${route}`;
+
 // Backend host for external API
-export const getAPIBackendHost = (): string => 'http://localhost:8000';
+export const getAPIBackendHost = (): string => 'http://localhost:8081';
 
 // Extract JSON from NextRequest
 export const getRequestBodyJSON = async (
@@ -39,8 +45,11 @@ type RequestMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
 // Axios instance setup
 const axiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api',
+  baseURL: `${API_HOST}/api/v1` || 'http://localhost:3000/api',
   withCredentials: true,
+  headers: {
+    'X-Custom-Header': 'schoolA.lepa.com',
+  },
 });
 
 // Base request handler
@@ -84,18 +93,24 @@ const sendRequest = async <T = any>(
 };
 
 // API Helpers
-export const getModel = async <T = any>(path: string): Promise<T | null> =>
-  await sendRequest<T>('GET', path);
+export const getModel = async <T = any>(
+  path: string,
+  config: AxiosRequestConfig = {}
+): Promise<T | null> => await sendRequest<T>('GET', path, null, config);
 
 export const postModel = async <T = any>(
   path: string,
-  body: Record<string, any> | null = null
-): Promise<T | null> => await sendRequest<T>('POST', path, body);
+  body: Record<string, any> | null = null,
+  config: AxiosRequestConfig = {}
+): Promise<T | null> => await sendRequest<T>('POST', path, body, config);
 
 export const patchModel = async <T = any>(
   path: string,
-  body: Record<string, any> | null = null
-): Promise<T | null> => await sendRequest<T>('PATCH', path, body);
+  body: Record<string, any> | null = null,
+  config: AxiosRequestConfig = {}
+): Promise<T | null> => await sendRequest<T>('PATCH', path, body, config);
 
-export const deleteModel = async <T = any>(path: string): Promise<T | null> =>
-  await sendRequest<T>('DELETE', path);
+export const deleteModel = async <T = any>(
+  path: string,
+  config: AxiosRequestConfig = {}
+): Promise<T | null> => await sendRequest<T>('DELETE', path, null, config);

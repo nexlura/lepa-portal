@@ -32,6 +32,8 @@ Create a `.env.local` at the project root with the following variables:
 NEXTAUTH_URL=http://localhost:3000
 # You can generate this using the command below
 NEXTAUTH_SECRET=replace-with-generated-secret
+# Needed for running the app in production
+AUTH_TRUST_HOST=http://localhost:3000
 ```
 
 ## Generate a NextAuth secret

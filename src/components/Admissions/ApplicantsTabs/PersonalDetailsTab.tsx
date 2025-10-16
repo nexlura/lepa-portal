@@ -28,7 +28,7 @@ const genders = [
     { id: 'Female', title: 'Female' },
 ]
 
-const PersonalDetailsTab = ({ personalData, setPersonalData }: PersonalDetsTabProps) => {
+const PersonalDetailsTab = ({ personalData }: PersonalDetsTabProps) => {
 
 
 

@@ -1,7 +1,5 @@
 import { Dispatch, SetStateAction } from 'react'
 
-import { Input } from '@/components/UIKit/Input'
-import { Field, Label } from '@/components/UIKit/Fieldset'
 import { Button } from '@/components/UIKit/Button'
 
 type GuardianData = {
@@ -16,7 +14,7 @@ interface GuardianTabProps {
     setGuardianData: Dispatch<SetStateAction<GuardianData>>
 }
 
-const GuardianTab = ({ guardianData, setGuardianData }: GuardianTabProps) => {
+const GuardianTab = ({ guardianData }: GuardianTabProps) => {
     const handleSaveParent = () => {
         // Save personal data
         console.log('Saving parent data:', guardianData)

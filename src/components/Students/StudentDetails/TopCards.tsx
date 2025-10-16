@@ -1,4 +1,4 @@
-import { BuildingOffice2Icon, CalendarIcon, UserIcon, ArrowTrendingUpIcon, UserGroupIcon, BookOpenIcon } from "@heroicons/react/24/outline"
+import { BuildingOffice2Icon, CalendarIcon, UserIcon, ArrowTrendingUpIcon, BookOpenIcon } from "@heroicons/react/24/outline"
 
 interface StudentLikeRecord {
     id: number
