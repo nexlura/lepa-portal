@@ -9,7 +9,7 @@ import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import Avatar from '../Avatar';
 
-export default function Header() {
+export default function Header({ onMenuClick }: { onMenuClick?: () => void }) {
     const { data: session } = useSession();
 
     const [currentUser, setCurrentUser] = useState<{
@@ -36,6 +36,7 @@ export default function Header() {
                 <div className="flex items-center lg:hidden">
                     <button
                         className="px-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+                        onClick={onMenuClick}
                     >
                         <Bars3Icon className="h-6 w-6" />
                     </button>

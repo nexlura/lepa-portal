@@ -3,12 +3,12 @@ import Image from "next/image"
 import wordmarkLogo from "../../public/wordmark-logo.png"
 import iconLogo from "../../public/icon-logo.png"
 
-export const WordmarkLogo = () => {
+export const WordmarkLogo = (props: { height: number | undefined }) => {
     return (
         <Image
             src={wordmarkLogo}
             alt="Lepa Logo"
-            height={30}
+            height={props.height || 30}
         />
     )
 }

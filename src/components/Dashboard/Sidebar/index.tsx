@@ -1,11 +1,14 @@
 import { XMarkIcon } from '@heroicons/react/24/outline';
+import Image from 'next/image';
 
 import SidebarNavigation from './Navigation';
 import SettingsNavigation from './SettingsNavigation';
 import LogoutButton from '@/components/LogoutButton';
+import { WordmarkLogo } from '@/components/Logo';
 
 interface SidebarProps {
     isOpen: boolean;
+    onClose?: () => void;
 }
 export interface NavigationItem {
     name: string;
@@ -14,7 +17,7 @@ export interface NavigationItem {
     subItems?: { name: string; href: string }[];
 }
 
-export default function Sidebar({ isOpen }: SidebarProps) {
+export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
     return (
         <>
@@ -22,6 +25,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
             {isOpen && (
                 <div
                     className="fixed inset-0 z-40 bg-gray-600 bg-opacity-75 lg:hidden"
+                    onClick={onClose}
                 />
             )}
 
@@ -33,11 +37,13 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                 <div className="flex h-full flex-col">
                     {/* Header */}
                     <div className="flex h-16 items-center justify-between px-6 border-gray-200">
-                        <div className="flex items-center">
-                            <h1 className="text-2xl font-bold text-primary-600">Lepa</h1>
+                        <div className="flex items-center gap-2">
+                            <WordmarkLogo height={28} />
+                            <span className="text-xl font-semibold text-primary-600 hidden sm:inline">Lepa</span>
                         </div>
                         <button
                             className="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+                            onClick={onClose}
                         >
                             <XMarkIcon className="h-6 w-6" />
                         </button>
