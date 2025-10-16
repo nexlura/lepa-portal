@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { DocumentIcon, EyeIcon, ArrowDownTrayIcon, XMarkIcon, DocumentTextIcon } from "@heroicons/react/24/outline"
+import { EyeIcon, ArrowDownTrayIcon, XMarkIcon, DocumentTextIcon } from "@heroicons/react/24/outline"
 
 export interface StudentDocument {
     id: string | number

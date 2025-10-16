@@ -2,7 +2,7 @@
 
 import { Dialog, DialogBackdrop, DialogPanel } from '@headlessui/react'
 import { StudentRecord } from '@/app/dashboard/admissions/page'
-import { Cog6ToothIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import { Cog6ToothIcon } from '@heroicons/react/24/outline'
 import { Button } from '../UIKit/Button'
 import { useRouter } from 'next/navigation'
 

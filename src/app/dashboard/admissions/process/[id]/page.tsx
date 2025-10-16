@@ -4,64 +4,10 @@ import { useRouter } from 'next/navigation'
 import { XMarkIcon } from '@heroicons/react/24/outline'
 
 import { Button } from '@/components/UIKit/Button'
-import { StudentRecord } from '@/app/dashboard/admissions/page'
 import VerticalStepper from '@/components/Admissions/VerticalStepper'
 import ApplicantTabs from '@/components/Admissions/ApplicantsTabs'
 
-// Mock data - in real app this would come from API
-export const mockStudent: StudentRecord = {
-    id: 1,
-    name: 'John Doe',
-    gender: 'Male',
-    dateOfBirth: '2010-05-15',
-    email: 'john.doe@example.com',
-    phone: '+1234567890',
-    address: '123 Main St',
-    city: 'New York',
-    state: 'NY',
-    postalCode: '10001',
-    grade: 'Grade 5',
-    classSection: 'A',
-    enrollmentDate: '2024-01-15',
-    previousSchool: 'Elementary School',
-    guardianName: 'Jane Doe',
-    guardianRelationship: 'Mother',
-    guardianEmail: 'jane.doe@example.com',
-    guardianPhone: '+1234567891',
-    status: 'Pending'
-}
-
-export const mockDocuments = [
-    {
-        id: 1,
-        name: 'Birth Certificate',
-        type: 'birth_certificate',
-        status: 'uploaded',
-        uploadedAt: '2024-01-10',
-        fileSize: '2.3 MB',
-        fileName: 'birth_certificate_john_doe.pdf'
-    },
-    {
-        id: 2,
-        name: 'Previous School Records',
-        type: 'school_records',
-        status: 'pending',
-        uploadedAt: null,
-        fileSize: null,
-        fileName: null
-    },
-    {
-        id: 3,
-        name: 'Immunization Records',
-        type: 'immunization',
-        status: 'uploaded',
-        uploadedAt: '2024-01-12',
-        fileSize: '1.8 MB',
-        fileName: 'immunization_records_john_doe.pdf'
-    }
-]
-
-export default function ProcessApplicantPage() {
+const ProcessApplicantPage = () => {
     const router = useRouter()
 
     return (
@@ -92,3 +38,5 @@ export default function ProcessApplicantPage() {
         </div>
     )
 }
+
+export default ProcessApplicantPage

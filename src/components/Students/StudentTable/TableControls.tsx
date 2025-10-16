@@ -39,6 +39,7 @@ const StudentTableControls = ({
                     <div className='bg-gray-100 px-2 rounded-md'>
                         <select
                             value={statusFilter}
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
                             onChange={(e) => { setStatusFilter(e.target.value as any); setPage(1) }}
                             className=" bg-gray-100 pr-2  border-gray-300 py-2  text-sm focus:border-primary-500 focus:ring-primary-500"
                         >

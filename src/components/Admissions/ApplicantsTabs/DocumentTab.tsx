@@ -3,35 +3,24 @@ import { DocumentTextIcon, ArrowDownTrayIcon, CloudArrowUpIcon } from '@heroicon
 import { Button } from '@/components/UIKit/Button'
 import { Dispatch, SetStateAction } from 'react';
 
-type Documents = ({
+export type Document = {
     id: number;
     name: string;
     type: string;
     status: string;
-    uploadedAt: string;
-    fileSize: string;
-    fileName: string;
-} | {
-    id: number;
-    name: string;
-    type: string;
-    status: string;
-    uploadedAt: null;
-    fileSize: null;
-    fileName: null;
-})[]
-
-
-
+    uploadedAt: string | null;
+    fileSize: string | null;
+    fileName: string | null;
+}
 interface DocumentTabProps {
-    documents: Documents
-    setDocuments: Dispatch<SetStateAction<Documents>>
+    documents: Document[]
+    setDocuments: Dispatch<SetStateAction<Document[]>>
 }
 
-const DocumentTab = ({ documents }: DocumentTabProps) => {
+const DocumentTab = ({ documents, setDocuments }: DocumentTabProps) => {
 
 
-    const handleDownloadDocument = (document: any) => {
+    const handleDownloadDocument = (document: Document) => {
         // Handle document download
         console.log('Downloading document:', document.fileName)
     }
@@ -77,7 +66,6 @@ const DocumentTab = ({ documents }: DocumentTabProps) => {
                                         </span>
                                         <Button
                                             outline
-                                            size="sm"
                                             onClick={() => handleDownloadDocument(doc)}
                                         >
                                             <ArrowDownTrayIcon className="h-4 w-4 mr-1" />
@@ -99,7 +87,6 @@ const DocumentTab = ({ documents }: DocumentTabProps) => {
                                         </span>
                                         <Button
                                             outline
-                                            size="sm"
                                             onClick={() => document.getElementById(`upload-${doc.type}`)?.click()}
                                         >
                                             <CloudArrowUpIcon className="h-4 w-4 mr-1" />

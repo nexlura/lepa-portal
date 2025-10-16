@@ -54,7 +54,7 @@ const EditStudentModal = ({ open, onClose, initialData, onSubmit }: {
     return (
         <Dialog size="lg" open={open} onClose={onClose} className="relative z-20">
             <DialogTitle>Update Student Record</DialogTitle>
-            <DialogDescription>Complete or edit the student's information.</DialogDescription>
+            <DialogDescription>Complete or edit the student&apos;s information.</DialogDescription>
             <DialogBody>
                 <div className="mt-4 grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2">
                     <Field className="sm:col-span-2">
