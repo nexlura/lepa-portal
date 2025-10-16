@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -12,7 +12,12 @@ import {
     ChevronDownIcon,
     ChevronRightIcon,
 } from '@heroicons/react/24/outline';
-import { NavigationItem } from '.';
+interface NavigationItem {
+    name: string;
+    href?: string;
+    icon: React.ComponentType<{ className?: string }>;
+    subItems?: { name: string; href: string }[];
+}
 
 const navigation: NavigationItem[] = [
     { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
@@ -29,7 +34,7 @@ const navigation: NavigationItem[] = [
     { name: 'Students', href: '/dashboard/students', icon: UserGroupIcon },
 ];
 
-const SidebarNavigation = () => {
+const SidebarNavigation: React.FC<{ collapsed?: boolean }> = ({ collapsed }) => {
     const pathname = usePathname();
     const [expandedItems, setExpandedItems] = useState<string[]>([]);
 
@@ -65,7 +70,7 @@ const SidebarNavigation = () => {
     const isSubItemActive = (href: string) => pathname.startsWith(href);
 
     return (
-        <nav className="flex-1 px-4 py-6 space-y-2">
+        <nav className={`flex-1 py-6 space-y-2 px-4`}>
             {navigation.map(item => {
                 const isActive = isItemActive(item);
                 const isExpanded = expandedItems.includes(item.name);
@@ -75,23 +80,23 @@ const SidebarNavigation = () => {
                         <div key={item.name}>
                             <button
                                 onClick={() => toggleExpanded(item.name)}
-                                className={`group flex w-full text-gray-500 items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${isActive
+                                className={`group flex w-full text-gray-500 items-center ${collapsed ? 'justify-center' : 'px-3'} py-2 text-sm font-medium rounded-md transition-colors ${isActive
                                     ? 'bg-primary-100 text-gray-900'
                                     : 'hover:bg-primary-50 hover:text-gray-900'
                                     }`}
                             >
                                 <item.icon
-                                    className={`mr-3 h-5 w-5 flex-shrink-0`}
+                                    className={`${collapsed ? '' : 'mr-3'} h-5 w-5 flex-shrink-0`}
                                 />
-                                {item.name}
-                                {isExpanded ? (
+                                {!collapsed && item.name}
+                                {!collapsed && (isExpanded ? (
                                     <ChevronDownIcon className="ml-auto h-4 w-4 font-bold" />
                                 ) : (
                                     <ChevronRightIcon className="ml-auto h-4 w-4 font-bold" />
-                                )}
+                                ))}
                             </button>
 
-                            {isExpanded && (
+                            {!collapsed && isExpanded && (
                                 <div className="ml-5 mt-2 ">
                                     {item.subItems.map((subItem) => (
                                         <Link
@@ -116,20 +121,20 @@ const SidebarNavigation = () => {
                     <Link
                         key={item.name}
                         href={item.href!}
-                        className={`group flex text-gray-500 items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${isActive
+                        className={`group flex text-gray-500 items-center ${collapsed ? 'justify-center' : 'px-3'} py-2 text-sm font-medium rounded-md transition-colors ${isActive
                             ? 'bg-primary-100 text-gray-900'
                             : 'hover:bg-primary-50 hover:text-gray-900'
                             }`}
                     >
                         <item.icon
-                            className={`mr-3 h-5 w-5 flex-shrink-0`}
+                            className={`${collapsed ? '' : 'mr-3'} h-5 w-5 flex-shrink-0`}
                         />
-                        {item.name}
+                        {!collapsed && item.name}
                     </Link>
                 );
             })}
         </nav>
     );
-};
+}
 
 export default SidebarNavigation;

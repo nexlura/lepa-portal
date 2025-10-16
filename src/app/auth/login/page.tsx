@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 
-import { WordmarkLogo } from '@/components/Logo'
+import { Logo, WordmarkLogo } from '@/components/Logo'
 import EmailForm from '@/components/SignIn/EmailForm'
 import PhoneForm from '@/components/SignIn/PhoneForm';
 import { useQueryKeys } from '@/hooks';
@@ -22,7 +22,7 @@ const AuthLoginPage = () => {
                 {/* Logo */}
                 <div className="absolute top-6 sm:top-8 left-5 sm:left-16">
                     <div className=" flex items-center">
-                        <WordmarkLogo />
+                        <Logo />
                     </div>
                 </div>
 

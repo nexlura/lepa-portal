@@ -1,6 +1,6 @@
 'use client'
 
-import { WordmarkLogo } from '@/components/Logo'
+import { Logo } from '@/components/Logo'
 import { useQueryKeys } from '@/hooks';
 import { formatPhoneNumber } from '@/utils';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -29,7 +29,7 @@ const AuthLayout = ({
                 {/* Logo */}
                 <div className="absolute top-6 sm:top-8 left-5 sm:left-16">
                     <div className=" flex items-center">
-                        <WordmarkLogo />
+                        <Logo />
                     </div>
                 </div>
 

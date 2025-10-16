@@ -11,16 +11,24 @@ interface DashboardLayoutProps {
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
 
     return (
         <div className="h-screen flex overflow-hidden bg-gray-50">
             {/* Sidebar */}
-            <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+            <Sidebar
+                isOpen={isSidebarOpen}
+                onClose={() => setIsSidebarOpen(false)}
+                collapsed={isSidebarCollapsed}
+                onDesktopToggleSidebar={() => setIsSidebarCollapsed(v => !v)}
+            />
 
             {/* Main content area */}
             <div className="flex-1 flex flex-col overflow-hidden">
                 {/* Header */}
-                <Header onMenuClick={() => setIsSidebarOpen(true)} />
+                <Header
+                    onMenuClick={() => setIsSidebarOpen(true)}
+                />
 
                 {/* Main content */}
                 <main className="flex-1 overflow-y-auto">

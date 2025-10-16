@@ -3,13 +3,15 @@
 import {
     BellIcon,
     Bars3Icon,
+    ArrowLeftEndOnRectangleIcon,
+    ArrowRightStartOnRectangleIcon,
 } from '@heroicons/react/24/outline';
 
 import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import Avatar from '../Avatar';
 
-export default function Header({ onMenuClick }: { onMenuClick?: () => void }) {
+export default function Header({ onMenuClick, onDesktopToggleSidebar, isSidebarCollapsed }: { onMenuClick?: () => void; isSidebarCollapsed?: boolean }) {
     const { data: session } = useSession();
 
     const [currentUser, setCurrentUser] = useState<{
@@ -42,9 +44,21 @@ export default function Header({ onMenuClick }: { onMenuClick?: () => void }) {
                     </button>
                 </div>
 
-                {/* Center - Search bar */}
+                {/* Center - Desktop collapse toggle */}
                 <div className="flex-1 max-w-lg mx-4 lg:mx-8">
-
+                    <div className="hidden lg:flex">
+                        <button
+                            className="px-2 py-1 rounded-md text-red-500 hover:text-gray-600 hover:bg-gray-100"
+                            onClick={onDesktopToggleSidebar}
+                            title={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                        >
+                            {isSidebarCollapsed ? (
+                                <ArrowRightStartOnRectangleIcon className="h-5 w-5" />
+                            ) : (
+                                <ArrowLeftEndOnRectangleIcon className="h-5 w-5" />
+                            )}
+                        </button>
+                    </div>
                 </div>
 
                 {/* Right side - User menu and notifications */}
