@@ -12,6 +12,7 @@ import {
     ChevronDownIcon,
     ChevronRightIcon,
 } from '@heroicons/react/24/outline';
+import { Tooltip } from '@/components/UIKit/Tooltip';
 interface NavigationItem {
     name: string;
     href?: string;
@@ -76,25 +77,35 @@ const SidebarNavigation: React.FC<{ collapsed?: boolean }> = ({ collapsed }) => 
                 const isExpanded = expandedItems.includes(item.name);
 
                 if (item.subItems) {
+                    const buttonContent = (
+                        <button
+                            onClick={() => toggleExpanded(item.name)}
+                            className={`group flex w-full text-gray-500 items-center ${collapsed ? 'justify-center' : 'px-3'} py-2 text-sm font-medium rounded-md transition-colors ${isActive
+                                ? 'bg-primary-100 text-gray-900'
+                                : 'hover:bg-primary-50 hover:text-gray-900'
+                                }`}
+                        >
+                            <item.icon
+                                className={`${collapsed ? '' : 'mr-3'} h-5 w-5 flex-shrink-0`}
+                            />
+                            {!collapsed && item.name}
+                            {!collapsed && (isExpanded ? (
+                                <ChevronDownIcon className="ml-auto h-4 w-4 font-bold" />
+                            ) : (
+                                <ChevronRightIcon className="ml-auto h-4 w-4 font-bold" />
+                            ))}
+                        </button>
+                    );
+
                     return (
                         <div key={item.name}>
-                            <button
-                                onClick={() => toggleExpanded(item.name)}
-                                className={`group flex w-full text-gray-500 items-center ${collapsed ? 'justify-center' : 'px-3'} py-2 text-sm font-medium rounded-md transition-colors ${isActive
-                                    ? 'bg-primary-100 text-gray-900'
-                                    : 'hover:bg-primary-50 hover:text-gray-900'
-                                    }`}
-                            >
-                                <item.icon
-                                    className={`${collapsed ? '' : 'mr-3'} h-5 w-5 flex-shrink-0`}
-                                />
-                                {!collapsed && item.name}
-                                {!collapsed && (isExpanded ? (
-                                    <ChevronDownIcon className="ml-auto h-4 w-4 font-bold" />
-                                ) : (
-                                    <ChevronRightIcon className="ml-auto h-4 w-4 font-bold" />
-                                ))}
-                            </button>
+                            {collapsed ? (
+                                <Tooltip content={item.name} position="right">
+                                    {buttonContent}
+                                </Tooltip>
+                            ) : (
+                                buttonContent
+                            )}
 
                             {!collapsed && isExpanded && (
                                 <div className="ml-5 mt-2 ">
@@ -117,7 +128,7 @@ const SidebarNavigation: React.FC<{ collapsed?: boolean }> = ({ collapsed }) => 
                     );
                 }
 
-                return (
+                const linkContent = (
                     <Link
                         key={item.name}
                         href={item.href!}
@@ -131,6 +142,18 @@ const SidebarNavigation: React.FC<{ collapsed?: boolean }> = ({ collapsed }) => 
                         />
                         {!collapsed && item.name}
                     </Link>
+                );
+
+                return (
+                    <div key={item.name}>
+                        {collapsed ? (
+                            <Tooltip content={item.name} position="right">
+                                {linkContent}
+                            </Tooltip>
+                        ) : (
+                            linkContent
+                        )}
+                    </div>
                 );
             })}
         </nav>

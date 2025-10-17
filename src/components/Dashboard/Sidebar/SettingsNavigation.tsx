@@ -3,6 +3,7 @@
 import { Cog6ToothIcon } from "@heroicons/react/24/outline"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { Tooltip } from '@/components/UIKit/Tooltip'
 
 const SettingsNavigation = (props: { collapsed: boolean | undefined }) => {
     const pathname = usePathname()
@@ -11,7 +12,7 @@ const SettingsNavigation = (props: { collapsed: boolean | undefined }) => {
     const isActive = pathname === '/dashboard/settings'
 
 
-    return (
+    const linkContent = (
         <Link
             href={'/dashboard/settings'}
             className={`group flex text-gray-500 items-center ${props.collapsed ? 'justify-center' : 'px-3'} py-2 text-sm font-medium rounded-md transition-colors ${isActive
@@ -24,6 +25,18 @@ const SettingsNavigation = (props: { collapsed: boolean | undefined }) => {
             />
             {!collapsed && ' Settings'}
         </Link>
+    )
+
+    return (
+        <>
+            {collapsed ? (
+                <Tooltip content="Settings" position="right">
+                    {linkContent}
+                </Tooltip>
+            ) : (
+                linkContent
+            )}
+        </>
     )
 }
 
