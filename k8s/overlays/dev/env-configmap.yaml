@@ -10,10 +10,10 @@ data:
     PORT=3000
     
     # NextAuth (required)
-    NEXTAUTH_URL=http://dev.lepa.cc
+    NEXTAUTH_URL=https://dev.lepa.cc
 
     # You can generate this using the command below
     NEXTAUTH_SECRET=replace-with-generated-secret
 
     # Needed for running the app in production
-    AUTH_TRUST_HOST=http://dev.lepa.cc
+    AUTH_TRUST_HOST=https://dev.lepa.cc
