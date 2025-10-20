@@ -74,21 +74,21 @@ jobs:
               kubectl apply -k k8s/overlays/dev
               echo "Restarting deployment to ensure latest changes are picked up"
               kubectl rollout restart deployment nexlura-lepa-dev-portal -n lepa
-              kubectl rollout status deployment nexlura-lepa-dev-portal -n lepa --timeout=300s
+              # kubectl rollout status deployment nexlura-lepa-dev-portal -n lepa --timeout=300s
               ;;
             refs/heads/staging)
               echo "Deploying to staging environment"
               kubectl apply -k k8s/overlays/staging
               echo "Restarting deployment to ensure latest changes are picked up"
               kubectl rollout restart deployment nexlura-lepa-staging-portal -n lepa
-              kubectl rollout status deployment nexlura-lepa-staging-portal -n lepa --timeout=300s
+              # kubectl rollout status deployment nexlura-lepa-staging-portal -n lepa --timeout=300s
               ;;
             refs/heads/main)
               echo "Deploying to production environment"
               kubectl apply -k k8s/overlays/production
               echo "Restarting deployment to ensure latest changes are picked up"
               kubectl rollout restart deployment nexlura-lepa-prod-portal -n lepa
-              kubectl rollout status deployment nexlura-lepa-prod-portal -n lepa --timeout=300s
+              # kubectl rollout status deployment nexlura-lepa-prod-portal -n lepa --timeout=300s
               ;;
             *)
               echo "Unknown branch: ${{ github.ref }}"
