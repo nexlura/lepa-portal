@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: api
+  name: ui
   namespace: lepa
 spec:
   replicas: 2  # Staging: moderate replicas for testing
