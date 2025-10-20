@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  namespace: lepa
+spec:
+  replicas: 3  # Production: more replicas for high availability
+  template:
+    spec:
+      containers:
+        - name: lepa-ui
+          image: nexlura/lepa-ui:latest
+          volumeMounts:
+            - name: env-file
+              mountPath: /.env
+              subPath: .env
+      volumes:
+        - name: env-file
+          configMap:
+            name: nexlura-lepa-env-file

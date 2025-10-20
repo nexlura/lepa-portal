@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: env-file
+  namespace: lepa
+data:
+  .env: |
+    # Staging Environment Variables
+    ENVIRONMENT=STAGING
+    PORT=3000
+    
+    # NextAuth (required)
+    NEXTAUTH_URL=https://staging.lepa.cc
+
+    # You can generate this using the command below
+    NEXTAUTH_SECRET=replace-with-generated-secret
+    
+    # Needed for running the app in production
+    AUTH_TRUST_HOST=https://staging.lepa.cc
