@@ -4,12 +4,15 @@ metadata:
   name: portal
   namespace: lepa
 spec:
-  replicas: 2  # dev: moderate replicas for testing
+  replicas: 1  # dev: single replica for development
   template:
     spec:
       containers:
         - name: lepa-portal
           image: nexlura/lepa-portal-dev:latest
+          envFrom:
+            - configMapRef:
+                name: nexlura-lepa-dev-env-file
           volumeMounts:
             - name: env-file
               mountPath: /.env
