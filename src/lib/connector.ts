@@ -6,14 +6,14 @@ const API_HOST = process.env.NEXT_PUBLIC_API_URL;
 
 // Local API route
 export const invokeInternalAPIRoute = (route: string): string =>
-  `http://localhost:3000/api/${route}`;
+  `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/${route}`;
 
 // Local API route
 export const invokeExternalAPIRoute = (route: string): string =>
   `${API_HOST}/api/v1/${route}`;
 
 // Backend host for external API
-export const getAPIBackendHost = (): string => 'http://localhost:8081';
+export const getAPIBackendHost = (): string => process.env.BACKEND_HOST || 'http://localhost:8081';
 
 // Extract JSON from NextRequest
 export const getRequestBodyJSON = async (
@@ -45,11 +45,8 @@ type RequestMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
 // Axios instance setup
 const axiosInstance = axios.create({
-  baseURL: `${API_HOST}/api/v1` || 'http://localhost:3000/api',
+  baseURL: `${API_HOST}/api/v1` || `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api`,
   withCredentials: true,
-  headers: {
-    'X-Custom-Header': 'schoolA.lepa.com',
-  },
 });
 
 // Base request handler
