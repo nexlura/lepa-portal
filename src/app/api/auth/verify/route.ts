@@ -12,7 +12,6 @@ export async function POST(req: NextRequest) {
     const response = await axios.get(url, {
       headers: {
         'Content-Type': 'application/json',
-        'X-Custom-Header': 'schoolA.lepa.com',
       },
     });
     // Return data with original status
