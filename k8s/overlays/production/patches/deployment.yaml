@@ -10,11 +10,6 @@ spec:
       containers:
         - name: lepa-portal
           image: nexlura/lepa-portal:latest
-          volumeMounts:
-            - name: env-file
-              mountPath: /.env
-              subPath: .env
-      volumes:
-        - name: env-file
-          configMap:
-            name: nexlura-lepa-env-file
+          envFrom:
+            - configMapRef:
+                name: nexlura-lepa-env-file

@@ -13,11 +13,3 @@ spec:
           envFrom:
             - configMapRef:
                 name: nexlura-lepa-dev-env-file
-          volumeMounts:
-            - name: env-file
-              mountPath: /.env
-              subPath: .env
-      volumes:
-        - name: env-file
-          configMap:
-            name: nexlura-lepa-dev-env-file

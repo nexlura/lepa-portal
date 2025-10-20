@@ -4,18 +4,9 @@ metadata:
   name: env-file
   namespace: lepa
 data:
-  .env: |
-    # Development Environment Variables
-    ENVIRONMENT=DEVELOPMENT
-    PORT=3000
-    
-    # NextAuth (required)
-    NEXTAUTH_URL=https://dev.lepa.cc
-
-    # You can generate this using the command below
-    NEXTAUTH_SECRET=dev-nextauth-secret-2025-a7b8c9d0e1f2g3h4i5j6k7l8m9n0o1p2q3r4s5t6u7v8w9x0y1z2
-
-    # Needed for running the app in production
-    AUTH_TRUST_HOST=dev.lepa.cc
-
-    NEXT_PUBLIC_API_URL=https://devapi.lepa.cc
+  ENVIRONMENT: "DEVELOPMENT"
+  PORT: "3000"
+  NEXTAUTH_URL: "https://dev.lepa.cc"
+  NEXTAUTH_SECRET: "dev-nextauth-secret-2025-a7b8c9d0e1f2g3h4i5j6k7l8m9n0o1p2q3r4s5t6u7v8w9x0y1z2"
+  AUTH_TRUST_HOST: "dev.lepa.cc"
+  NEXT_PUBLIC_API_URL: "https://devapi.lepa.cc"
