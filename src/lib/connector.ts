@@ -13,7 +13,7 @@ export const invokeExternalAPIRoute = (route: string): string =>
   `${API_HOST}/api/v1/${route}`;
 
 // Backend host for external API
-export const getAPIBackendHost = (): string => process.env.BACKEND_HOST || 'http://localhost:8081';
+export const getAPIBackendHost = (): string => process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8081';
 
 // Extract JSON from NextRequest
 export const getRequestBodyJSON = async (
