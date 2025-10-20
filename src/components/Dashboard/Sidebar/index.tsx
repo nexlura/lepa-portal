@@ -1,11 +1,10 @@
-import { XMarkIcon } from '@heroicons/react/24/outline';
 import React from 'react';
 
 import SidebarNavigation from './Navigation';
 import SettingsNavigation from './SettingsNavigation';
 import LogoutButton from '@/components/LogoutButton';
-import { Logo } from '@/components/Logo';
 import { Tooltip } from '@/components/UIKit/Tooltip';
+import { IconLogo } from '@/components/Logo';
 
 interface SidebarProps {
     collapsed?: boolean;
@@ -41,7 +40,7 @@ const Sidebar = ({ collapsed, onDesktopToggleSidebar }: SidebarProps) => {
                 {/* Header */}
                 <div className={`flex h-16 items-center ${collapsed ? 'justify-center' : 'justify-between'} px-4 border-gray-200`}>
                     <div className="flex items-center gap-2 md:px-2">
-                        <Logo height={28} icon={true} />
+                        <IconLogo height={28} />
                     </div>
 
                     {!collapsed && (

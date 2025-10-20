@@ -10,7 +10,7 @@ import {
 import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import Avatar from '../Avatar';
-import { Logo } from '@/components/Logo';
+import { IconLogo } from '@/components/Logo';
 
 export default function Header({ onMenuClick, onDesktopToggleSidebar, isSidebarCollapsed }: { onMenuClick?: () => void; onDesktopToggleSidebar?: () => void; isSidebarCollapsed?: boolean }) {
     const { data: session } = useSession();
@@ -44,7 +44,7 @@ export default function Header({ onMenuClick, onDesktopToggleSidebar, isSidebarC
                         >
                             <Bars3Icon className="h-6 w-6" />
                         </button>
-                        <Logo height={24} icon={true} />
+                        <IconLogo height={24} />
                     </div>
 
                     {/* Center - Desktop collapse toggle */}
