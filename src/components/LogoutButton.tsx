@@ -6,7 +6,7 @@ import { logoutAction } from '@/app/actions/logout';
 import { ArrowRightEndOnRectangleIcon } from '@heroicons/react/24/outline';
 import { Tooltip } from '@/components/UIKit/Tooltip';
 
-const LogoutButton = (props: { collapsed: boolean | undefined }) => {
+const LogoutButton = (props: { collapsed?: boolean | undefined }) => {
     const [isPending, startTransition] = useTransition();
     const { collapsed } = props
 

@@ -5,7 +5,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Tooltip } from '@/components/UIKit/Tooltip'
 
-const SettingsNavigation = (props: { collapsed: boolean | undefined }) => {
+const SettingsNavigation = (props: { collapsed?: boolean | undefined }) => {
     const pathname = usePathname()
     const { collapsed } = props
 
