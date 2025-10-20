@@ -4,6 +4,7 @@ metadata:
   name: portal
   namespace: lepa
 spec:
+  replicas: 2  # dev: moderate replicas for testing
   template:
     spec:
       containers:
