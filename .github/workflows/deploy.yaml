@@ -35,9 +35,9 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            ${{ env.REGISTRY }}/nexlura/lepa-ui-dev,enable=${{ github.ref == 'refs/heads/dev' }}
-            ${{ env.REGISTRY }}/nexlura/lepa-ui-staging,enable=${{ github.ref == 'refs/heads/staging' }}
-            ${{ env.REGISTRY }}/nexlura/lepa-ui,enable=${{ github.ref == 'refs/heads/main' }}
+            ${{ env.REGISTRY }}/nexlura/lepa-portal-dev,enable=${{ github.ref == 'refs/heads/dev' }}
+            ${{ env.REGISTRY }}/nexlura/lepa-portal-staging,enable=${{ github.ref == 'refs/heads/staging' }}
+            ${{ env.REGISTRY }}/nexlura/lepa-portal,enable=${{ github.ref == 'refs/heads/main' }}
           tags: |
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/dev' }}
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/staging' }}
@@ -73,22 +73,22 @@ jobs:
               echo "Deploying to dev environment"
               kubectl apply -k k8s/overlays/dev
               echo "Restarting deployment to ensure latest changes are picked up"
-              kubectl rollout restart deployment nexlura-lepa-dev-ui -n lepa
-              kubectl rollout status deployment nexlura-lepa-dev-ui -n lepa --timeout=300s
+              kubectl rollout restart deployment nexlura-lepa-dev-portal -n lepa
+              kubectl rollout status deployment nexlura-lepa-dev-portal -n lepa --timeout=300s
               ;;
             refs/heads/staging)
               echo "Deploying to staging environment"
               kubectl apply -k k8s/overlays/staging
               echo "Restarting deployment to ensure latest changes are picked up"
-              kubectl rollout restart deployment nexlura-lepa-staging-ui -n lepa
-              kubectl rollout status deployment nexlura-lepa-staging-ui -n lepa --timeout=300s
+              kubectl rollout restart deployment nexlura-lepa-staging-portal -n lepa
+              kubectl rollout status deployment nexlura-lepa-staging-portal -n lepa --timeout=300s
               ;;
             refs/heads/main)
               echo "Deploying to production environment"
               kubectl apply -k k8s/overlays/production
               echo "Restarting deployment to ensure latest changes are picked up"
-              kubectl rollout restart deployment nexlura-lepa-prod-ui -n lepa
-              kubectl rollout status deployment nexlura-lepa-prod-ui -n lepa --timeout=300s
+              kubectl rollout restart deployment nexlura-lepa-prod-portal -n lepa
+              kubectl rollout status deployment nexlura-lepa-prod-portal -n lepa --timeout=300s
               ;;
             *)
               echo "Unknown branch: ${{ github.ref }}"

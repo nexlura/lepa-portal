@@ -1,14 +1,14 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ui
+  name: portal
   namespace: lepa
 spec:
   template:
     spec:
       containers:
-        - name: lepa-ui
-          image: nexlura/lepa-ui-dev:latest
+        - name: lepa-portal
+          image: nexlura/lepa-portal-dev:latest
           volumeMounts:
             - name: env-file
               mountPath: /.env

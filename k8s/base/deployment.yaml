@@ -7,15 +7,15 @@ spec:
   replicas: 2
   selector:
     matchLabels:
-      app: lepa-ui
+      app: lepa-portal
   template:
     metadata:
       labels:
-        app: lepa-ui
+        app: lepa-portal
     spec:
       containers:
-        - name: lepa-ui
-          image: nexlura/lepa-ui:latest  # This will be overridden by overlays
+        - name: lepa-portal
+          image: nexlura/lepa-portal:latest  # This will be overridden by overlays
           ports:
             - name: http
               containerPort: 3000

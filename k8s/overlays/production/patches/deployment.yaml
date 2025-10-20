@@ -1,15 +1,15 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ui
+  name: portal
   namespace: lepa
 spec:
   replicas: 3  # Production: more replicas for high availability
   template:
     spec:
       containers:
-        - name: lepa-ui
-          image: nexlura/lepa-ui:latest
+        - name: lepa-portal
+          image: nexlura/lepa-portal:latest
           volumeMounts:
             - name: env-file
               mountPath: /.env

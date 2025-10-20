@@ -7,9 +7,9 @@ resources:
 
 labels:
   - pairs:
-      app: lepa-ui
+      app: lepa-portal
 
 commonAnnotations:
-  app: lepa-ui
+  app: lepa-portal
 
 # Removed nameSuffix for cleaner naming
