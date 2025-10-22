@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: portal
-  namespace: lepa
 spec:
   replicas: 3  # Production: more replicas for high availability
   template:
