@@ -1,21 +1,35 @@
+'use client'
+
 import Sidebar from './Sidebar';
 import Header from './Header';
+import { useState } from 'react';
+import MobileMenu from './MobileMenu';
 
 interface DashboardLayoutProps {
     children: React.ReactNode;
 }
 
-export default function DashboardLayout({ children }: DashboardLayoutProps) {
+const DashboardLayout = ({ children }: DashboardLayoutProps) => {
+
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
 
     return (
         <div className="h-screen flex overflow-hidden bg-gray-50">
             {/* Sidebar */}
-            <Sidebar isOpen={true} />
+            <Sidebar
+                collapsed={isSidebarCollapsed}
+                onDesktopToggleSidebar={() => setIsSidebarCollapsed(v => !v)}
+            />
+
+            <MobileMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
 
             {/* Main content area */}
             <div className="flex-1 flex flex-col overflow-hidden">
                 {/* Header */}
-                <Header />
+                <Header
+                    onMenuClick={() => setIsMenuOpen(true)}
+                />
 
                 {/* Main content */}
                 <main className="flex-1 overflow-y-auto">
@@ -28,4 +42,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             </div>
         </div>
     );
-} 
+}
+
+export default DashboardLayout

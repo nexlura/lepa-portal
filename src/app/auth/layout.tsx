@@ -1,6 +1,6 @@
 'use client'
 
-import { WordmarkLogo } from '@/components/Logo'
+import { WordmarkLogo } from '@/components/Logo';
 import { useQueryKeys } from '@/hooks';
 import { formatPhoneNumber } from '@/utils';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
