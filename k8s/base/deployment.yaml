@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: portal
-  namespace: lepa
 spec:
   replicas: 2
   selector:
@@ -20,9 +19,6 @@ spec:
             - name: http
               containerPort: 3000
               protocol: TCP
-          envFrom:
-            - secretRef:
-                name: secrets
           env:
             - name: NAMESPACE
               valueFrom:
