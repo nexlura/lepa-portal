@@ -3,8 +3,7 @@ import { redirect } from 'next/navigation';
 
 import { auth, signOut } from '@/auth'; // if you exported it from your NextAuth setup
 import { postModel } from '@/lib/connector';
-import { getRequestHost, useHostHeader } from '@/utils/hostHeader';
-// import { signOut } from 'next-auth/react'; // optional for client-side redirection
+import { getRequestHost } from '@/utils/hostHeader';
 
 export async function logoutAction(host: string) {
   const session = await auth();

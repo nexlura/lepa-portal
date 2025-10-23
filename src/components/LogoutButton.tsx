@@ -9,7 +9,7 @@ import { useHostHeader } from '@/utils/hostHeader';
 
 const LogoutButton = (props: { collapsed?: boolean | undefined }) => {
     const [isPending, startTransition] = useTransition();
-    const { hostHeader } = useHostHeader()
+    const hostHeader = useHostHeader()
 
     const { collapsed } = props
 
