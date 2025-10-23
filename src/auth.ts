@@ -6,6 +6,7 @@ import type { User as NextAuthUser } from '@auth/core/types';
 
 import { authConfig } from './auth.config';
 import { postModel } from './lib/connector';
+import { getRequestHost } from './utils/hostHeader';
 
 declare module 'next-auth' {
   interface User {
@@ -63,7 +64,9 @@ export const { auth, signIn, signOut } = NextAuth({
   ...authConfig,
   providers: [
     Credentials({
-      async authorize(credentials): Promise<NextAuthUser | null> {
+      async authorize(credentials, req): Promise<NextAuthUser | null> {
+        const host = getRequestHost(req.headers.get('host'));
+
         const parsedCredentials = z
           .object({ email: z.string().min(8), password: z.string().min(6) })
           .safeParse(credentials);
@@ -93,6 +96,11 @@ export const { auth, signIn, signOut } = NextAuth({
             {
               identifier: parsed.data.identifier,
               password: parsed.data.password,
+            },
+            {
+              headers: {
+                'X-Lepa-Host-Header': host,
+              },
             }
           );
 

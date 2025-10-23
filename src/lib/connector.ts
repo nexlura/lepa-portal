@@ -8,8 +8,15 @@ const NEXTAUTH_URL = process.env.NEXTAUTH_URL;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
 // Default URLs for different environments
-const DEFAULT_INTERNAL_URL = NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://localhost:3000';
-const DEFAULT_EXTERNAL_URL = NODE_ENV === 'development' ? 'http://localhost:8081' : 'https://localhost:8081';
+const DEFAULT_INTERNAL_URL = 'http://localhost:3000';
+// NODE_ENV === 'development'
+//   ? 'http://localhost:3000'
+//   : 'https://localhost:3000';
+
+const DEFAULT_EXTERNAL_URL = 'http://localhost:8081';
+// NODE_ENV === 'development'
+//   ? 'http://localhost:8081'
+//   : 'https://localhost:8081';
 
 // Internal API route (Next.js API routes)
 export const invokeInternalAPIRoute = (route: string): string => {
@@ -28,6 +35,16 @@ export const invokeExternalAPIRoute = (route: string): string => {
 // Backend host for external API
 export const getAPIBackendHost = (): string => {
   return API_HOST || DEFAULT_EXTERNAL_URL;
+};
+
+// Get host header for X-Lepa-Host-Header (client-side only)
+export const getHostHeader = (): string => {
+  // Check if we're in the browser
+  if (typeof window !== 'undefined') {
+    return window.location.origin;
+  }
+  // Fallback for server-side rendering
+  return NEXTAUTH_URL || DEFAULT_INTERNAL_URL;
 };
 
 // Extract JSON from NextRequest
@@ -65,7 +82,7 @@ const axiosInstance = axios.create({
   timeout: 30000, // 30 seconds timeout
   headers: {
     'Content-Type': 'application/json',
-    'Accept': 'application/json',
+    Accept: 'application/json',
   },
 });
 
@@ -73,7 +90,9 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use(
   (config) => {
     if (NODE_ENV === 'development') {
-      console.log(`🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`);
+      console.log(
+        `🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`
+      );
     }
     return config;
   },
@@ -93,7 +112,10 @@ axiosInstance.interceptors.response.use(
   },
   (error: AxiosError) => {
     if (NODE_ENV === 'development') {
-      console.error(`❌ API Error: ${error.response?.status} ${error.config?.url}`, error.response?.data);
+      console.error(
+        `❌ API Error: ${error.response?.status} ${error.config?.url}`,
+        error.response?.data
+      );
     }
     return Promise.reject(error);
   }
@@ -126,7 +148,9 @@ const sendRequest = async <T = any>(
     if ([200, 201, 202, 204].includes(response.status)) {
       return response.data;
     } else {
-      console.error(`Unexpected status code: ${response.status} for ${method} ${url}`);
+      console.error(
+        `Unexpected status code: ${response.status} for ${method} ${url}`
+      );
       return null;
     }
   } catch (error: any) {
@@ -134,7 +158,6 @@ const sendRequest = async <T = any>(
     if (axios.isAxiosError(error)) {
       const statusCode = error.response?.status;
       const message = error.response?.data?.message || error.message;
-      
       // Log error details in development
       if (NODE_ENV === 'development') {
         console.error(`API Error [${statusCode}]: ${message}`, {
@@ -186,7 +209,9 @@ export const deleteModel = async <T = any>(
 ): Promise<T | null> => await sendRequest<T>('DELETE', path, null, config);
 
 // Utility function to check if response is an error
-export const isErrorResponse = (response: any): response is { error: true; status: number; message: string } => {
+export const isErrorResponse = (
+  response: any
+): response is { error: true; status: number; message: string } => {
   return response && typeof response === 'object' && response.error === true;
 };
 
