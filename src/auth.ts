@@ -125,7 +125,7 @@ export const { auth, signIn, signOut } = NextAuth({
               role,
               accessToken: resp.data.access_token,
               refreshToken: resp.data.refresh_token,
-              schoolName: tenant.school_name,
+              schoolName: tenant?.school_name || '',
             };
           }
         } catch (error) {
@@ -158,7 +158,11 @@ export const { auth, signIn, signOut } = NextAuth({
         session.user.role = token.role ?? 'User';
         session.user.accessToken = token.accessToken;
         session.user.refreshToken = token.refreshToken;
-        session.user.schoolName = token.schoolName;
+
+        //school name would be null for lepa admins
+        if (token.schoolName) {
+          session.user.schoolName = token.schoolName;
+        }
       }
       return session;
     },
