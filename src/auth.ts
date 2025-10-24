@@ -91,7 +91,7 @@ export const { auth, signIn, signOut } = NextAuth({
         if (!parsed.success) return null;
 
         try {
-          const resp = await postModel<APIAuthResponse | string>(
+          const resp = await postModel<APIAuthResponse>(
             '/auth/login',
             {
               identifier: parsed.data.identifier,
@@ -106,8 +106,7 @@ export const { auth, signIn, signOut } = NextAuth({
 
           if (
             resp &&
-            typeof resp !== 'string' &&
-            resp.data &&
+            resp?.data &&
             'access_token' in resp.data &&
             typeof resp.data.access_token === 'string'
           ) {
