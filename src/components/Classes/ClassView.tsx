@@ -11,7 +11,7 @@ import { Button } from '@/components/UIKit/Button'
 import AddClassModal from '@/components/Classes/AddClassModal'
 import ClassesTable from '@/components/Classes/ClassesTable'
 import ImportClassesModal from '@/components/Classes/ImportClassesModal'
-import { SchoolClass } from '@/app/dashboard/classes/page'
+import { SchoolClass } from '@/app/(portal)/classes/page'
 
 
 

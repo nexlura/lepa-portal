@@ -1,4 +1,4 @@
-import { SchoolClass } from "@/app/dashboard/classes/page"
+import { SchoolClass } from "@/app/(portal)/classes/page"
 
 interface ClassesTableProps {
     classes: SchoolClass[]

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { CheckIcon, XMarkIcon } from '@heroicons/react/24/outline'
 
 import { Button } from '@/components/UIKit/Button'
-import { StudentRecord } from '@/app/dashboard/admissions/page'
+import { StudentRecord } from '@/app/(portal)/admissions/page'
 
 const admissionSteps = [
     { id: 1, name: 'Application Review', description: 'Review submitted application', completed: true },
