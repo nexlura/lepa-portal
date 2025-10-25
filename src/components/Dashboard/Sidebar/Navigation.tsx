@@ -30,7 +30,7 @@ const navigation: NavigationItem[] = [
             { name: 'Applicants', href: '/admissions' },
         ],
     },
-    { name: 'Classes', href: '/classes', icon: BookOpenIcon },
+    { name: 'Classes', href: '/classes/1', icon: BookOpenIcon },
     { name: 'Teachers', href: '/teachers', icon: AcademicCapIcon },
     { name: 'Students', href: '/students', icon: UserGroupIcon },
 ];

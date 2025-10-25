@@ -23,11 +23,15 @@ export type SchoolClass = {
     currentSize?: number
 }
 
-const ClassesPage = async () => {
+export type PageProps = {
+    params: Promise<{ pageNumber: string }>;
+};
 
+const ClassesPage = async ({ params }: PageProps) => {
+    const { pageNumber } = await params
     const session = await auth();
     // Fetch the data using server-side connector with auth cookie
-    const res = await getModel(`/classes`,
+    const res = await getModel(`/classes?page=${pageNumber}`,
         {
             headers: {
                 'X-Lepa-Host-Header': 'schoolA.lepa.com',
