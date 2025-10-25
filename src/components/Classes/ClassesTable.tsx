@@ -17,8 +17,9 @@ const ClassesTable = ({ classes }: ClassesTableProps) => {
                             <tr>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Capacity</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Current Size</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Teacher</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
@@ -31,9 +32,11 @@ const ClassesTable = ({ classes }: ClassesTableProps) => {
                                         <div className="text-sm text-gray-900">{klass.capacity ?? '-'}</div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
+                                        <div className="text-sm text-gray-900">{klass.currentSize || '-'}</div>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="text-sm text-gray-900">{klass.teacher || '-'}</div>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{klass.createdAt}</td>
                                 </tr>
                             ))}
                         </tbody>

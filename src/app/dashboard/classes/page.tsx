@@ -20,12 +20,12 @@ export type SchoolClass = {
     capacity: number
     teacher?: string
     createdAt?: string
+    currentSize?: number
 }
 
 const ClassesPage = async () => {
 
     const session = await auth();
-
     // Fetch the data using server-side connector with auth cookie
     const res = await getModel(`/classes`,
         {
@@ -36,14 +36,14 @@ const ClassesPage = async () => {
         }
     );
 
-
     const transformedData: SchoolClass[] = res.data.classes.map((classK: BackendClassesData) => {
 
         return {
             id: classK.id,
             capacity: classK.capacity,
             className: classK.name,
-            createdAt: classK.created_at
+            createdAt: classK.created_at,
+            currentSize: classK.current_size.toString()
         }
     });
 
