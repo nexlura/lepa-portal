@@ -1,5 +1,5 @@
 import { auth } from '@/auth';
-import ClassesView from '@/components/Classes/ClassView';
+import ClassesView from '@/components/SchoolClasses/ClassView';
 import { getModel } from '@/lib/connector';
 
 type BackendClassesData = {

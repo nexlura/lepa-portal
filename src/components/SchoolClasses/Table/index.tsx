@@ -1,16 +1,34 @@
-import { SchoolClass } from "@/app/(portal)/classes/[pageNumber]/page"
+'use client'
 
+import { useMemo, useState } from "react"
+
+import { SchoolClass } from "@/app/(portal)/classes/[pageNumber]/page"
+import SchoolClassesTableControls from "./Controls"
 interface ClassesTableProps {
     classes: SchoolClass[]
 }
 
-const ClassesTable = ({ classes }: ClassesTableProps) => {
+const SchoolClassesTable = ({ classes }: ClassesTableProps) => {
+    // UI state: search, filters, sorting, pagination
+    const [search, setSearch] = useState('')
+    const [gradeFilter, setGradeFilter] = useState<string>('All')
+
+    // Derived data: unique grades for filter
+    const gradeOptions = useMemo(() => {
+        const set = new Set<string>(classes.map(c => c.className).filter(Boolean))
+        return ['All', ...Array.from(set).sort()]
+    }, [classes])
+
     return (
         <div className="bg-white shadow rounded-lg">
             <div className="px-4 py-5 sm:p-6">
-                <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-                    All Classes
-                </h3>
+                <SchoolClassesTableControls
+                    search={search}
+                    setSearch={setSearch}
+                    gradeFilter={gradeFilter}
+                    gradeOptions={gradeOptions}
+                    setGradeFilter={setGradeFilter}
+                />
                 <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
@@ -47,4 +65,4 @@ const ClassesTable = ({ classes }: ClassesTableProps) => {
     )
 }
 
-export default ClassesTable
+export default SchoolClassesTable

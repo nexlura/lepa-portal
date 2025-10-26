@@ -8,14 +8,9 @@ import {
 } from '@heroicons/react/24/outline'
 
 import { Button } from '@/components/UIKit/Button'
-import AddClassModal from '@/components/Classes/AddClassModal'
-import ClassesTable from '@/components/Classes/ClassesTable'
-import ImportClassesModal from '@/components/Classes/ImportClassesModal'
+import AddClassModal from '@/components/SchoolClasses/AddClassModal'
+import ClassesTable from '@/components/SchoolClasses/Table'
 import { SchoolClass } from '@/app/(portal)/classes/[pageNumber]/page'
-
-
-
-
 interface ClassesViewProps {
     classes: SchoolClass[]
 }
@@ -24,7 +19,6 @@ const ClassesView = ({ classes }: ClassesViewProps) => {
     // const [classes, setClasses] = useState<Klass[]>()
 
     const [isAddOpen, setIsAddOpen] = useState(false)
-    const [isImportOpen, setIsImportOpen] = useState(false)
 
     return (
         <div className="space-y-6">
@@ -37,7 +31,7 @@ const ClassesView = ({ classes }: ClassesViewProps) => {
                     </p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <Button outline onClick={() => setIsImportOpen(true)}>
+                    <Button outline >
                         <ArrowUpTrayIcon data-slot="icon" />
                         Import CSV
                     </Button>
@@ -50,18 +44,10 @@ const ClassesView = ({ classes }: ClassesViewProps) => {
             {/* Classes table */}
             <ClassesTable classes={classes} />
             {/* Add Class Modal */}
-            {/* <AddClassModal
+            <AddClassModal
                 open={isAddOpen}
                 onClose={setIsAddOpen}
-                onSubmit={handleAddClass}
-            /> */}
-
-            {/* CSV Import Modal */}
-            {/* <ImportClassesModal
-                onClose={setIsImportOpen}
-                onSubmit={handleImportClasses}
-                open={isImportOpen}
-            /> */}
+            />
         </div>
     )
 }

@@ -5,19 +5,12 @@ import { Field, Label, ErrorMessage } from '@/components/UIKit/Fieldset'
 import { Input } from '@/components/UIKit/Input'
 import { Button } from '../UIKit/Button'
 
-const AddClassModal = ({
-    open,
-    onClose,
-    onSubmit,
-}: {
+interface AddClassModalProps {
     open: boolean
     onClose: (open: boolean) => void
-    onSubmit: (data: {
-        name: string
-        capacity: string
-        teacher?: string
-    }) => void
-}) => {
+}
+
+const AddClassModal = ({ open, onClose }: AddClassModalProps) => {
     const [form, setForm] = useState({
         name: '',
         capacity: '',
