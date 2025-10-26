@@ -20,7 +20,6 @@ export default function SelectMenu({ options, selected, setSelected }: SelectMen
 
     return (
         <Listbox value={selected} onChange={setSelected} >
-            <Label className="block text-sm/6 font-medium text-gray-900 dark:text-white">School Level</Label>
             <div className="relative mt-3">
                 <ListboxButton
                     className={clsx(
@@ -31,7 +30,7 @@ export default function SelectMenu({ options, selected, setSelected }: SelectMen
                         'border border-zinc-950/15 data-hover:border-zinc-950/20',
                         'bg-transparent focus:outline-hidden',
                         'data-invalid:border-red-500 data-invalid:data-hover:border-red-500',
-                        'data-disabled:border-zinc-950/20 shadow-xs'
+                        'data-disabled:border-zinc-950/20 shadow-xs capitalize'
                     )}
                 >
                     <span className="truncate pr-6">{selected?.name}</span>
@@ -44,7 +43,7 @@ export default function SelectMenu({ options, selected, setSelected }: SelectMen
 
                 <ListboxOptions
                     transition
-                    className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg outline-1 outline-black/5 data-leave:transition data-leave:duration-100 data-leave:ease-in data-closed:data-leave:opacity-0 sm:text-sm dark:bg-gray-800 dark:shadow-none dark:-outline-offset-1 dark:outline-white/10"
+                    className="absolute capitalize z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg outline-1 outline-black/5 data-leave:transition data-leave:duration-100 data-leave:ease-in data-closed:data-leave:opacity-0 sm:text-sm dark:bg-gray-800 dark:shadow-none dark:-outline-offset-1 dark:outline-white/10"
                 >
                     {options.map((option) => (
                         <ListboxOption

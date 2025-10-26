@@ -4,11 +4,23 @@ import { Dialog, DialogActions, DialogBody, DialogDescription, DialogTitle } fro
 import { Field, Label, ErrorMessage } from '@/components/UIKit/Fieldset'
 import { Input } from '@/components/UIKit/Input'
 import { Button } from '../UIKit/Button'
+import SelectMenu from '../UIKit/SelectMenu'
 
 interface AddClassModalProps {
     open: boolean
     onClose: (open: boolean) => void
 }
+
+
+const classes = [
+    { id: 1, name: 'class 1' },
+    { id: 2, name: 'class 2' },
+    { id: 3, name: 'class 3' },
+    { id: 4, name: 'class 4' },
+    { id: 5, name: 'class 5' },
+    { id: 6, name: 'class 6' },
+
+]
 
 const AddClassModal = ({ open, onClose }: AddClassModalProps) => {
     const [form, setForm] = useState({
@@ -17,6 +29,7 @@ const AddClassModal = ({ open, onClose }: AddClassModalProps) => {
         teacher: '',
     })
     const [errors, setErrors] = useState<{ name?: string; grade?: string }>({})
+    const [selectedLevel, setSelectedLevel] = useState(classes[1])
 
     const validate = () => {
         const next: { name?: string; grade?: string } = {}
@@ -34,12 +47,16 @@ const AddClassModal = ({ open, onClose }: AddClassModalProps) => {
                     <Field className="sm:col-span-2">
                         <Label className="text-sm/6 text-gray-900 font-medium">Class Name</Label>
                         <Input
-                            placeholder="e.g., Class 1"
+                            placeholder="e.g., Class 1 Blue"
                             value={form.name}
                             onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
                             invalid={Boolean(errors.name)}
                         />
                         {errors.name ? <ErrorMessage>{errors.name}</ErrorMessage> : null}
+                    </Field>
+                    <Field className="sm:col-span-2">
+                        <Label className="block text-sm/6 font-medium text-gray-900 dark:text-white">Class</Label>
+                        <SelectMenu options={classes} selected={selectedLevel} setSelected={setSelectedLevel} />
                     </Field>
                     <Field className="sm:col-span-2">
                         <Label className="text-sm/6 text-gray-900 font-medium">Capacity</Label>
