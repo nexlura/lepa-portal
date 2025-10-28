@@ -1,6 +1,6 @@
 'use client'
 
-import { Label, Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@headlessui/react'
+import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@headlessui/react'
 import { ChevronUpDownIcon } from '@heroicons/react/16/solid'
 import { CheckIcon } from '@heroicons/react/20/solid'
 import clsx from 'clsx'
@@ -16,7 +16,6 @@ interface SelectMenuProps {
 }
 
 export default function SelectMenu({ options, selected, setSelected }: SelectMenuProps) {
-
 
     return (
         <Listbox value={selected} onChange={setSelected} >

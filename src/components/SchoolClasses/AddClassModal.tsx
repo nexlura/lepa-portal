@@ -1,10 +1,14 @@
-import { useState } from 'react'
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useSession } from 'next-auth/react'
 
 import { Dialog, DialogActions, DialogBody, DialogDescription, DialogTitle } from '@/components/UIKit/Dialog'
 import { Field, Label, ErrorMessage } from '@/components/UIKit/Fieldset'
 import { Input } from '@/components/UIKit/Input'
 import { Button } from '../UIKit/Button'
 import SelectMenu from '../UIKit/SelectMenu'
+import { postModel } from '@/lib/connector'
 
 interface AddClassModalProps {
     open: boolean
@@ -23,6 +27,8 @@ const classes = [
 ]
 
 const AddClassModal = ({ open, onClose }: AddClassModalProps) => {
+    const { data: session } = useSession();
+
     const [form, setForm] = useState({
         name: '',
         capacity: '',
@@ -37,6 +43,63 @@ const AddClassModal = ({ open, onClose }: AddClassModalProps) => {
         setErrors(next)
         return Object.keys(next).length === 0
     }
+
+    const postData = {
+        user_id: session?.user?.userId,
+        tenant_id: session?.user?.tenantId,
+        grade: selectedLevel,
+        capacity: form.capacity,
+        name: form.name
+    }
+
+    const handleSubmit = async () => {
+        if (!validate) return
+
+        try {
+            const resp = await postModel(
+                '/classes',
+                postData,
+                {
+                    headers: {
+                        // 'X-Lepa-Host-Header': host,
+                    },
+                }
+            );
+
+            if (
+                resp &&
+                resp?.data &&
+                'access_token' in resp.data &&
+                typeof resp.data.access_token === 'string'
+            ) {
+                const user = resp.data.user;
+                const tenant = resp.data.tenant;
+                const role = user?.roles?.[0] || 'User';
+                const name =
+                    `${user?.first_name ?? ''} ${user?.last_name ?? ''}`.trim() ||
+                    undefined;
+
+                return {
+                    id: user?.email,
+                    email: user?.email,
+                    name,
+                    role,
+                    accessToken: resp.data.access_token,
+                    refreshToken: resp.data.refresh_token,
+                    schoolName: tenant?.school_name || '',
+                };
+            }
+        } catch (error) {
+            console.error('Authorize error:', error);
+        }
+
+    }
+
+    useEffect(() => {
+        console.log('session', session?.user);
+
+    }, [session])
+
 
     return (
         <Dialog size="md" open={open} onClose={onClose} className="relative z-20">
@@ -72,10 +135,7 @@ const AddClassModal = ({ open, onClose }: AddClassModalProps) => {
                 <Button plain onClick={() => onClose(false)}>Cancel</Button>
                 <Button
                     color="primary"
-                    onClick={() => {
-                        if (!validate()) return
-                        onSubmit(form)
-                    }}
+                    onClick={handleSubmit}
                 >
                     Save Class
                 </Button>
