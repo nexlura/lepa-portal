@@ -10,34 +10,41 @@ import { getRequestHost } from './utils/hostHeader';
 
 declare module 'next-auth' {
   interface User {
+    userId: string;
     role: string;
     accessToken?: string;
     refreshToken?: string;
-    schoolName?: string; // ✅ added
+    schoolName?: string;
+    tenantId?: string;
   }
 
   interface Session {
     user: {
+      userId: string;
       role: string;
       email?: string | null;
       name?: string | null;
       accessToken?: string;
       refreshToken?: string;
-      schoolName?: string; // ✅ added
+      schoolName?: string;
+      tenantId?: string;
     };
   }
 }
 
 declare module 'next-auth/jwt' {
   interface JWT {
+    userId?: string;
     role?: string;
     accessToken?: string;
     refreshToken?: string;
-    schoolName?: string; // ✅ added
+    schoolName?: string;
+    tenantId?: string;
   }
 }
 
 type BackendAuthUser = {
+  id: string;
   email?: string;
   first_name?: string;
   last_name?: string;
@@ -45,6 +52,7 @@ type BackendAuthUser = {
 };
 
 type BackendAuthTenant = {
+  id?: string;
   school_name?: string; // ✅ if your backend returns it
 };
 
@@ -91,7 +99,7 @@ export const { auth, signIn, signOut } = NextAuth({
         if (!parsed.success) return null;
 
         try {
-          const resp = await postModel<APIAuthResponse | string>(
+          const resp = await postModel<APIAuthResponse>(
             '/auth/login',
             {
               identifier: parsed.data.identifier,
@@ -106,8 +114,7 @@ export const { auth, signIn, signOut } = NextAuth({
 
           if (
             resp &&
-            typeof resp !== 'string' &&
-            resp.data &&
+            resp?.data &&
             'access_token' in resp.data &&
             typeof resp.data.access_token === 'string'
           ) {
@@ -119,13 +126,14 @@ export const { auth, signIn, signOut } = NextAuth({
               undefined;
 
             return {
-              id: user?.email,
+              userId: user?.id,
               email: user?.email,
               name,
               role,
               accessToken: resp.data.access_token,
               refreshToken: resp.data.refresh_token,
               schoolName: tenant?.school_name || '',
+              tenantId: tenant?.id || '',
             };
           }
         } catch (error) {
@@ -141,27 +149,33 @@ export const { auth, signIn, signOut } = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         const u = user as NextAuthUser & {
+          userId?: string;
           role?: string;
           accessToken?: string;
           refreshToken?: string;
           schoolName?: string;
+          tenantId?: string;
         };
+        if (u.userId) token.userId = u.userId;
         if (u.role) token.role = u.role;
         if (u.accessToken) token.accessToken = u.accessToken;
         if (u.refreshToken) token.refreshToken = u.refreshToken;
         if (u.schoolName) token.schoolName = u.schoolName;
+        if (u.tenantId) token.tenantId = u.tenantId;
       }
       return token as JWT;
     },
     async session({ session, token }) {
       if (token) {
         session.user.role = token.role ?? 'User';
+        session.user.userId = token.userId ?? '';
         session.user.accessToken = token.accessToken;
         session.user.refreshToken = token.refreshToken;
 
         //school name would be null for lepa admins
         if (token.schoolName) {
           session.user.schoolName = token.schoolName;
+          session.user.tenantId = token.tenantId;
         }
       }
       return session;

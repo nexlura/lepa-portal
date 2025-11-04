@@ -1,6 +1,6 @@
 import Link from 'next/link'
 
-import { StudentRecord } from "@/app/dashboard/admissions/page"
+import { StudentRecord } from "@/app/(portal)/admissions/page"
 import { ChevronRightIcon } from '@heroicons/react/24/outline'
 
 const Breadcrumbs = (props: { student: StudentRecord }) => {

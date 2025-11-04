@@ -1,4 +1,4 @@
-import { StudentRecord } from "@/app/dashboard/admissions/page";
+import { StudentRecord } from "@/app/(portal)/admissions/page";
 import { ChevronRightIcon } from "@heroicons/react/24/outline";
 
 const AdmissionsTable = ({ students, setViewTarget, setShowViewModal }: { students: StudentRecord[], setViewTarget: (s: StudentRecord) => void, setShowViewModal: (b: boolean) => void }) => {

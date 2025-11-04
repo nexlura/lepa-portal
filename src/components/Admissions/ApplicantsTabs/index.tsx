@@ -5,7 +5,7 @@ import PersonalDetailsTab from './PersonalDetailsTab'
 import DocumentTab, { Document } from './DocumentTab'
 import TabNavigation from './TabHeader'
 import GuardianTab from './Guardian'
-import { StudentRecord } from '@/app/dashboard/admissions/page'
+import { StudentRecord } from '@/app/(portal)/admissions/page'
 
 // Mock data - in real app this would come from API
 const mockStudent: StudentRecord = {

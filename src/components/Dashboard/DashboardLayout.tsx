@@ -12,7 +12,7 @@ interface DashboardLayoutProps {
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
     return (
         <div className="h-screen flex overflow-hidden bg-gray-50">
@@ -27,9 +27,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             {/* Main content area */}
             <div className="flex-1 flex flex-col overflow-hidden">
                 {/* Header */}
-                <Header
-                    onMenuClick={() => setIsMenuOpen(true)}
-                />
+                <Header onMenuClick={() => setIsMenuOpen(true)} />
 
                 {/* Main content */}
                 <main className="flex-1 overflow-y-auto">

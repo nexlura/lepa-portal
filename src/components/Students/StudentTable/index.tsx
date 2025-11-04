@@ -3,7 +3,7 @@
 import { ChevronRightIcon, ArrowsUpDownIcon } from '@heroicons/react/24/outline'
 import { useRouter } from 'next/navigation'
 
-import { StudentRecord } from '@/app/dashboard/admissions/page'
+import { StudentRecord } from '@/app/(portal)/admissions/page'
 
 interface StudentTableProps {
     pagedRows: StudentRecord[]
