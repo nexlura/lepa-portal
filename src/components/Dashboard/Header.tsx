@@ -26,6 +26,7 @@ export default function Header({ onMenuClick }: { onMenuClick?: () => void }) {
         if (session?.user) {
             setCurrentUser(session.user)
         }
+
     }, [currentUser, session])
 
 

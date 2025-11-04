@@ -6,6 +6,7 @@ import {
     PlusIcon,
     ArrowUpTrayIcon,
 } from '@heroicons/react/24/outline'
+import { useSession } from 'next-auth/react'
 
 import { Button } from '@/components/UIKit/Button'
 import AddClassModal from '@/components/SchoolClasses/AddClassModal'
@@ -16,7 +17,7 @@ interface ClassesViewProps {
 }
 
 const ClassesView = ({ classes }: ClassesViewProps) => {
-    // const [classes, setClasses] = useState<Klass[]>()
+    const { data: session } = useSession();
 
     const [isAddOpen, setIsAddOpen] = useState(false)
 
@@ -41,12 +42,16 @@ const ClassesView = ({ classes }: ClassesViewProps) => {
                     </Button>
                 </div>
             </div>
+
             {/* Classes table */}
             <ClassesTable classes={classes} />
+
             {/* Add Class Modal */}
             <AddClassModal
                 open={isAddOpen}
                 onClose={setIsAddOpen}
+                userId={session?.user?.userId}
+                tenantId={session?.user?.tenantId}
             />
         </div>
     )
