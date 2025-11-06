@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { Dialog, DialogActions, DialogBody, DialogDescription, DialogTitle } from '@/components/UIKit/Dialog'
 import { Field, Label, ErrorMessage } from '@/components/UIKit/Fieldset'
@@ -10,12 +10,11 @@ import SelectMenu from '../UIKit/SelectMenu'
 import { postModel } from '@/lib/connector'
 import axios from 'axios'
 import FormSubmitFeedback from '../FormAlert'
+import { useSession } from 'next-auth/react'
 
 interface AddClassModalProps {
     open: boolean
     onClose: (open: boolean) => void
-    userId?: string
-    tenantId?: string
 }
 
 
@@ -29,7 +28,9 @@ const classes = [
 
 ]
 
-const AddClassModal = ({ userId, tenantId, open, onClose }: AddClassModalProps) => {
+const AddClassModal = ({ open, onClose }: AddClassModalProps) => {
+    const { data: session, } = useSession();
+
 
     const [localError, setLocalError] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(false)
@@ -49,8 +50,8 @@ const AddClassModal = ({ userId, tenantId, open, onClose }: AddClassModalProps) 
     }
 
     const postData = {
-        user_id: userId,
-        tenant_id: tenantId,
+        user_id: session?.user?.userId,
+        tenant_id: session?.user?.tenantId,
         grade: selectedLevel.name,
         capacity: Number(form.capacity),
         name: form.name
@@ -102,6 +103,14 @@ const AddClassModal = ({ userId, tenantId, open, onClose }: AddClassModalProps) 
         }
 
     }
+
+    useEffect(() => {
+        console.log('session', session?.user);
+
+
+
+    }, [session?.user])
+
 
     return (
         <Dialog size="md" open={open} onClose={onClose} className="relative z-20">

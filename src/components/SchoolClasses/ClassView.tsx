@@ -1,25 +1,22 @@
 'use client'
 
 import { useState } from 'react'
-import {
-
-    PlusIcon,
-    ArrowUpTrayIcon,
-} from '@heroicons/react/24/outline'
-import { useSession } from 'next-auth/react'
-
+import { PlusIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outline'
 import { Button } from '@/components/UIKit/Button'
 import AddClassModal from '@/components/SchoolClasses/AddClassModal'
 import ClassesTable from '@/components/SchoolClasses/Table'
 import { SchoolClass } from '@/app/(portal)/classes/[pageNumber]/page'
+import { useSession } from 'next-auth/react'
+
 interface ClassesViewProps {
     classes: SchoolClass[]
 }
 
 const ClassesView = ({ classes }: ClassesViewProps) => {
-    const { data: session } = useSession();
-
+    const { status } = useSession()
     const [isAddOpen, setIsAddOpen] = useState(false)
+
+    const isLoadingUser = status === 'loading'
 
     return (
         <div className="space-y-6">
@@ -32,11 +29,16 @@ const ClassesView = ({ classes }: ClassesViewProps) => {
                     </p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <Button outline >
+                    <Button outline>
                         <ArrowUpTrayIcon data-slot="icon" />
                         Import CSV
                     </Button>
-                    <Button color="primary" onClick={() => setIsAddOpen(true)}>
+
+                    <Button
+                        color="primary"
+                        disabled={isLoadingUser}
+                        onClick={() => setIsAddOpen(true)}
+                    >
                         <PlusIcon data-slot="icon" />
                         Add Class
                     </Button>
@@ -46,13 +48,10 @@ const ClassesView = ({ classes }: ClassesViewProps) => {
             {/* Classes table */}
             <ClassesTable classes={classes} />
 
-            {/* Add Class Modal */}
-            <AddClassModal
-                open={isAddOpen}
-                onClose={setIsAddOpen}
-                userId={session?.user?.userId}
-                tenantId={session?.user?.tenantId}
-            />
+            {/* Only mount modal when user session is loaded */}
+            {status === 'authenticated' && (
+                <AddClassModal open={isAddOpen} onClose={setIsAddOpen} />
+            )}
         </div>
     )
 }
