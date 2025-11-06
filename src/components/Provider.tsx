@@ -10,24 +10,18 @@ const TokenRefresher = () => {
     const isRefreshingRef = useRef(false);
     const updateRef = useRef(update);
 
-    // Keep the latest update function
-    useEffect(() => {
-        updateRef.current = update;
-    }, [update]);
+    useEffect(() => { updateRef.current = update; }, [update]);
 
     useEffect(() => {
+        if (!session?.user) return; // only run for authenticated users
+
         const checkAndRefresh = async () => {
-            // Only run if user exists
-            if (!session?.user) return; // ✅ prevents loop
-
             if (isRefreshingRef.current) return;
             isRefreshingRef.current = true;
 
             try {
                 const check = await fetch("/api/auth/session");
                 if (check.status === 401) {
-                    // Only sign out if we are on a protected route
-                    // You can skip signOut on auth pages
                     if (!window.location.pathname.startsWith("/auth")) {
                         await signOut({ callbackUrl: "/" });
                     }
@@ -46,16 +40,14 @@ const TokenRefresher = () => {
                 }
             } catch (err) {
                 console.error("Error refreshing token:", err);
-                if (session?.user) {
-                    await signOut({ callbackUrl: "/" });
-                }
+                if (session?.user) await signOut({ callbackUrl: "/" });
             } finally {
                 isRefreshingRef.current = false;
             }
         };
 
         const timeoutId = setTimeout(checkAndRefresh, 5000);
-        const intervalId = setInterval(checkAndRefresh, 50 * 60 * 1000);
+        const intervalId = setInterval(checkAndRefresh, 10 * 60 * 1000); // 10 min
 
         return () => {
             clearTimeout(timeoutId);
@@ -63,9 +55,9 @@ const TokenRefresher = () => {
         };
     }, [session?.user]);
 
-
     return null;
 };
+
 
 const Provider = ({
     children,
@@ -77,7 +69,7 @@ const Provider = ({
     return (
         <SessionProvider session={session} key={session?.user.email}>
             <FeedbackProvider>
-                <TokenRefresher />
+                {session?.user && <TokenRefresher />}
                 {children}
             </FeedbackProvider>
         </SessionProvider>
