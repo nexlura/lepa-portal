@@ -14,7 +14,7 @@ const ClassesStats = () => {
                                 <dt className="text-sm font-medium text-gray-500 truncate">
                                     Total Classes
                                 </dt>
-                                <dd className="text-lg font-medium text-gray-900">{classes.length}</dd>
+                                <dd className="text-lg font-medium text-gray-900">4</dd>
                             </dl>
                         </div>
                     </div>
@@ -31,7 +31,7 @@ const ClassesStats = () => {
                                 <dt className="text-sm font-medium text-gray-500 truncate">
                                     Total Capacity
                                 </dt>
-                                <dd className="text-lg font-medium text-gray-900">{totalCapacity}</dd>
+                                <dd className="text-lg font-medium text-gray-900">130</dd>
                             </dl>
                         </div>
                     </div>

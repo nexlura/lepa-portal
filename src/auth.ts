@@ -146,7 +146,7 @@ export const { auth, signIn, signOut } = NextAuth({
 
   callbacks: {
     ...(authConfig.callbacks ?? {}),
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         const u = user as NextAuthUser & {
           userId?: string;
@@ -162,6 +162,13 @@ export const { auth, signIn, signOut } = NextAuth({
         if (u.refreshToken) token.refreshToken = u.refreshToken;
         if (u.schoolName) token.schoolName = u.schoolName;
         if (u.tenantId) token.tenantId = u.tenantId;
+      }
+
+      // Persist updates from client-side session.update()
+      if (trigger === 'update' && session) {
+        const s = session as import('next-auth').Session;
+        if (s.user?.accessToken) token.accessToken = s.user.accessToken;
+        if (s.user?.refreshToken) token.refreshToken = s.user.refreshToken;
       }
       return token as JWT;
     },

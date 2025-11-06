@@ -2,11 +2,19 @@ import { NextResponse, NextRequest } from 'next/server';
 import { auth } from './auth';
 
 export const config = {
-  matcher: ['/', '/dashboard/:path*'],
+  // Apply middleware to all routes except static files and Next.js internals
+  matcher: ['/((?!_next|static|favicon.ico).*)'],
 };
 
 export async function middleware(request: NextRequest) {
+  console.log('log middleware');
+
   const { pathname } = request.nextUrl;
+
+  // Skip middleware for /auth routes
+  if (pathname.startsWith('/auth')) {
+    return NextResponse.next();
+  }
 
   // Check session using your auth() function
   const session = await auth();
@@ -24,13 +32,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
-  // // Protect /dashboard routes
-  if (pathname.startsWith('/dashboard')) {
-    if (!session?.user) {
-      const redirectUrl = new URL('/auth/verify', request.url);
-      redirectUrl.searchParams.set('phone', '');
-      return NextResponse.redirect(redirectUrl);
-    }
+  // Protect all routes except /auth
+  if (!session?.user) {
+    const redirectUrl = new URL('/auth/verify', request.url);
+    redirectUrl.searchParams.set('phone', '');
+    return NextResponse.redirect(redirectUrl);
   }
 
   // Otherwise, continue
