@@ -7,12 +7,12 @@ import AddClassModal from '@/components/SchoolClasses/AddClassModal'
 import ClassesTable from '@/components/SchoolClasses/Table'
 import { SchoolClass } from '@/app/(portal)/classes/[pageNumber]/page'
 import { useSession } from 'next-auth/react'
-
 interface ClassesViewProps {
-    classes: SchoolClass[]
-}
+    classes: SchoolClass[];
+    session: Session | null;
+};
 
-const ClassesView = ({ classes }: ClassesViewProps) => {
+const ClassesView = ({ classes, session }: ClassesViewProps) => {
     const { status } = useSession()
     const [isAddOpen, setIsAddOpen] = useState(false)
 
@@ -50,10 +50,10 @@ const ClassesView = ({ classes }: ClassesViewProps) => {
 
             {/* Only mount modal when user session is loaded */}
             {status === 'authenticated' && (
-                <AddClassModal open={isAddOpen} onClose={setIsAddOpen} />
+                <AddClassModal open={isAddOpen} onClose={setIsAddOpen} session={session} />
             )}
         </div>
-    )
-}
+    );
+};
 
-export default ClassesView
+export default ClassesView;

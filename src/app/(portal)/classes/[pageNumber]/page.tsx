@@ -54,7 +54,7 @@ const ClassesPage = async ({ params }: PageProps) => {
     });
 
     return (
-        <ClassesView classes={transformedData} />
+        <ClassesView classes={transformedData} session={session} />
     );
 };
 

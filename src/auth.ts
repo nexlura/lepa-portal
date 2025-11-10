@@ -18,7 +18,7 @@ declare module 'next-auth' {
     tenantId?: string;
   }
 
-  interface Session {
+  export interface Session {
     user: {
       userId: string;
       role: string;
