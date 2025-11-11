@@ -26,13 +26,13 @@ const navigation: NavigationItem[] = [
         name: 'Admissions',
         icon: ClipboardDocumentListIcon,
         subItems: [
-            { name: 'Admission Form', href: '/dashboard/admissions/new' },
-            { name: 'Applicants', href: '/dashboard/admissions' },
+            { name: 'Admission Form', href: '/admissions/new' },
+            { name: 'Applicants', href: '/admissions' },
         ],
     },
-    { name: 'Classes', href: '/dashboard/classes', icon: BookOpenIcon },
-    { name: 'Teachers', href: '/dashboard/teachers', icon: AcademicCapIcon },
-    { name: 'Students', href: '/dashboard/students', icon: UserGroupIcon },
+    { name: 'Classes', href: '/classes/1', icon: BookOpenIcon },
+    { name: 'Teachers', href: '/teachers', icon: AcademicCapIcon },
+    { name: 'Students', href: '/students', icon: UserGroupIcon },
 ];
 
 const SidebarNavigation: React.FC<{ collapsed?: boolean }> = ({ collapsed }) => {

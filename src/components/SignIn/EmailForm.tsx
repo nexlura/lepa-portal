@@ -34,8 +34,7 @@ const EmailForm = ({
     const handleVerificationSuccess = () => {
         // Example: redirect based on whichever identifier you have
         redirectToPassword({ email: email });
-        // or
-        // redirectToPassword({ phone: '+23212345678' });
+
     };
 
     const updateEmail = (newEmail: string) => {

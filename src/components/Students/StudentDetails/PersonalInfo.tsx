@@ -1,4 +1,4 @@
-import { StudentRecord } from "@/app/dashboard/admissions/page"
+import { StudentRecord } from "@/app/(portal)/admissions/page"
 
 interface PersonalInfoProps {
     student: StudentRecord
