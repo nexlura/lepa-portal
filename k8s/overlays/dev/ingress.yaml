@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: lepa-portal-dev-ingress
+  annotations:
+    kubernetes.io/ingress.class: "gce"                       # GKE Ingress
+    networking.gke.io/managed-certificates: "lepa-portal-dev-cert" # Optional, if you want HTTPS
+spec:
+  rules:
+    - host: "*.dev.lepa.cc"  # ✅ wildcard for all subdomains
+      http:
+        paths:
+          - path: /*
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: portal-service
+                port:
+                  number: 3000

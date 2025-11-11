@@ -4,6 +4,9 @@ namespace: lepa-dev
 resources:
   - ../../base
   - env-configmap.yaml
+  - managed-certificate.yaml
+  - ingress.yaml
+
 namePrefix: nexlura-lepa-dev-
 patches:
   - path: patches/deployment.yaml

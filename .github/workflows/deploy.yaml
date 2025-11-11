@@ -9,6 +9,12 @@ on:
 
 env:
   REGISTRY: docker.io
+  GCP_PROJECT: dynamic-nomad-477512-n6
+  GKE_CLUSTER: autopilot-cluster-1
+  GKE_ZONE: us-central1
+  DEV_IMAGE: docker.io/nexlura/lepa-portal-dev
+  STAGING_IMAGE: docker.io/nexlura/lepa-portal-staging
+  PROD_IMAGE: docker.io/nexlura/lepa-portal
 
 jobs:
   build-and-push:
@@ -35,9 +41,9 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            ${{ env.REGISTRY }}/nexlura/lepa-portal-dev,enable=${{ github.ref == 'refs/heads/dev' }}
-            ${{ env.REGISTRY }}/nexlura/lepa-portal-staging,enable=${{ github.ref == 'refs/heads/staging' }}
-            ${{ env.REGISTRY }}/nexlura/lepa-portal,enable=${{ github.ref == 'refs/heads/main' }}
+            ${{ env.DEV_IMAGE }},enable=${{ github.ref == 'refs/heads/dev' }}
+            ${{ env.STAGING_IMAGE }},enable=${{ github.ref == 'refs/heads/staging' }}
+            ${{ env.PROD_IMAGE }},enable=${{ github.ref == 'refs/heads/main' }}
           tags: |
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/dev' }}
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/staging' }}
@@ -59,39 +65,65 @@ jobs:
 
   deploy:
     needs: build-and-push
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main'
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Set up gcloud CLI with auth plugin
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: ${{ env.GCP_PROJECT }}
+          export_default_credentials: true
+          install_components: gke-gcloud-auth-plugin
+
+      - name: Get GKE credentials
+        run: |
+          gcloud container clusters get-credentials ${{ env.GKE_CLUSTER }} \
+            --zone ${{ env.GKE_ZONE }} \
+            --project ${{ env.GCP_PROJECT }}
+
       - name: Deploy to Kubernetes
         run: |
-          case "${{ github.ref }}" in
+          echo "Determining environment and deployment info..."
+          case "${GITHUB_REF}" in
             refs/heads/dev)
-              echo "Deploying to dev environment"
-              kubectl apply -k k8s/overlays/dev
-              echo "Restarting deployment to ensure latest changes are picked up"
-              kubectl rollout restart deployment nexlura-lepa-dev-portal -n lepa-dev
-              # kubectl rollout status deployment nexlura-lepa-dev-portal -n lepa-dev --timeout=300s
+              NAMESPACE="lepa-dev"
+              DEPLOYMENT="nexlura-lepa-dev-portal"
+              IMAGE="${DEV_IMAGE}"
+              OVERLAY="k8s/overlays/dev"
               ;;
             refs/heads/staging)
-              echo "Deploying to staging environment"
-              kubectl apply -k k8s/overlays/staging
-              echo "Restarting deployment to ensure latest changes are picked up"
-              kubectl rollout restart deployment nexlura-lepa-staging-portal -n lepa-staging
-              # kubectl rollout status deployment nexlura-lepa-staging-portal -n lepa-staging --timeout=300s
+              NAMESPACE="lepa-staging"
+              DEPLOYMENT="nexlura-lepa-staging-portal"
+              IMAGE="${STAGING_IMAGE}"
+              OVERLAY="k8s/overlays/staging"
               ;;
             refs/heads/main)
-              echo "Deploying to production environment"
-              kubectl apply -k k8s/overlays/production
-              echo "Restarting deployment to ensure latest changes are picked up"
-              kubectl rollout restart deployment nexlura-lepa-prod-portal -n lepa-prod
-              # kubectl rollout status deployment nexlura-lepa-prod-portal -n lepa-prod --timeout=300s
+              NAMESPACE="lepa-prod"
+              DEPLOYMENT="nexlura-lepa-portal"
+              IMAGE="${PROD_IMAGE}"
+              OVERLAY="k8s/overlays/production"
               ;;
             *)
-              echo "Unknown branch: ${{ github.ref }}"
+              echo "Unknown branch: ${GITHUB_REF}"
               exit 1
               ;;
           esac
+
+          echo "Applying Kubernetes manifests for ${GITHUB_REF}..."
+          kubectl apply -k $OVERLAY --validate=false
+
+          echo "Updating deployment image to ${IMAGE}..."
+          kubectl set image deployment/$DEPLOYMENT -n $NAMESPACE \
+            $DEPLOYMENT=$IMAGE
+
+          echo "Waiting for rollout to complete..."
+          kubectl rollout status deployment/$DEPLOYMENT -n $NAMESPACE --timeout=300s
