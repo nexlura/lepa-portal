@@ -52,15 +52,15 @@ jobs:
       - run: |
           case "${GITHUB_REF}" in
             refs/heads/dev)
-              OVERLAY="k8s/overlays/dev-portal"
+              OVERLAY="k8s/overlays/dev"
               NAMESPACE="lepa-dev"
               ;;
             refs/heads/staging)
-              OVERLAY="k8s/overlays/staging-portal"
+              OVERLAY="k8s/overlays/staging"
               NAMESPACE="lepa-staging"
               ;;
             refs/heads/main)
-              OVERLAY="k8s/overlays/production-portal"
+              OVERLAY="k8s/overlays/production"
               NAMESPACE="lepa-prod"
               ;;
           esac
