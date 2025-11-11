@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: portal
 spec:
-  replicas: 2  # Staging: moderate replicas for testing
+  replicas: 1  # Staging: single replica for testing
   template:
     spec:
       containers:
