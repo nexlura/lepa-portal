@@ -6,7 +6,8 @@ metadata:
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-    # Ensure ACME HTTP-01 challenge requests bypass HTTPS redirect
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/server-snippet: |
       location ^~ /.well-known/acme-challenge/ {
         allow all;
@@ -18,11 +19,11 @@ spec:
         - "*.dev.lepa.cc"
       secretName: dev-apps-tls
   rules:
-    - host: "*.dev.lepa.cc"  # ✅ wildcard for all subdomains
+    - host: "*.dev.lepa.cc"
       http:
         paths:
-          - path: /*
-            pathType: ImplementationSpecific
+          - path: /
+            pathType: Prefix
             backend:
               service:
                 name: portal-service
