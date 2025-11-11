@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 
 import { Dialog, DialogActions, DialogBody, DialogDescription, DialogTitle } from '@/components/UIKit/Dialog'
 import { Field, Label, ErrorMessage } from '@/components/UIKit/Fieldset'
@@ -8,9 +8,9 @@ import { Input } from '@/components/UIKit/Input'
 import { Button } from '../UIKit/Button'
 import SelectMenu from '../UIKit/SelectMenu'
 import { postModel } from '@/lib/connector'
-import axios from 'axios'
 import FormSubmitFeedback from '../FormAlert'
 import { Session } from 'next-auth'
+import { FeedbackContext } from '@/context/feedback'
 
 interface AddClassModalProps {
     open: boolean;
@@ -31,6 +31,7 @@ const classes = [
 
 const AddClassModal = ({ open, onClose, session }: AddClassModalProps) => {
     const nameInputRef = useRef<HTMLInputElement>(null);
+    const { setFeedback } = useContext(FeedbackContext)
 
     const [localError, setLocalError] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(false)
@@ -62,9 +63,10 @@ const AddClassModal = ({ open, onClose, session }: AddClassModalProps) => {
     };
 
     const handleVerificationSuccess = () => {
-        // Example: redirect based on whichever identifier you have
-        // redirectToPassword({ email: email });
+        onClose(false)
+        setFeedback({ status: 'success', text: 'Class added successfully!' })
 
+        return
     };
 
     const validate = () => {
@@ -80,6 +82,7 @@ const AddClassModal = ({ open, onClose, session }: AddClassModalProps) => {
     const handleSubmit = async () => {
         if (!validate()) return; // ✅ fix: call the function
 
+        setLocalError(null)
         setIsLoading(true)
 
         try {
@@ -97,21 +100,15 @@ const AddClassModal = ({ open, onClose, session }: AddClassModalProps) => {
             if (resp.status >= 200 && resp.status < 300) {
                 handleVerificationSuccess()
             }
+
+            //request failed
+            if (resp.error.message) {
+                setLocalError(resp.error.message)
+            } else {
+                setLocalError('Something went wrong. Please try again')
+            }
         } catch (error) {
             console.error('Error during POST request:', error);
-
-            if (axios.isAxiosError(error)) {
-                console.error('axios error', error);
-
-                // If backend provided an error message
-                const errorMessage =
-                    error.response?.data?.message ||
-                    `Request failed with status ${error.response?.status || 'Unknown'}`;
-                setLocalError(errorMessage);
-            } else {
-                // Network or unexpected error
-                setLocalError('Unable to add class. Please try again.');
-            }
 
             throw error; // Re-throw for higher-level handling if needed
         } finally {
@@ -134,7 +131,9 @@ const AddClassModal = ({ open, onClose, session }: AddClassModalProps) => {
             <DialogBody>
                 <form className="mt-4 grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2">
                     {localError && (
-                        <FormSubmitFeedback msg={localError} />
+                        <div className='col-span-2'>
+                            <FormSubmitFeedback msg={localError} />
+                        </div>
                     )}
                     <Field className="sm:col-span-2">
                         <Label className="text-sm/6 text-gray-900 font-medium">Name</Label>
@@ -148,7 +147,7 @@ const AddClassModal = ({ open, onClose, session }: AddClassModalProps) => {
                         {errors.name ? <ErrorMessage>{errors.name}</ErrorMessage> : null}
                     </Field>
                     <Field className="sm:col-span-2">
-                        <Label className="block text-sm/6 font-medium text-gray-900 dark:text-white">Grade</Label>
+                        <Label className="block text-sm/6 font-medium text-gray-900 ">Grade</Label>
                         <SelectMenu options={classes} selected={selectedLevel} setSelected={setSelectedLevel} />
                     </Field>
                     <Field className="sm:col-span-2">

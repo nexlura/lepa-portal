@@ -2,8 +2,8 @@ import { XCircleIcon } from '@heroicons/react/20/solid'
 
 const FormSubmitFeedback = (props: { msg: string }) => {
     return (
-        <div className="rounded-md bg-red-50 p-4 mb-3">
-            <div className="flex">
+        <div className="rounded-md bg-red-50 p-4 mb-3 w-full">
+            <div className="flex w-full">
                 <div className="shrink-0">
                     <XCircleIcon aria-hidden="true" className="size-5 text-red-400" />
                 </div>

@@ -7,9 +7,10 @@ import AddClassModal from '@/components/SchoolClasses/AddClassModal'
 import ClassesTable from '@/components/SchoolClasses/Table'
 import { SchoolClass } from '@/app/(portal)/classes/[pageNumber]/page'
 import { useSession } from 'next-auth/react'
+import { Session } from 'next-auth'
 interface ClassesViewProps {
     classes: SchoolClass[];
-    session: Session | null;
+    session: Session
 };
 
 const ClassesView = ({ classes, session }: ClassesViewProps) => {
