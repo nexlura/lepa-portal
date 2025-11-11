@@ -15,7 +15,7 @@ import { FeedbackContext } from '@/context/feedback'
 interface AddClassModalProps {
     open: boolean;
     onClose: (open: boolean) => void;
-    session: Session;
+    session: Session | null;
 }
 
 

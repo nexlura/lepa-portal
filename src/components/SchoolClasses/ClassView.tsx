@@ -10,7 +10,7 @@ import { useSession } from 'next-auth/react'
 import { Session } from 'next-auth'
 interface ClassesViewProps {
     classes: SchoolClass[];
-    session: Session
+    session: Session | null
 };
 
 const ClassesView = ({ classes, session }: ClassesViewProps) => {
