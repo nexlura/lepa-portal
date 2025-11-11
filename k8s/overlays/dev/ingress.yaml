@@ -2,10 +2,22 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: lepa-portal-dev-ingress
+  namespace: dev
   annotations:
-    kubernetes.io/ingress.class: "gce"                       # GKE Ingress
-    networking.gke.io/managed-certificates: "lepa-portal-dev-cert" # Optional, if you want HTTPS
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    # Ensure ACME HTTP-01 challenge requests bypass HTTPS redirect
+    nginx.ingress.kubernetes.io/server-snippet: |
+      location ^~ /.well-known/acme-challenge/ {
+        allow all;
+      }
 spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - "*.dev.lepa.cc"
+      secretName: dev-apps-tls
   rules:
     - host: "*.dev.lepa.cc"  # ✅ wildcard for all subdomains
       http:
