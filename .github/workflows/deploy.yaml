@@ -53,15 +53,15 @@ jobs:
           case "${GITHUB_REF}" in
             refs/heads/dev)
               OVERLAY="k8s/overlays/dev"
-              NAMESPACE="lepa-dev"
+              NAMESPACE="lepa"
               ;;
             refs/heads/staging)
               OVERLAY="k8s/overlays/staging"
-              NAMESPACE="lepa-staging"
+              NAMESPACE="lepa"
               ;;
             refs/heads/main)
               OVERLAY="k8s/overlays/production"
-              NAMESPACE="lepa-prod"
+              NAMESPACE="lepa"
               ;;
           esac
 
