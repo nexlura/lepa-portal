@@ -18,7 +18,7 @@ declare module 'next-auth' {
     tenantId?: string;
   }
 
-  interface Session {
+  export interface Session {
     user: {
       userId: string;
       role: string;
@@ -68,7 +68,7 @@ type APIAuthResponse = {
   data: APIAuthResponseData;
 };
 
-export const { auth, signIn, signOut } = NextAuth({
+export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
   providers: [
     Credentials({

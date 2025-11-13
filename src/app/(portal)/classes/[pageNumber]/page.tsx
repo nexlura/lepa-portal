@@ -1,6 +1,7 @@
 import { auth } from '@/auth';
 import ClassesView from '@/components/SchoolClasses/ClassView';
 import { getModel } from '@/lib/connector';
+import { getRequestHostAction } from '@/app/actions/get-host';
 
 type BackendClassesData = {
     id: string,
@@ -30,11 +31,12 @@ export type PageProps = {
 const ClassesPage = async ({ params }: PageProps) => {
     const { pageNumber } = await params
     const session = await auth();
-    // Fetch the data using server-side connector with auth cookie
+    const host = await getRequestHostAction()
+    // Fetch the data using server-side connector with auth cookie(getRequestHostAction());
     const res = await getModel(`/classes?page=${pageNumber}`,
         {
             headers: {
-                'X-Lepa-Host-Header': 'schoolA.lepa.com',
+                'X-Lepa-Host-Header': host,
                 'Authorization': `Bearer ${session?.user.accessToken}`
             },
         }
@@ -52,7 +54,7 @@ const ClassesPage = async ({ params }: PageProps) => {
     });
 
     return (
-        <ClassesView classes={transformedData} />
+        <ClassesView classes={transformedData} session={session} />
     );
 };
 

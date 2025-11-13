@@ -6,34 +6,29 @@ import { SessionProvider, useSession, signOut } from "next-auth/react";
 import { useEffect, useRef } from "react";
 
 const TokenRefresher = () => {
-    const { update } = useSession();
+    const { data: session, update } = useSession();
     const isRefreshingRef = useRef(false);
     const updateRef = useRef(update);
 
-    // Keep the ref updated with the latest update function
-    useEffect(() => {
-        updateRef.current = update;
-    }, [update]);
+    useEffect(() => { updateRef.current = update; }, [update]);
 
     useEffect(() => {
+        if (!session?.user) return; // only run for authenticated users
+
         const checkAndRefresh = async () => {
-            // Prevent multiple simultaneous refresh calls
-            if (isRefreshingRef.current) {
-                return;
-            }
-
+            if (isRefreshingRef.current) return;
             isRefreshingRef.current = true;
 
             try {
-                // Check if session is still valid
-                const check = await fetch('/api/auth/session', { method: 'GET' });
+                const check = await fetch("/api/auth/session");
                 if (check.status === 401) {
-                    await signOut({ callbackUrl: '/' });
+                    if (!window.location.pathname.startsWith("/auth")) {
+                        await signOut({ callbackUrl: "/" });
+                    }
                     return;
                 }
 
-                // Attempt refresh
-                const res = await fetch('/api/auth/session', { method: 'POST' });
+                const res = await fetch("/api/auth/refresh", { method: "POST" });
                 if (res.ok) {
                     const data = await res.json();
                     if ((data?.accessToken || data?.refreshToken) && updateRef.current) {
@@ -43,29 +38,26 @@ const TokenRefresher = () => {
                         });
                     }
                 }
-            } catch {
-                // On any error, attempt to sign out to keep state consistent
-                await signOut({ callbackUrl: '/' });
+            } catch (err) {
+                console.error("Error refreshing token:", err);
+                if (session?.user) await signOut({ callbackUrl: "/" });
             } finally {
                 isRefreshingRef.current = false;
             }
         };
 
-        // Run once after a short delay on mount, then periodically
-        const timeoutId = setTimeout(() => {
-            checkAndRefresh();
-        }, 5000); // Wait 5 seconds after mount before first refresh
-
-        const intervalId = setInterval(checkAndRefresh, 10 * 60 * 1000); // every 10 minutes
+        const timeoutId = setTimeout(checkAndRefresh, 5000);
+        const intervalId = setInterval(checkAndRefresh, 10 * 60 * 1000); // 10 min
 
         return () => {
-            if (intervalId) clearInterval(intervalId);
-            if (timeoutId) clearTimeout(timeoutId);
+            clearTimeout(timeoutId);
+            clearInterval(intervalId);
         };
-    }, []); // Empty dependency array - only run once on mount
+    }, [session?.user]);
 
     return null;
 };
+
 
 const Provider = ({
     children,
@@ -77,7 +69,7 @@ const Provider = ({
     return (
         <SessionProvider session={session} key={session?.user.email}>
             <FeedbackProvider>
-                <TokenRefresher />
+                {session?.user && <TokenRefresher />}
                 {children}
             </FeedbackProvider>
         </SessionProvider>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 
 import { Dialog, DialogActions, DialogBody, DialogDescription, DialogTitle } from '@/components/UIKit/Dialog'
 import { Field, Label, ErrorMessage } from '@/components/UIKit/Fieldset'
@@ -8,14 +8,14 @@ import { Input } from '@/components/UIKit/Input'
 import { Button } from '../UIKit/Button'
 import SelectMenu from '../UIKit/SelectMenu'
 import { postModel } from '@/lib/connector'
-import axios from 'axios'
 import FormSubmitFeedback from '../FormAlert'
+import { Session } from 'next-auth'
+import { FeedbackContext } from '@/context/feedback'
 
 interface AddClassModalProps {
-    open: boolean
-    onClose: (open: boolean) => void
-    userId?: string
-    tenantId?: string
+    open: boolean;
+    onClose: (open: boolean) => void;
+    session: Session | null;
 }
 
 
@@ -29,7 +29,9 @@ const classes = [
 
 ]
 
-const AddClassModal = ({ userId, tenantId, open, onClose }: AddClassModalProps) => {
+const AddClassModal = ({ open, onClose, session }: AddClassModalProps) => {
+    const nameInputRef = useRef<HTMLInputElement>(null);
+    const { setFeedback } = useContext(FeedbackContext)
 
     const [localError, setLocalError] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(false)
@@ -39,31 +41,48 @@ const AddClassModal = ({ userId, tenantId, open, onClose }: AddClassModalProps) 
         teacher: '',
     })
     const [errors, setErrors] = useState<{ name?: string; grade?: string }>({})
-    const [selectedLevel, setSelectedLevel] = useState(classes[1])
-
-    const validate = () => {
-        const next: { name?: string; grade?: string } = {}
-        if (!form.name.trim()) next.name = 'Class name is required'
-        setErrors(next)
-        return Object.keys(next).length === 0
-    }
+    const [selectedLevel, setSelectedLevel] = useState(classes[0])
 
     const postData = {
-        user_id: userId,
-        tenant_id: tenantId,
+        user_id: session?.user?.userId,
+        tenant_id: session?.user?.tenantId,
         grade: selectedLevel.name,
         capacity: Number(form.capacity),
         name: form.name
     }
 
-    const handleVerificationSuccess = () => {
-        // Example: redirect based on whichever identifier you have
-        // redirectToPassword({ email: email });
+    const resetForm = () => {
+        setForm({
+            name: '',
+            capacity: '',
+            teacher: '',
+        });
+        setErrors({});
+        setLocalError(null);
+        setSelectedLevel(classes[0]); // reset dropdown to default
+    };
 
+    const handleVerificationSuccess = () => {
+        onClose(false)
+        setFeedback({ status: 'success', text: 'Class added successfully!' })
+
+        return
+    };
+
+    const validate = () => {
+        const next: { name?: string } = {};
+        if (!form.name.trim()) {
+            next.name = 'Class name is required';
+            nameInputRef.current?.focus();
+        }
+        setErrors(next);
+        return Object.keys(next).length === 0;
     };
 
     const handleSubmit = async () => {
-        if (!validate) return
+        if (!validate()) return; // ✅ fix: call the function
+
+        setLocalError(null)
         setIsLoading(true)
 
         try {
@@ -73,6 +92,7 @@ const AddClassModal = ({ userId, tenantId, open, onClose }: AddClassModalProps) 
                 {
                     headers: {
                         'X-Lepa-Host-Header': 'schoolA.lepa.com',
+                        'Authorization': `Bearer ${session?.user.accessToken}`
                     },
                 }
             );
@@ -80,21 +100,15 @@ const AddClassModal = ({ userId, tenantId, open, onClose }: AddClassModalProps) 
             if (resp.status >= 200 && resp.status < 300) {
                 handleVerificationSuccess()
             }
+
+            //request failed
+            if (resp.error.message) {
+                setLocalError(resp.error.message)
+            } else {
+                setLocalError('Something went wrong. Please try again')
+            }
         } catch (error) {
             console.error('Error during POST request:', error);
-
-            if (axios.isAxiosError(error)) {
-                console.error('axios error', error);
-
-                // If backend provided an error message
-                const errorMessage =
-                    error.response?.data?.message ||
-                    `Request failed with status ${error.response?.status || 'Unknown'}`;
-                setLocalError(errorMessage);
-            } else {
-                // Network or unexpected error
-                setLocalError('Unable to add class. Please try again.');
-            }
 
             throw error; // Re-throw for higher-level handling if needed
         } finally {
@@ -103,6 +117,13 @@ const AddClassModal = ({ userId, tenantId, open, onClose }: AddClassModalProps) 
 
     }
 
+
+    useEffect(() => {
+        if (!open) {
+            resetForm();
+        }
+    }, [open]);
+
     return (
         <Dialog size="md" open={open} onClose={onClose} className="relative z-20">
             <DialogTitle>Add a Class</DialogTitle>
@@ -110,11 +131,14 @@ const AddClassModal = ({ userId, tenantId, open, onClose }: AddClassModalProps) 
             <DialogBody>
                 <form className="mt-4 grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2">
                     {localError && (
-                        <FormSubmitFeedback msg={localError} />
+                        <div className='col-span-2'>
+                            <FormSubmitFeedback msg={localError} />
+                        </div>
                     )}
                     <Field className="sm:col-span-2">
-                        <Label className="text-sm/6 text-gray-900 font-medium">Class Name</Label>
+                        <Label className="text-sm/6 text-gray-900 font-medium">Name</Label>
                         <Input
+                            ref={nameInputRef}
                             placeholder="e.g., Class 1 Blue"
                             value={form.name}
                             onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
@@ -123,7 +147,7 @@ const AddClassModal = ({ userId, tenantId, open, onClose }: AddClassModalProps) 
                         {errors.name ? <ErrorMessage>{errors.name}</ErrorMessage> : null}
                     </Field>
                     <Field className="sm:col-span-2">
-                        <Label className="block text-sm/6 font-medium text-gray-900 dark:text-white">Class</Label>
+                        <Label className="block text-sm/6 font-medium text-gray-900 ">Grade</Label>
                         <SelectMenu options={classes} selected={selectedLevel} setSelected={setSelectedLevel} />
                     </Field>
                     <Field className="sm:col-span-2">
