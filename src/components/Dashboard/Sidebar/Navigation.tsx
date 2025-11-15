@@ -31,7 +31,7 @@ const navigation: NavigationItem[] = [
         ],
     },
     { name: 'Classes', href: '/classes/1', icon: BookOpenIcon },
-    { name: 'Teachers', href: '/teachers', icon: AcademicCapIcon },
+    { name: 'Teachers', href: '/teachers/1', icon: AcademicCapIcon },
     { name: 'Students', href: '/students', icon: UserGroupIcon },
 ];
 
