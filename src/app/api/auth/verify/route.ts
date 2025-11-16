@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import axios from 'axios';
 import { invokeExternalAPIRoute } from '@/lib/connector';
-import { getRequestHost } from '@/utils/hostHeader';
+import { getTenantDomain } from '@/utils/hostHeader';
 
 export async function POST(req: NextRequest) {
   const { identifier } = await req.json();
 
   const url = invokeExternalAPIRoute(`auth/verify-identifier/${identifier}`);
-  const hostHeader = getRequestHost(req.headers.get('host'));
+  const hostHeader = getTenantDomain(req.headers.get('host'));
   //make login request to API server
   try {
     const response = await axios.get(url, {

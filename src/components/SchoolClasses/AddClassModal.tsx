@@ -11,6 +11,7 @@ import { postModel } from '@/lib/connector'
 import FormSubmitFeedback from '../FormAlert'
 import { Session } from 'next-auth'
 import { FeedbackContext } from '@/context/feedback'
+import { getTenantDomain, useHostHeader } from '@/utils/hostHeader'
 
 interface AddClassModalProps {
     open: boolean;
@@ -32,6 +33,8 @@ const classes = [
 const AddClassModal = ({ open, onClose, session }: AddClassModalProps) => {
     const nameInputRef = useRef<HTMLInputElement>(null);
     const { setFeedback } = useContext(FeedbackContext)
+    const hostHeader = useHostHeader()
+    const effectiveHost = getTenantDomain(hostHeader)
 
     const [localError, setLocalError] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(false)
@@ -44,11 +47,9 @@ const AddClassModal = ({ open, onClose, session }: AddClassModalProps) => {
     const [selectedLevel, setSelectedLevel] = useState(classes[0])
 
     const postData = {
-        user_id: session?.user?.userId,
-        tenant_id: session?.user?.tenantId,
         grade: selectedLevel.name,
         capacity: Number(form.capacity),
-        name: form.name
+        name: form.name,
     }
 
     const resetForm = () => {
@@ -91,7 +92,7 @@ const AddClassModal = ({ open, onClose, session }: AddClassModalProps) => {
                 postData,
                 {
                     headers: {
-                        'X-Lepa-Host-Header': 'schoolA.lepa.com',
+                        'X-Lepa-Host-Header': effectiveHost,
                         'Authorization': `Bearer ${session?.user.accessToken}`
                     },
                 }
