@@ -22,15 +22,25 @@ export const useHostHeader = (): string => {
   return window.location.origin;
 };
 
-export const getRequestHost = (host?: string | null): string => {
-  // host could include port, e.g., "localhost:3000"
-  const hostname = host?.split(':')[0] || '';
+/**
+ * utility to get tenent domian from host header
+ */
+export const getTenantDomain = (host?: string | null): string => {
+  if (!host) return '';
+
+  // Remove protocol if included
+  let cleaned = host.replace(/^https?:\/\//, '');
+
+  // Remove trailing slash if present
+  cleaned = cleaned.replace(/\/$/, '');
+
+  // Extract hostname (remove port)
+  const hostname = cleaned.split(':')[0];
 
   // If running on localhost, use env fallback
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
-    return process.env.LEPA_HOST_HEADER || 'schoolA.lepa.com';
+    return process.env.NEXT_PUBLIC_LEPA_HOST_HEADER || '';
   }
 
-  // Otherwise, return the real host
   return hostname;
 };

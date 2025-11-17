@@ -60,7 +60,7 @@ export default function Header({ onMenuClick }: { onMenuClick?: () => void }) {
 
                         {/* User avatar and menu */}
                         <div className="flex items-center space-x-3">
-                            <div className="hidden md:flex flex-col items-end">
+                            <div className="hidden md:flex flex-col items-end capitalize">
                                 <span className="text-sm font-medium text-gray-900">
                                     {currentUser && currentUser.role}
                                 </span>

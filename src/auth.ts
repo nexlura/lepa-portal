@@ -6,7 +6,7 @@ import type { User as NextAuthUser } from '@auth/core/types';
 
 import { authConfig } from './auth.config';
 import { postModel } from './lib/connector';
-import { getRequestHost } from './utils/hostHeader';
+import { getTenantDomain } from './utils/hostHeader';
 
 declare module 'next-auth' {
   interface User {
@@ -73,7 +73,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     Credentials({
       async authorize(credentials, req): Promise<NextAuthUser | null> {
-        const host = getRequestHost(req.headers.get('host'));
+        const host = getTenantDomain(req.headers.get('host'));
 
         const parsedCredentials = z
           .object({ email: z.string().min(8), password: z.string().min(6) })
