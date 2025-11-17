@@ -1,6 +1,7 @@
 'use client'
 
 import { useContext, useEffect, useRef, useState } from 'react'
+import { Session } from 'next-auth'
 
 import { Dialog, DialogActions, DialogBody, DialogDescription, DialogTitle } from '@/components/UIKit/Dialog'
 import { Field, Label, ErrorMessage } from '@/components/UIKit/Fieldset'
@@ -9,9 +10,9 @@ import { Button } from '../UIKit/Button'
 import SelectMenu from '../UIKit/SelectMenu'
 import { postModel } from '@/lib/connector'
 import FormSubmitFeedback from '../FormAlert'
-import { Session } from 'next-auth'
 import { FeedbackContext } from '@/context/feedback'
 import { getTenantDomain, useHostHeader } from '@/utils/hostHeader'
+import revalidatePage from '@/app/actions/revalidate-path'
 
 interface AddClassModalProps {
     open: boolean;
@@ -64,6 +65,7 @@ const AddClassModal = ({ open, onClose, session }: AddClassModalProps) => {
     };
 
     const handleVerificationSuccess = () => {
+        revalidatePage('/classes/1');
         onClose(false)
         setFeedback({ status: 'success', text: 'Class added successfully!' })
 
