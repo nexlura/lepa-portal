@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 
 import { auth, signOut } from '@/auth'; // if you exported it from your NextAuth setup
 import { postModel } from '@/lib/connector';
-import { getRequestHost } from '@/utils/hostHeader';
+import { getTenantDomain } from '@/utils/hostHeader';
 
 export async function logoutAction(host: string) {
   const session = await auth();
@@ -12,7 +12,7 @@ export async function logoutAction(host: string) {
     redirect('/auth/verify?phone=');
   }
 
-  const effectiveHost = getRequestHost(host);
+  const effectiveHost = getTenantDomain(host);
 
   try {
     await postModel(

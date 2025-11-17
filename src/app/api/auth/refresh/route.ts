@@ -1,6 +1,6 @@
 import { auth } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { getRequestHost } from '@/utils/hostHeader';
+import { getTenantDomain } from '@/utils/hostHeader';
 import { postModel } from '@/lib/connector';
 
 type RefreshResponse = {
@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const host = getRequestHost(req.headers.get('host'));
+  const host = getTenantDomain(req.headers.get('host'));
   const refreshToken = session.user.refreshToken;
 
   if (!refreshToken) {
