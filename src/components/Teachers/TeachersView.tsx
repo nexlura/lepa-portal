@@ -53,11 +53,15 @@ const TeachersView = ({ teachers, session }: TeachersViewProps) => {
                     }
                     icon={<AcademicCapIcon className='size-12 text-gray-500' />}
                 />
+                {/* Modals */}
+                <AddTeacherModal
+                    open={showAddModal}
+                    onClose={setShowAddModal}
+                    onSubmit={handleAddTeacher}
+                />
             </>
         )
     }
-
-
 
     return (
         <div className="space-y-6">
