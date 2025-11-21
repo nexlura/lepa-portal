@@ -14,7 +14,7 @@ import { FeedbackContext } from '@/context/feedback'
 import { getTenantDomain, useHostHeader } from '@/utils/hostHeader'
 import revalidatePage from '@/app/actions/revalidate-path'
 
-interface AddClassModalProps {
+export interface AddModalProps {
     open: boolean;
     onClose: (open: boolean) => void;
     session: Session | null;
@@ -31,7 +31,7 @@ const classes = [
 
 ]
 
-const AddClassModal = ({ open, onClose, session }: AddClassModalProps) => {
+const AddClassModal = ({ open, onClose, session }: AddModalProps) => {
     const nameInputRef = useRef<HTMLInputElement>(null);
     const { setFeedback } = useContext(FeedbackContext)
     const hostHeader = useHostHeader()

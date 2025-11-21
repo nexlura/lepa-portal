@@ -1,70 +1,127 @@
-import { useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 
 import { Dialog, DialogActions, DialogBody, DialogDescription, DialogTitle } from '@/components/UIKit/Dialog'
 import { Field, Label, ErrorMessage } from '@/components/UIKit/Fieldset'
 import { Input } from '@/components/UIKit/Input'
 import { Button } from '../UIKit/Button'
+import { AddModalProps } from '../SchoolClasses/AddClassModal'
+import { getTenantDomain, useHostHeader } from '@/utils/hostHeader'
+import { FeedbackContext } from '@/context/feedback'
+import { postModel } from '@/lib/connector'
+import revalidatePage from '@/app/actions/revalidate-path'
+import FormSubmitFeedback from '../FormAlert'
 
-const AddTeacherModal = ({
-    open,
-    onClose,
-    onSubmit,
-}: {
-    open: boolean
-    onClose: (open: boolean) => void
-    onSubmit: (data: {
-        name: string
-        email: string
-        subject: string
-        phone?: string
-        department?: string
-    }) => void
-}) => {
+const AddTeacherModal = ({ open, onClose, session }: AddModalProps) => {
+    const nameInputRef = useRef<HTMLInputElement>(null);
+    const { setFeedback } = useContext(FeedbackContext)
+    const hostHeader = useHostHeader()
+    const effectiveHost = getTenantDomain(hostHeader)
+
+    const [localError, setLocalError] = useState<string | null>(null)
+    const [isLoading, setIsLoading] = useState(false)
     const [form, setForm] = useState({
-        name: '',
         email: '',
+        name: '',
         subject: '',
         phone: '',
-        department: '',
+        department: ''
     })
-    const [errors, setErrors] = useState<{ name?: string; email?: string; subject?: string }>({})
+    const [errors, setErrors] = useState<{
+        name?: string;
+        email?: string;
+        subject?: string
+    }>({})
+
+    const postData = {
+        name: form.name,
+    }
+
+    const resetForm = () => {
+        setForm({
+            name: '',
+            email: '',
+            subject: '',
+            phone: '',
+            department: ''
+        });
+        setErrors({});
+        setLocalError(null);
+    };
+
+    const handleVerificationSuccess = () => {
+        revalidatePage('/teachers/1');
+        onClose(false)
+        setFeedback({ status: 'success', text: 'Class added successfully!' })
+
+        return
+    };
 
     const validate = () => {
-        const next: { name?: string; email?: string; subject?: string } = {}
-        if (!form.name.trim()) next.name = 'Teacher name is required'
-        if (!form.email.trim()) next.email = 'Email is required'
-        if (!form.subject.trim()) next.subject = 'Subject is required'
+        const next: { name?: string } = {};
+        if (!form.name.trim()) {
+            next.name = 'Class name is required';
+            nameInputRef.current?.focus();
+        }
+        setErrors(next);
+        return Object.keys(next).length === 0;
+    };
 
-        // Basic email validation
-        if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-            next.email = 'Please enter a valid email address'
+    const handleSubmit = async () => {
+        if (!validate()) return; // ✅ fix: call the function
+
+        setLocalError(null)
+        setIsLoading(true)
+
+        try {
+            const resp = await postModel(
+                '/teachers',
+                postData,
+                {
+                    headers: {
+                        'X-Lepa-Host-Header': effectiveHost,
+                        'Authorization': `Bearer ${session?.user.accessToken}`
+                    },
+                }
+            );
+
+            if (resp.status >= 200 && resp.status < 300) {
+                handleVerificationSuccess()
+            }
+
+            //request failed
+            if (resp.error.message) {
+                setLocalError(resp.error.message)
+            } else {
+                setLocalError('Something went wrong. Please try again')
+            }
+        } catch (error) {
+            console.error('Error during POST request:', error);
+
+            throw error; // Re-throw for higher-level handling if needed
+        } finally {
+            setIsLoading(false);
         }
 
-        setErrors(next)
-        return Object.keys(next).length === 0
     }
 
-    const handleSubmit = () => {
-        if (!validate()) return
-        onSubmit(form)
-        // Reset form
-        setForm({ name: '', email: '', subject: '', phone: '', department: '' })
-        setErrors({})
-    }
 
-    const handleClose = () => {
-        onClose(false)
-        // Reset form
-        setForm({ name: '', email: '', subject: '', phone: '', department: '' })
-        setErrors({})
-    }
+    useEffect(() => {
+        if (!open) {
+            resetForm();
+        }
+    }, [open]);
 
     return (
-        <Dialog size="md" open={open} onClose={handleClose} className="relative z-20">
+        <Dialog size="md" open={open} onClose={onClose} className="relative z-20">
             <DialogTitle>Add a Teacher</DialogTitle>
             <DialogDescription>Provide details for the new teacher.</DialogDescription>
             <DialogBody>
-                <div className="mt-4 grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2">
+                <form className="mt-4 grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2">
+                    {localError && (
+                        <div className='col-span-2'>
+                            <FormSubmitFeedback msg={localError} />
+                        </div>
+                    )}
                     <Field className="sm:col-span-2">
                         <Label className="text-sm/6 text-gray-900 font-medium">Full Name</Label>
                         <Input
@@ -117,15 +174,15 @@ const AddTeacherModal = ({
                             onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
                         />
                     </Field>
-                </div>
+                </form>
             </DialogBody>
             <DialogActions>
-                <Button plain onClick={handleClose}>Cancel</Button>
+                <Button plain onClick={() => onClose(false)}>Cancel</Button>
                 <Button
                     color="primary"
                     onClick={handleSubmit}
                 >
-                    Add Teacher
+                    {isLoading ? 'Saving' : 'Save Teacher'}
                 </Button>
             </DialogActions>
         </Dialog>

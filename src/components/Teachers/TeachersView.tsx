@@ -27,14 +27,7 @@ interface TeachersViewProps {
 };
 
 const TeachersView = ({ teachers, session }: TeachersViewProps) => {
-
-
     const [showAddModal, setShowAddModal] = useState(false)
-
-    const handleAddTeacher = () => {
-
-
-    }
 
     if (teachers?.length < 1) {
         return (
@@ -57,7 +50,7 @@ const TeachersView = ({ teachers, session }: TeachersViewProps) => {
                 <AddTeacherModal
                     open={showAddModal}
                     onClose={setShowAddModal}
-                    onSubmit={handleAddTeacher}
+                    session={session}
                 />
             </>
         )
@@ -99,7 +92,7 @@ const TeachersView = ({ teachers, session }: TeachersViewProps) => {
             <AddTeacherModal
                 open={showAddModal}
                 onClose={setShowAddModal}
-                onSubmit={handleAddTeacher}
+                session={session}
             />
         </div>
     )
