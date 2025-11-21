@@ -11,7 +11,6 @@ import SelectMenu from '../UIKit/SelectMenu'
 import { postModel } from '@/lib/connector'
 import FormSubmitFeedback from '../FormAlert'
 import { FeedbackContext } from '@/context/feedback'
-import { getTenantDomain, useHostHeader } from '@/utils/hostHeader'
 import revalidatePage from '@/app/actions/revalidate-path'
 
 interface AddClassModalProps {
@@ -34,8 +33,6 @@ const classes = [
 const AddClassModal = ({ open, onClose, session }: AddClassModalProps) => {
     const nameInputRef = useRef<HTMLInputElement>(null);
     const { setFeedback } = useContext(FeedbackContext)
-    const hostHeader = useHostHeader()
-    const effectiveHost = getTenantDomain(hostHeader)
 
     const [localError, setLocalError] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(false)
@@ -83,7 +80,7 @@ const AddClassModal = ({ open, onClose, session }: AddClassModalProps) => {
     };
 
     const handleSubmit = async () => {
-        if (!validate()) return; // ✅ fix: call the function
+        if (!validate()) return;
 
         setLocalError(null)
         setIsLoading(true)
@@ -91,33 +88,35 @@ const AddClassModal = ({ open, onClose, session }: AddClassModalProps) => {
         try {
             const resp = await postModel(
                 '/classes',
-                postData,
-                {
-                    headers: {
-                        'X-Lepa-Host-Header': effectiveHost,
-                        'Authorization': `Bearer ${session?.user.accessToken}`
-                    },
-                }
+                postData
             );
 
-            if (resp.status >= 200 && resp.status < 300) {
-                handleVerificationSuccess()
+            // Check if response is an error
+            if (resp && typeof resp === 'object' && 'error' in resp && resp.error) {
+                setLocalError(resp.message || 'Something went wrong. Please try again')
+                return
             }
 
-            //request failed
-            if (resp.error.message) {
-                setLocalError(resp.error.message)
-            } else {
-                setLocalError('Something went wrong. Please try again')
+            // Check for 204 success response
+            if (resp && typeof resp === 'object' && 'status' in resp && resp.status === 204) {
+                handleVerificationSuccess()
+                return
             }
+
+            // If we have data or success response, treat as success
+            if (!resp || (resp && typeof resp === 'object' && !('error' in resp))) {
+                handleVerificationSuccess()
+                return
+            }
+
+            // Fallback error
+            setLocalError('Something went wrong. Please try again')
         } catch (error) {
             console.error('Error during POST request:', error);
-
-            throw error; // Re-throw for higher-level handling if needed
+            setLocalError('An unexpected error occurred. Please try again.')
         } finally {
             setIsLoading(false);
         }
-
     }
 
 
