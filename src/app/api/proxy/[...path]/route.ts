@@ -66,7 +66,7 @@ async function handleRequest(
     
     // Prepare request config
     const config: AxiosRequestConfig = {
-      method: method as any,
+      method: method as 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
       url,
       headers: {
         'Content-Type': 'application/json',

@@ -2,13 +2,26 @@ import { NextRequest, NextResponse } from 'next/server';
 import { postModel, isErrorResponse } from '@/lib/connector';
 import { getHostHeaderForRequest } from '@/utils/getHostHeader';
 
+type BackendUser = {
+  id: string;
+  email?: string;
+  first_name?: string;
+  last_name?: string;
+  roles?: string[];
+};
+
+type BackendTenant = {
+  id?: string;
+  school_name?: string;
+};
+
 type LoginResponse = {
   success: boolean;
   data: {
     access_token: string;
     refresh_token: string;
-    user: any;
-    tenant: any;
+    user: BackendUser;
+    tenant: BackendTenant;
   };
 };
 

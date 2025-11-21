@@ -1,7 +1,6 @@
 'use client'
 
 import { useContext, useEffect, useRef, useState } from 'react'
-import { Session } from 'next-auth'
 
 import { Dialog, DialogActions, DialogBody, DialogDescription, DialogTitle } from '@/components/UIKit/Dialog'
 import { Field, Label, ErrorMessage } from '@/components/UIKit/Fieldset'
@@ -16,7 +15,6 @@ import revalidatePage from '@/app/actions/revalidate-path'
 interface AddClassModalProps {
     open: boolean;
     onClose: (open: boolean) => void;
-    session: Session | null;
 }
 
 
@@ -30,7 +28,7 @@ const classes = [
 
 ]
 
-const AddClassModal = ({ open, onClose, session }: AddClassModalProps) => {
+const AddClassModal = ({ open, onClose }: AddClassModalProps) => {
     const nameInputRef = useRef<HTMLInputElement>(null);
     const { setFeedback } = useContext(FeedbackContext)
 

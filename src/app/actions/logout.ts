@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import { auth, signOut } from '@/auth';
 import { postModel } from '@/lib/connector';
 
-export async function logoutAction(host: string) {
+export async function logoutAction() {
   const session = await auth();
 
   if (!session?.user?.accessToken) {

@@ -13,7 +13,7 @@ interface ClassesViewProps {
     session: Session | null
 };
 
-const ClassesView = ({ classes, session }: ClassesViewProps) => {
+const ClassesView = ({ classes }: ClassesViewProps) => {
     const { status } = useSession()
     const [isAddOpen, setIsAddOpen] = useState(false)
 
@@ -51,7 +51,7 @@ const ClassesView = ({ classes, session }: ClassesViewProps) => {
 
             {/* Only mount modal when user session is loaded */}
             {status === 'authenticated' && (
-                <AddClassModal open={isAddOpen} onClose={setIsAddOpen} session={session} />
+                <AddClassModal open={isAddOpen} onClose={setIsAddOpen} />
             )}
         </div>
     );

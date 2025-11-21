@@ -8,8 +8,6 @@ import { authConfig } from './auth.config';
 import { postModel, isErrorResponse } from './lib/connector';
 import { getHostHeaderForRequest } from './utils/getHostHeader';
 
-const NODE_ENV = process.env.NODE_ENV || 'development';
-
 declare module 'next-auth' {
   interface User {
     userId: string;
