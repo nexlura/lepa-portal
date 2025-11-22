@@ -31,9 +31,11 @@ const ClassesPage = async ({ params }: PageProps) => {
     const { pageNumber } = await params
     const session = await auth();
     // Headers are automatically handled by the connector
-    const res = await getModel(`/classes?page=${pageNumber}`);
+    const res = await getModel(`/classes?page=${pageNumber}&limit=5`);
+    const totalPages = res.data?.total_pages
+    const classes = res.data?.classes
 
-    const transformedData: SchoolClass[] = res.data.classes.map((classK: BackendClassesData) => {
+    const transformedData: SchoolClass[] = classes.map((classK: BackendClassesData) => {
 
         return {
             id: classK.id,
@@ -45,7 +47,11 @@ const ClassesPage = async ({ params }: PageProps) => {
     });
 
     return (
-        <ClassesView classes={transformedData} session={session} />
+        <ClassesView
+            classes={transformedData}
+            session={session}
+            totalPages={totalPages}
+        />
     );
 };
 
