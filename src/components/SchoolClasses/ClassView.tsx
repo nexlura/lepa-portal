@@ -26,15 +26,15 @@ const ClassesView = ({ classes, totalPages }: ClassesViewProps) => {
         return (
             <>
                 <EmptyState
-                    heading='No Teachers Found'
-                    subHeading='Get started by adding teachers'
+                    heading='No Classes Found'
+                    subHeading='Get started by adding Classes'
                     button={
                         <Button
                             onClick={() => setIsAddOpen(true)}
                             color='primary'
                         >
                             <PlusIcon className="h-4 w-4 mr-2 text-white" color='white' />
-                            Add Teacher
+                            Add Class
                         </Button>
                     }
                     icon={<BookOpenIcon className='size-12 text-gray-500' />}
