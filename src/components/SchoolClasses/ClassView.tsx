@@ -9,11 +9,12 @@ import { SchoolClass } from '@/app/(portal)/classes/[pageNumber]/page'
 import { useSession } from 'next-auth/react'
 import { Session } from 'next-auth'
 interface ClassesViewProps {
-    classes: SchoolClass[];
+    classes: SchoolClass[]
     session: Session | null
+    totalPages: number
 };
 
-const ClassesView = ({ classes }: ClassesViewProps) => {
+const ClassesView = ({ classes, totalPages }: ClassesViewProps) => {
     const { status } = useSession()
     const [isAddOpen, setIsAddOpen] = useState(false)
 
@@ -47,7 +48,7 @@ const ClassesView = ({ classes }: ClassesViewProps) => {
             </div>
 
             {/* Classes table */}
-            <ClassesTable classes={classes} />
+            <ClassesTable classes={classes} totalPages={totalPages} />
 
             {/* Only mount modal when user session is loaded */}
             {status === 'authenticated' && (
