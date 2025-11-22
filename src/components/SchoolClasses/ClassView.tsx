@@ -1,13 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import { PlusIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outline'
+import { PlusIcon, ArrowUpTrayIcon, BookOpenIcon } from '@heroicons/react/24/outline'
 import { Button } from '@/components/UIKit/Button'
 import AddClassModal from '@/components/SchoolClasses/AddClassModal'
 import ClassesTable from '@/components/SchoolClasses/Table'
 import { SchoolClass } from '@/app/(portal)/classes/[pageNumber]/page'
 import { useSession } from 'next-auth/react'
 import { Session } from 'next-auth'
+import EmptyState from '../EmptyState'
 interface ClassesViewProps {
     classes: SchoolClass[]
     session: Session | null
@@ -19,6 +20,33 @@ const ClassesView = ({ classes, totalPages }: ClassesViewProps) => {
     const [isAddOpen, setIsAddOpen] = useState(false)
 
     const isLoadingUser = status === 'loading'
+
+    //show empty-state component when we have zero items
+    if (classes.length < 1) {
+        return (
+            <>
+                <EmptyState
+                    heading='No Teachers Found'
+                    subHeading='Get started by adding teachers'
+                    button={
+                        <Button
+                            onClick={() => setIsAddOpen(true)}
+                            color='primary'
+                        >
+                            <PlusIcon className="h-4 w-4 mr-2 text-white" color='white' />
+                            Add Teacher
+                        </Button>
+                    }
+                    icon={<BookOpenIcon className='size-12 text-gray-500' />}
+                />
+                {/* Modals */}
+                <AddClassModal
+                    open={isAddOpen}
+                    onClose={setIsAddOpen}
+                />
+            </>
+        )
+    }
 
     return (
         <div className="space-y-6">
