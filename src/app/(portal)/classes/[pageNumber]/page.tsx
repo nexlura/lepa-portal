@@ -30,8 +30,8 @@ export type PageProps = {
 const ClassesPage = async ({ params }: PageProps) => {
     const { pageNumber } = await params
     const session = await auth();
-    // Headers are automatically handled by the connector
-    const res = await getModel(`/classes?page=${pageNumber}&limit=5`);
+
+    const res = await getModel(`/classes?page=${pageNumber}&limit=10`);
     const totalPages = res.data?.total_pages
     const classes = res.data?.classes
 
