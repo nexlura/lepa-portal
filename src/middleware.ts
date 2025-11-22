@@ -11,10 +11,8 @@ export const config = {
   ],
 };
 
-export async function middleware(request: NextRequest) {
-  console.log('log middleware');
-
-  const { pathname } = request.nextUrl;
+export async function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
 
   // Skip middleware for /auth routes
   if (pathname.startsWith('/auth')) {
@@ -23,20 +21,29 @@ export async function middleware(request: NextRequest) {
 
   const session = await auth();
 
+  // redirect to dashboard or login page if user try to access the "/" route
   if (pathname === '/') {
     if (session?.user) {
-      return NextResponse.redirect(new URL('/dashboard', request.url));
+      return NextResponse.redirect(new URL('/dashboard', req.url));
     }
 
-    const redirectUrl = new URL('/auth/verify', request.url);
+    const redirectUrl = new URL('/auth/verify', req.url);
     redirectUrl.searchParams.set('phone', '');
     return NextResponse.redirect(redirectUrl);
   }
 
+  // redirect unauthenticated users to login page
   if (!session?.user) {
-    const redirectUrl = new URL('/auth/verify', request.url);
+    const redirectUrl = new URL('/auth/verify', req.url);
     redirectUrl.searchParams.set('phone', '');
     return NextResponse.redirect(redirectUrl);
+  }
+
+  //redirect to e.g /teams/agents/1 if user wants to access e.g /teams/agents/
+  if (pathname === '/classes') {
+    const url = req.nextUrl.clone();
+    url.pathname = `${pathname}/1`;
+    return NextResponse.redirect(url);
   }
 
   return NextResponse.next();

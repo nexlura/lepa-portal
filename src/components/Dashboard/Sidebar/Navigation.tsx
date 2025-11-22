@@ -30,7 +30,7 @@ const navigation: NavigationItem[] = [
             { name: 'Applicants', href: '/admissions' },
         ],
     },
-    { name: 'Classes', href: '/classes/1', icon: BookOpenIcon },
+    { name: 'Classes', href: '/classes', icon: BookOpenIcon },
     { name: 'Teachers', href: '/teachers', icon: AcademicCapIcon },
     { name: 'Students', href: '/students', icon: UserGroupIcon },
 ];
@@ -60,7 +60,7 @@ const SidebarNavigation: React.FC<{ collapsed?: boolean }> = ({ collapsed }) => 
 
     const isItemActive = (item: NavigationItem) => {
         if (item.href) {
-            return pathname === item.href;
+            return pathname.startsWith(item.href);
         }
         if (item.subItems) {
             return item.subItems.some(subItem => pathname.startsWith(subItem.href));
