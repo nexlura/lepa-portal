@@ -145,7 +145,7 @@ const AddClassModal = ({ open, onClose }: AddClassModalProps) => {
                         {errors.name ? <ErrorMessage>{errors.name}</ErrorMessage> : null}
                     </Field>
                     <Field className="sm:col-span-2">
-                        <Label className="block text-sm/6 font-medium text-gray-900 ">Grade</Label>
+                        <Label className="block text-sm/6 font-medium text-gray-900 ">Class</Label>
                         <SelectMenu options={classes} selected={selectedLevel} setSelected={setSelectedLevel} />
                     </Field>
                     <Field className="sm:col-span-2">
