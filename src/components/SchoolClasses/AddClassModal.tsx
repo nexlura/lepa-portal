@@ -63,8 +63,6 @@ const AddClassModal = ({ open, onClose }: AddClassModalProps) => {
         revalidatePage('/classes/1');
         onClose(false)
         setFeedback({ status: 'success', text: 'Class added successfully!' })
-
-        return
     };
 
     const validate = () => {
