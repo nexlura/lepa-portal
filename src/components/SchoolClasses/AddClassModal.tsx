@@ -1,7 +1,6 @@
 'use client'
 
 import { useContext, useEffect, useRef, useState } from 'react'
-import { Session } from 'next-auth'
 
 import { Dialog, DialogActions, DialogBody, DialogDescription, DialogTitle } from '@/components/UIKit/Dialog'
 import { Field, Label, ErrorMessage } from '@/components/UIKit/Fieldset'
@@ -11,13 +10,11 @@ import SelectMenu from '../UIKit/SelectMenu'
 import { postModel } from '@/lib/connector'
 import FormSubmitFeedback from '../FormAlert'
 import { FeedbackContext } from '@/context/feedback'
-import { getTenantDomain, useHostHeader } from '@/utils/hostHeader'
 import revalidatePage from '@/app/actions/revalidate-path'
 
 export interface AddModalProps {
     open: boolean;
     onClose: (open: boolean) => void;
-    session: Session | null;
 }
 
 
@@ -31,11 +28,9 @@ const classes = [
 
 ]
 
-const AddClassModal = ({ open, onClose, session }: AddModalProps) => {
+const AddClassModal = ({ open, onClose }: AddModalProps) => {
     const nameInputRef = useRef<HTMLInputElement>(null);
     const { setFeedback } = useContext(FeedbackContext)
-    const hostHeader = useHostHeader()
-    const effectiveHost = getTenantDomain(hostHeader)
 
     const [localError, setLocalError] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(false)
@@ -68,8 +63,6 @@ const AddClassModal = ({ open, onClose, session }: AddModalProps) => {
         revalidatePage('/classes/1');
         onClose(false)
         setFeedback({ status: 'success', text: 'Class added successfully!' })
-
-        return
     };
 
     const validate = () => {
@@ -83,7 +76,7 @@ const AddClassModal = ({ open, onClose, session }: AddModalProps) => {
     };
 
     const handleSubmit = async () => {
-        if (!validate()) return; // ✅ fix: call the function
+        if (!validate()) return;
 
         setLocalError(null)
         setIsLoading(true)
@@ -91,33 +84,35 @@ const AddClassModal = ({ open, onClose, session }: AddModalProps) => {
         try {
             const resp = await postModel(
                 '/classes',
-                postData,
-                {
-                    headers: {
-                        'X-Lepa-Host-Header': effectiveHost,
-                        'Authorization': `Bearer ${session?.user.accessToken}`
-                    },
-                }
+                postData
             );
 
-            if (resp.status >= 200 && resp.status < 300) {
-                handleVerificationSuccess()
+            // Check if response is an error
+            if (resp && typeof resp === 'object' && 'error' in resp && resp.error) {
+                setLocalError(resp.message || 'Something went wrong. Please try again')
+                return
             }
 
-            //request failed
-            if (resp.error.message) {
-                setLocalError(resp.error.message)
-            } else {
-                setLocalError('Something went wrong. Please try again')
+            // Check for 204 success response
+            if (resp && typeof resp === 'object' && 'status' in resp && resp.status === 204) {
+                handleVerificationSuccess()
+                return
             }
+
+            // If we have data or success response, treat as success
+            if (!resp || (resp && typeof resp === 'object' && !('error' in resp))) {
+                handleVerificationSuccess()
+                return
+            }
+
+            // Fallback error
+            setLocalError('Something went wrong. Please try again')
         } catch (error) {
             console.error('Error during POST request:', error);
-
-            throw error; // Re-throw for higher-level handling if needed
+            setLocalError('An unexpected error occurred. Please try again.')
         } finally {
             setIsLoading(false);
         }
-
     }
 
 
@@ -150,7 +145,7 @@ const AddClassModal = ({ open, onClose, session }: AddModalProps) => {
                         {errors.name ? <ErrorMessage>{errors.name}</ErrorMessage> : null}
                     </Field>
                     <Field className="sm:col-span-2">
-                        <Label className="block text-sm/6 font-medium text-gray-900 ">Grade</Label>
+                        <Label className="block text-sm/6 font-medium text-gray-900 ">Class</Label>
                         <SelectMenu options={classes} selected={selectedLevel} setSelected={setSelectedLevel} />
                     </Field>
                     <Field className="sm:col-span-2">

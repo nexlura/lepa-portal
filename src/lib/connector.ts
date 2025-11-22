@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios, { AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 import { NextRequest } from 'next/server';
+import { auth } from '@/auth';
+import { getTenantDomain } from '@/utils/hostHeader';
 
 // Environment variables with proper fallbacks
 const API_HOST = process.env.NEXT_PUBLIC_API_URL;
@@ -121,7 +123,13 @@ axiosInstance.interceptors.response.use(
   }
 );
 
+// Check if we're running on the client side
+const isClientSide = (): boolean => {
+  return typeof window !== 'undefined';
+};
+
 // Base request handler with improved error handling
+// Automatically routes client-side requests through Next.js proxy to avoid CORS
 const sendRequest = async <T = any>(
   method: RequestMethod,
   url: string,
@@ -129,16 +137,73 @@ const sendRequest = async <T = any>(
   config: AxiosRequestConfig = {}
 ): Promise<T | null> => {
   try {
+    // Create a copy of body before trimming to avoid mutating the original
+    let processedBody = body;
     if (body) {
-      trimStringValues(body);
+      processedBody = JSON.parse(JSON.stringify(body)); // Deep clone
+      trimStringValues(processedBody);
     }
 
+    // If client-side, route through Next.js proxy to avoid CORS
+    if (isClientSide()) {
+      return await sendRequestViaProxy<T>(method, url, processedBody, config);
+    }
+
+    // Server-side: use direct external API call
+    // Automatically get session and host header
+    const session = await auth().catch(() => null);
+    
+    // Dynamically import headers() only on server-side to avoid client-side import errors
+    let hostHeader = '';
+    try {
+      const { headers: getHeaders } = await import('next/headers');
+      const headerList = await getHeaders().catch(() => null);
+      const host = headerList?.get('host') || headerList?.get('x-forwarded-host') || '';
+      hostHeader = getTenantDomain(host);
+    } catch {
+      // If headers() is not available (e.g., in API routes or client context), use env fallback
+      hostHeader = process.env.NEXT_PUBLIC_LEPA_HOST_HEADER || '';
+    }
+    
+    // Ensure we always have a host header - use env as final fallback
+    if (!hostHeader) {
+      hostHeader = process.env.NEXT_PUBLIC_LEPA_HOST_HEADER || '';
+    }
+
+    // Get X-Lepa-Host-Header - prioritize config, then auto-extracted, then env
+    const lepaHostHeader = config.headers?.['X-Lepa-Host-Header'] || hostHeader || process.env.NEXT_PUBLIC_LEPA_HOST_HEADER || '';
+    
+    // Merge headers: defaults + auto headers + config headers (config takes precedence)
+    // IMPORTANT: Always include X-Lepa-Host-Header - it's required for all requests
+    const mergedHeaders: Record<string, string> = {
+      // Convert axios default headers to strings
+      ...Object.fromEntries(
+        Object.entries(axiosInstance.defaults.headers.common || {}).map(([k, v]) => [k, String(v ?? '')])
+      ),
+      // Always add X-Lepa-Host-Header (REQUIRED - backend will reject without it)
+      'X-Lepa-Host-Header': lepaHostHeader,
+      // Only add Authorization if session exists and not already provided in config
+      ...(session?.user?.accessToken && !config.headers?.['Authorization'] ? { 'Authorization': `Bearer ${session.user.accessToken}` } : {}),
+      // Config headers override everything (except X-Lepa-Host-Header which we ensure above)
+      ...Object.fromEntries(
+        Object.entries(config.headers || {}).map(([k, v]) => [k, String(v ?? '')])
+      ),
+    };
+
     const requestConfig: AxiosRequestConfig = {
+      ...config,
       method,
       url: url.trim(),
-      data: body ?? undefined,
-      ...config,
+      data: processedBody ?? undefined,
+      headers: mergedHeaders,
     };
+    
+    // Ensure Content-Type is set for POST/PUT/PATCH requests with body
+    if (['POST', 'PUT', 'PATCH'].includes(method) && processedBody && requestConfig.headers) {
+      if (!requestConfig.headers['Content-Type']) {
+        requestConfig.headers['Content-Type'] = 'application/json';
+      }
+    }
 
     const response: AxiosResponse<T> = await axiosInstance.request<T>(
       requestConfig
@@ -146,6 +211,10 @@ const sendRequest = async <T = any>(
 
     // Handle successful responses
     if ([200, 201, 202, 204].includes(response.status)) {
+      // For 204 No Content, return success indicator
+      if (response.status === 204) {
+        return { status: 204, success: true } as any;
+      }
       return response.data;
     } else {
       console.error(
@@ -181,6 +250,94 @@ const sendRequest = async <T = any>(
       error: true,
       status: 500,
       message: 'An unexpected error occurred. Please try again later.',
+    } as any;
+  }
+};
+
+// Client-side request handler that routes through Next.js proxy
+const sendRequestViaProxy = async <T = any>(
+  method: RequestMethod,
+  url: string,
+  body: Record<string, any> | null = null,
+  config: AxiosRequestConfig = {}
+): Promise<T | null> => {
+  try {
+    // Parse URL to separate path and query params
+    // Handle both absolute URLs and relative paths
+    let path: string;
+    const searchParams = new URLSearchParams();
+    
+    if (url.includes('?')) {
+      // URL has query params
+      const [pathPart, queryPart] = url.split('?');
+      path = pathPart.startsWith('/') ? pathPart.slice(1) : pathPart;
+      const urlParams = new URLSearchParams(queryPart);
+      urlParams.forEach((value, key) => {
+        searchParams.append(key, value);
+      });
+    } else {
+      // No query params in URL
+      path = url.startsWith('/') ? url.slice(1) : url;
+    }
+    
+    // Add query params from config (config params take precedence)
+    if (config.params) {
+      Object.entries(config.params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          searchParams.set(key, String(value));
+        }
+      });
+    }
+    
+    // Build proxy URL
+    const proxyUrl = invokeInternalAPIRoute(`proxy/${path}`);
+    const finalUrl = searchParams.toString() 
+      ? `${proxyUrl}?${searchParams.toString()}`
+      : proxyUrl;
+    
+    // Make request to proxy
+    const response = await fetch(finalUrl, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(config.headers as Record<string, string> || {}),
+      },
+      body: body ? JSON.stringify(body) : undefined,
+      credentials: 'include', // Include cookies for session
+    });
+
+    // Handle 204 No Content
+    if (response.status === 204) {
+      return { status: 204, success: true } as any;
+    }
+
+    // Handle successful responses
+    if (response.status >= 200 && response.status < 300) {
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        const data = await response.json();
+        return data;
+      }
+      return null;
+    }
+
+    // Handle error responses
+    const errorData = await response.json().catch(() => ({
+      message: 'Request failed',
+    }));
+
+    return {
+      error: true,
+      status: response.status,
+      message: errorData.message || 'An error occurred while processing the request',
+    } as any;
+  } catch (error: any) {
+    // Handle network errors
+    console.error('Proxy request error:', error);
+    return {
+      error: true,
+      status: undefined,
+      message: error.message || 'Network error occurred',
     } as any;
   }
 };

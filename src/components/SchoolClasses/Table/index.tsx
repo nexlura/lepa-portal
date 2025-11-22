@@ -4,11 +4,15 @@ import { useMemo, useState } from "react"
 
 import { SchoolClass } from "@/app/(portal)/classes/[pageNumber]/page"
 import SchoolClassesTableControls from "./Controls"
+import TableFoot from "@/components/TableFoot"
+import ClassesTableHead from "./TableHead"
+import ClassesTableBody from "./TableBody"
 interface ClassesTableProps {
     classes: SchoolClass[]
+    totalPages: number
 }
 
-const SchoolClassesTable = ({ classes }: ClassesTableProps) => {
+const SchoolClassesTable = ({ classes, totalPages }: ClassesTableProps) => {
     // UI state: search, filters, sorting, pagination
     const [search, setSearch] = useState('')
     const [gradeFilter, setGradeFilter] = useState<string>('All')
@@ -21,7 +25,7 @@ const SchoolClassesTable = ({ classes }: ClassesTableProps) => {
 
     return (
         <div className="bg-white shadow rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
+            <div className="px-4 py-5 sm:px-6 sm:py-6 sm:pb-0">
                 <SchoolClassesTableControls
                     search={search}
                     setSearch={setSearch}
@@ -31,33 +35,11 @@ const SchoolClassesTable = ({ classes }: ClassesTableProps) => {
                 />
                 <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Capacity</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Current Size</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Teacher</th>
-
-                            </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                            {classes.map((klass) => (
-                                <tr key={klass.id} className="hover:bg-gray-50">
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm font-medium text-gray-900 capitalize">{klass.className}</div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm text-gray-900">{klass.capacity ?? '-'}</div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm text-gray-900">{klass.currentSize || '-'}</div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm text-gray-900">{klass.teacher || '-'}</div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
+                        <ClassesTableHead />
+                        <ClassesTableBody classes={classes} />
+                        {totalPages > 1 && (
+                            <TableFoot totalPages={totalPages} />
+                        )}
                     </table>
                 </div>
             </div>

@@ -5,8 +5,8 @@ import type { JWT } from 'next-auth/jwt';
 import type { User as NextAuthUser } from '@auth/core/types';
 
 import { authConfig } from './auth.config';
-import { postModel } from './lib/connector';
-import { getTenantDomain } from './utils/hostHeader';
+import { postModel, isErrorResponse } from './lib/connector';
+import { getHostHeaderForRequest } from './utils/getHostHeader';
 
 declare module 'next-auth' {
   interface User {
@@ -73,7 +73,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     Credentials({
       async authorize(credentials, req): Promise<NextAuthUser | null> {
-        const host = getTenantDomain(req.headers.get('host'));
+        // Get host header using helper function
+        const host = await getHostHeaderForRequest(req?.headers);
+        
+        if (!host) {
+          console.error('No host header available for login request');
+          return null;
+        }
 
         const parsedCredentials = z
           .object({ email: z.string().min(8), password: z.string().min(6) })
@@ -111,6 +117,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
               },
             }
           );
+
+          // Check if response is an error
+          if (isErrorResponse(resp)) {
+            console.error('Login error:', resp.message);
+            return null;
+          }
 
           if (
             resp &&

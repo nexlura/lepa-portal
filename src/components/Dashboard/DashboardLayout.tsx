@@ -2,14 +2,17 @@
 
 import Sidebar from './Sidebar';
 import Header from './Header';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import MobileMenu from './MobileMenu';
+import { FeedbackContext } from '@/context/feedback';
+import Alert from '../UIKit/Alert';
 
 interface DashboardLayoutProps {
     children: React.ReactNode;
 }
 
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
+    const { feedback, setFeedback } = useContext(FeedbackContext)
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -36,6 +39,14 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                             {children}
                         </div>
                     </div>
+                    {feedback && (
+                        <Alert
+                            status={feedback?.status}
+                            text={feedback?.text}
+                            autoHideDuration={6000}
+                            onClose={() => setFeedback(null)}
+                        />
+                    )}
                 </main>
             </div>
         </div>

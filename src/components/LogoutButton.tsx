@@ -5,17 +5,15 @@ import { useTransition } from 'react';
 import { logoutAction } from '@/app/actions/logout';
 import { ArrowRightEndOnRectangleIcon } from '@heroicons/react/24/outline';
 import { Tooltip } from '@/components/UIKit/Tooltip';
-import { useHostHeader } from '@/utils/hostHeader';
 
 const LogoutButton = (props: { collapsed?: boolean | undefined }) => {
     const [isPending, startTransition] = useTransition();
-    const hostHeader = useHostHeader()
 
     const { collapsed } = props
 
     const handleLogout = () => {
         startTransition(async () => {
-            await logoutAction(hostHeader);
+            await logoutAction();
         });
     };
 

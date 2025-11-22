@@ -1,7 +1,7 @@
 import { auth } from '@/auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { getTenantDomain } from '@/utils/hostHeader';
-import { postModel } from '@/lib/connector';
+import { postModel, isErrorResponse } from '@/lib/connector';
+import { getHostHeaderForRequest } from '@/utils/getHostHeader';
 
 type RefreshResponse = {
   data: {
@@ -19,7 +19,6 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const host = getTenantDomain(req.headers.get('host'));
   const refreshToken = session.user.refreshToken;
 
   if (!refreshToken) {
@@ -29,6 +28,17 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // Get host header using helper function
+  const host = await getHostHeaderForRequest(req.headers);
+  
+  if (!host) {
+    return NextResponse.json(
+      { message: 'Host header is required' },
+      { status: 400 }
+    );
+  }
+
+  // Make refresh request using postModel with explicit headers
   const resp = await postModel<RefreshResponse>(
     '/auth/refresh',
     { refresh_token: refreshToken },
@@ -39,9 +49,16 @@ export async function POST(req: NextRequest) {
     }
   );
 
-  console.log('token refreshed successfully');
+  // Check if response is an error
+  if (isErrorResponse(resp)) {
+    return NextResponse.json(
+      { message: resp.message || 'failed to refresh token' },
+      { status: resp.status || 500 }
+    );
+  }
 
-  if (!resp || (!resp.data.access_token && !resp.data.refresh_token)) {
+  // Check if response has required data
+  if (!resp || !resp.data || (!resp.data.access_token && !resp.data.refresh_token)) {
     return NextResponse.json(
       { message: 'failed to refresh token' },
       { status: 500 }

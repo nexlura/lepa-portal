@@ -23,10 +23,13 @@ export const useHostHeader = (): string => {
 };
 
 /**
- * utility to get tenent domian from host header
+ * utility to get tenant domain from host header
  */
 export const getTenantDomain = (host?: string | null): string => {
-  if (!host) return '';
+  // If no host provided, use env fallback
+  if (!host) {
+    return process.env.NEXT_PUBLIC_LEPA_HOST_HEADER || '';
+  }
 
   // Remove protocol if included
   let cleaned = host.replace(/^https?:\/\//, '');
@@ -38,7 +41,7 @@ export const getTenantDomain = (host?: string | null): string => {
   const hostname = cleaned.split(':')[0];
 
   // If running on localhost, use env fallback
-  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+  if (hostname === 'localhost' || hostname === '127.0.0.1' || !hostname) {
     return process.env.NEXT_PUBLIC_LEPA_HOST_HEADER || '';
   }
 

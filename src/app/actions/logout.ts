@@ -1,30 +1,22 @@
 'use server';
 import { redirect } from 'next/navigation';
 
-import { auth, signOut } from '@/auth'; // if you exported it from your NextAuth setup
+import { auth, signOut } from '@/auth';
 import { postModel } from '@/lib/connector';
-import { getTenantDomain } from '@/utils/hostHeader';
 
-export async function logoutAction(host: string) {
+export async function logoutAction() {
   const session = await auth();
 
-  if (!session?.user?.accessToken || !session?.user?.refreshToken) {
+  if (!session?.user?.accessToken) {
     redirect('/auth/verify?phone=');
   }
 
-  const effectiveHost = getTenantDomain(host);
-
   try {
+    // Headers are automatically handled by the connector
     await postModel(
       `/auth/logout`,
       {
         access_token: session.user.accessToken,
-        refresh_token: session.user.refreshToken,
-      },
-      {
-        headers: {
-          'X-Lepa-Host-Header': effectiveHost,
-        },
       }
     );
   } catch (err) {

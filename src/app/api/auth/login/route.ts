@@ -1,8 +1,31 @@
-import { NextResponse } from 'next/server';
-import axios from 'axios';
-import { invokeExternalAPIRoute } from '@/lib/connector';
+import { NextRequest, NextResponse } from 'next/server';
+import { postModel, isErrorResponse } from '@/lib/connector';
+import { getHostHeaderForRequest } from '@/utils/getHostHeader';
 
-export async function POST(request: Request) {
+type BackendUser = {
+  id: string;
+  email?: string;
+  first_name?: string;
+  last_name?: string;
+  roles?: string[];
+};
+
+type BackendTenant = {
+  id?: string;
+  school_name?: string;
+};
+
+type LoginResponse = {
+  success: boolean;
+  data: {
+    access_token: string;
+    refresh_token: string;
+    user: BackendUser;
+    tenant: BackendTenant;
+  };
+};
+
+export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     
@@ -14,33 +37,52 @@ export async function POST(request: Request) {
       );
     }
 
-    // Make login request to external API
-    const url = invokeExternalAPIRoute('auth/login');
+    // Get host header using helper function
+    const host = await getHostHeaderForRequest(request.headers);
     
-    const response = await axios.post(url, {
-      identifier: body.identifier,
-      password: body.password,
-    }, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    return NextResponse.json(response.data, { status: response.status });
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      const statusCode = error.response?.status || 500;
-      const message = error.response?.data?.message || 'Login failed';
-      
+    if (!host) {
       return NextResponse.json(
-        { message },
-        { status: statusCode }
+        { message: 'Host header is required' },
+        { status: 400 }
       );
-    } else {
+    }
+    
+    // Make login request using postModel with explicit headers
+    const resp = await postModel<LoginResponse>(
+      '/auth/login',
+      {
+        identifier: body.identifier,
+        password: body.password,
+      },
+      {
+        headers: {
+          'X-Lepa-Host-Header': host,
+        },
+      }
+    );
+
+    // Check if response is an error
+    if (isErrorResponse(resp)) {
       return NextResponse.json(
-        { message: 'An unexpected error occurred. Please try again later.' },
+        { message: resp.message || 'Login failed' },
+        { status: resp.status || 500 }
+      );
+    }
+
+    // Check if response has required data
+    if (!resp || !resp.data) {
+      return NextResponse.json(
+        { message: 'Login failed - invalid response' },
         { status: 500 }
       );
     }
+
+    return NextResponse.json(resp.data, { status: 200 });
+  } catch (error) {
+    console.error('Login route error:', error);
+    return NextResponse.json(
+      { message: 'An unexpected error occurred. Please try again later.' },
+      { status: 500 }
+    );
   }
 }
