@@ -6,7 +6,7 @@ interface TeachersTableProps {
 
 const TeachersTable = ({ teachers }: TeachersTableProps) => {
     return (
-        < div className="bg-white shadow rounded-lg" >
+        <div className="bg-white shadow rounded-lg">
             <div className="px-4 py-5 sm:p-6">
                 <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
                     Faculty Directory
@@ -22,10 +22,10 @@ const TeachersTable = ({ teachers }: TeachersTableProps) => {
                                     Email
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Subject
+                                    Subjects
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Department
+                                    Classes
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Phone
@@ -49,11 +49,41 @@ const TeachersTable = ({ teachers }: TeachersTableProps) => {
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="text-sm text-gray-500">{teacher.email}</div>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm text-gray-900">{teacher.subject}</div>
+                                    <td className="px-6 py-4">
+                                        <div className="text-sm text-gray-900">
+                                            {teacher.subjects && teacher.subjects.length > 0 ? (
+                                                <div className="flex flex-wrap gap-1">
+                                                    {teacher.subjects.map((subject, idx) => (
+                                                        <span
+                                                            key={idx}
+                                                            className="inline-flex px-2 py-1 text-xs font-medium rounded-md bg-blue-100 text-blue-800"
+                                                        >
+                                                            {subject}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <span className="text-gray-400">-</span>
+                                            )}
+                                        </div>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm text-gray-500">{teacher.department || '-'}</div>
+                                    <td className="px-6 py-4">
+                                        <div className="text-sm text-gray-900">
+                                            {teacher.classes && teacher.classes.length > 0 ? (
+                                                <div className="flex flex-wrap gap-1">
+                                                    {teacher.classes.map((className, idx) => (
+                                                        <span
+                                                            key={idx}
+                                                            className="inline-flex px-2 py-1 text-xs font-medium rounded-md bg-green-100 text-green-800"
+                                                        >
+                                                            {className}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <span className="text-gray-400">-</span>
+                                            )}
+                                        </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="text-sm text-gray-500">{teacher.phone || '-'}</div>
@@ -72,7 +102,7 @@ const TeachersTable = ({ teachers }: TeachersTableProps) => {
                     </table>
                 </div>
             </div>
-        </ div>
+        </div>
     )
 }
 

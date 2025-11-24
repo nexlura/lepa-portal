@@ -1,9 +1,7 @@
 'use client'
 
-import { useState } from 'react'
 import { AcademicCapIcon, PlusIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline'
 
-import AddTeacherModal from '@/components/Teachers/AddTeacherModal'
 import { Button } from '@/components/UIKit/Button'
 import { Session } from 'next-auth'
 import TeachersTable from './Table'
@@ -14,7 +12,8 @@ export interface Teacher {
     id: number
     name: string
     email: string
-    subject: string
+    subjects?: string[]
+    classes?: string[]
     status: string
     joinDate: string
     phone?: string
@@ -23,11 +22,10 @@ export interface Teacher {
 
 interface TeachersViewProps {
     teachers: Teacher[];
+    session?: Session | null;
 };
 
 const TeachersView = ({ teachers }: TeachersViewProps) => {
-    const [showAddModal, setShowAddModal] = useState(false)
-
     if (teachers?.length < 1) {
         return (
             <>
@@ -36,7 +34,7 @@ const TeachersView = ({ teachers }: TeachersViewProps) => {
                     subHeading='Get started by adding teachers'
                     button={
                         <Button
-                            onClick={() => setShowAddModal(true)}
+                            href="/teachers/new"
                             color='primary'
                         >
                             <PlusIcon className="h-4 w-4 mr-2 text-white" color='white' />
@@ -44,11 +42,6 @@ const TeachersView = ({ teachers }: TeachersViewProps) => {
                         </Button>
                     }
                     icon={<AcademicCapIcon className='size-12 text-gray-500' />}
-                />
-                {/* Modals */}
-                <AddTeacherModal
-                    open={showAddModal}
-                    onClose={setShowAddModal}
                 />
             </>
         )
@@ -72,7 +65,7 @@ const TeachersView = ({ teachers }: TeachersViewProps) => {
                         Import CSV
                     </Button>
                     <Button
-                        onClick={() => setShowAddModal(true)}
+                        href="/teachers/new"
                         color='primary'
                     >
                         <PlusIcon className="h-4 w-4 mr-2 text-white" color='white' />
@@ -85,12 +78,6 @@ const TeachersView = ({ teachers }: TeachersViewProps) => {
             <TeachersStats />
 
             <TeachersTable teachers={teachers} />
-
-            {/* Modals */}
-            <AddTeacherModal
-                open={showAddModal}
-                onClose={setShowAddModal}
-            />
         </div>
     )
 }
