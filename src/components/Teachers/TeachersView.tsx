@@ -23,10 +23,9 @@ export interface Teacher {
 
 interface TeachersViewProps {
     teachers: Teacher[];
-    session: Session | null
 };
 
-const TeachersView = ({ teachers, session }: TeachersViewProps) => {
+const TeachersView = ({ teachers }: TeachersViewProps) => {
     const [showAddModal, setShowAddModal] = useState(false)
 
     if (teachers?.length < 1) {
@@ -50,7 +49,6 @@ const TeachersView = ({ teachers, session }: TeachersViewProps) => {
                 <AddTeacherModal
                     open={showAddModal}
                     onClose={setShowAddModal}
-                    session={session}
                 />
             </>
         )
@@ -92,7 +90,6 @@ const TeachersView = ({ teachers, session }: TeachersViewProps) => {
             <AddTeacherModal
                 open={showAddModal}
                 onClose={setShowAddModal}
-                session={session}
             />
         </div>
     )

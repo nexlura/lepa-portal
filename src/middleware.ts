@@ -42,7 +42,7 @@ export async function middleware(req: NextRequest) {
   }
 
   // Call your redirect helper *inside* middleware
-  const redirectResponse = handlePathRedirect(req, ['/classes', '/teachers']);
+  const redirectResponse = handlePathRedirect(req);
 
   if (redirectResponse) {
     return redirectResponse;

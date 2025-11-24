@@ -5,17 +5,15 @@ import { Field, Label, ErrorMessage } from '@/components/UIKit/Fieldset'
 import { Input } from '@/components/UIKit/Input'
 import { Button } from '../UIKit/Button'
 import { AddModalProps } from '../SchoolClasses/AddClassModal'
-import { getTenantDomain, useHostHeader } from '@/utils/hostHeader'
 import { FeedbackContext } from '@/context/feedback'
 import { postModel } from '@/lib/connector'
 import revalidatePage from '@/app/actions/revalidate-path'
 import FormSubmitFeedback from '../FormAlert'
 
-const AddTeacherModal = ({ open, onClose, session }: AddModalProps) => {
+const AddTeacherModal = ({ open, onClose }: AddModalProps) => {
     const nameInputRef = useRef<HTMLInputElement>(null);
     const { setFeedback } = useContext(FeedbackContext)
-    const hostHeader = useHostHeader()
-    const effectiveHost = getTenantDomain(hostHeader)
+
 
     const [localError, setLocalError] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(false)
@@ -73,16 +71,7 @@ const AddTeacherModal = ({ open, onClose, session }: AddModalProps) => {
         setIsLoading(true)
 
         try {
-            const resp = await postModel(
-                '/teachers',
-                postData,
-                {
-                    headers: {
-                        'X-Lepa-Host-Header': effectiveHost,
-                        'Authorization': `Bearer ${session?.user.accessToken}`
-                    },
-                }
-            );
+            const resp = await postModel('/teachers', postData);
 
             if (resp.status >= 200 && resp.status < 300) {
                 handleVerificationSuccess()
