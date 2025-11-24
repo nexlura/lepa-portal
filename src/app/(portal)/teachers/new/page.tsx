@@ -2,39 +2,37 @@
 
 import { FormEvent, useContext, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 
-import { Button } from '@/components/UIKit/Button'
-import { MultiSelect, MultiSelectOption } from '@/components/UIKit/MultiSelect'
+import { MultiSelectOption } from '@/components/UIKit/MultiSelect'
 import FormSubmitFeedback from '@/components/FormAlert'
 import { FeedbackContext } from '@/context/feedback'
-import { useSession } from 'next-auth/react'
 import { postModel, getModel } from '@/lib/connector'
 import revalidatePage from '@/app/actions/revalidate-path'
-import clsx from 'clsx'
-import PersonalInfoForm from '@/components/Teachers/PersonalinfoForm'
+import PersonalInfoForm from '@/components/Teachers/AddTeacher/PersonalinfoForm'
+import AssignedTabs from '@/components/Teachers/AddTeacher/AssignedTabs'
+import AddTeacherHeader from '@/components/Teachers/AddTeacher/Header'
 
-const SUBJECT_OPTIONS: MultiSelectOption[] = [
-    { id: 'math', name: 'Mathematics' },
-    { id: 'science', name: 'Science' },
-    { id: 'english', name: 'English' },
-    { id: 'physics', name: 'Physics' },
-    { id: 'chemistry', name: 'Chemistry' },
-    { id: 'biology', name: 'Biology' },
-    { id: 'history', name: 'History' },
-    { id: 'geography', name: 'Geography' },
-    { id: 'literature', name: 'Literature' },
-    { id: 'art', name: 'Art' },
-    { id: 'music', name: 'Music' },
-    { id: 'physical_education', name: 'Physical Education' },
-    { id: 'computer_science', name: 'Computer Science' },
-]
+export type AddTeacherForm = {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    password: string;
+    address: string;
+    sex: string;
+    subjects: MultiSelectOption[];
+    assignedClasses: MultiSelectOption[];
+}
 
-const ASSIGNMENT_TABS = [
-    { id: 'subjects', label: 'Assigned Subjects', description: 'Choose all subjects this teacher can cover.' },
-    { id: 'classes', label: 'Assigned Classes', description: 'Pick the classes or grades they belong to.' },
-] as const
-
-type AssignmentTab = (typeof ASSIGNMENT_TABS)[number]['id']
+export type AddTeacherFormErrors = {
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    phone?: string;
+    password?: string;
+    sex?: string;
+}
 
 type BackendClass = {
     id: string
@@ -73,7 +71,6 @@ const AddTeacherPage = () => {
     const [isLoading, setIsLoading] = useState(false)
     const [classes, setClasses] = useState<MultiSelectOption[]>([])
     const [loadingClasses, setLoadingClasses] = useState(false)
-    const [activeTab, setActiveTab] = useState<AssignmentTab>('subjects')
 
     // Fetch classes once
     useEffect(() => {
@@ -193,93 +190,30 @@ const AddTeacherPage = () => {
 
     return (
         <div className="space-y-8 sm:px-6">
-            <div className="w-9/12 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                <div>
-                    <h1 className="mt-1 text-3xl font-bold text-gray-900">Add a new teacher</h1>
-                    <p className="mt-2 text-sm text-gray-500">
-                        Add personal information and teaching responsibilities in one place.
-                    </p>
-                </div>
-                <div className="flex flex-wrap gap-3">
-                    <Button type="button" plain onClick={() => router.push('/teachers/1')}>
-                        Cancel
-                    </Button>
-                    <Button type="submit" color="primary" data-disabled={isLoading}>
-                        {isLoading ? 'Saving...' : 'Save Teacher'}
-                    </Button>
-                </div>
-            </div>
+            <AddTeacherHeader isLoading={isLoading} />
 
             {localError && (
                 <div>
                     <FormSubmitFeedback msg={localError} />
                 </div>
             )}
+            <div className='w-9/12 rounded-md border border-zinc-200 bg-white py-5'>
 
-            <PersonalInfoForm
-                errors={errors}
-                firstNameInputRef={firstNameInputRef}
-                form={form}
-                handleSubmit={handleSubmit}
-                setForm={setForm}
-            />
+                <PersonalInfoForm
+                    errors={errors}
+                    firstNameInputRef={firstNameInputRef}
+                    form={form}
+                    handleSubmit={handleSubmit}
+                    setForm={setForm}
+                />
+                <AssignedTabs
+                    classes={classes}
+                    form={form}
+                    loadingClasses={loadingClasses}
+                    setForm={setForm}
+                />
+            </div>
 
-            <section className="w-9/12  rounded-2xl border border-zinc-200 bg-white shadow-sm">
-                <div className="flex flex-col gap-2 border-b border-zinc-100 px-6 pt-6">
-                    <h2 className="text-lg font-semibold text-gray-900">Assignments</h2>
-                    <p className="text-sm text-gray-500">
-                        Use tabs to toggle between subjects and classes when setting responsibilities.
-                    </p>
-                    <div className="mt-4 flex gap-4">
-                        {ASSIGNMENT_TABS.map((tab) => (
-                            <button
-                                key={tab.id}
-                                type="button"
-                                onClick={() => setActiveTab(tab.id)}
-                                className={clsx(
-                                    'border-b-2 pb-2 text-sm font-medium transition-all',
-                                    activeTab === tab.id
-                                        ? 'border-blue-600 text-blue-600'
-                                        : 'border-transparent text-gray-500 hover:text-gray-900'
-                                )}
-                            >
-                                {tab.label}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-                <div className="px-6 pb-6 pt-4">
-                    {ASSIGNMENT_TABS.map((tab) => {
-                        const isSubjects = tab.id === 'subjects'
-                        const isActive = activeTab === tab.id
-                        if (!isActive) {
-                            return null
-                        }
-                        return (
-                            <div key={tab.id} className="space-y-4">
-                                <p className="text-sm text-gray-500">{tab.description}</p>
-                                {isSubjects ? (
-                                    <MultiSelect
-                                        options={SUBJECT_OPTIONS}
-                                        selected={form.subjects}
-                                        onChange={(selected) => setForm((f) => ({ ...f, subjects: selected }))}
-                                        placeholder="Select subjects..."
-                                        aria-label="Assign subjects"
-                                    />
-                                ) : (
-                                    <MultiSelect
-                                        options={classes}
-                                        selected={form.assignedClasses}
-                                        onChange={(selected) => setForm((f) => ({ ...f, assignedClasses: selected }))}
-                                        placeholder={loadingClasses ? 'Loading classes...' : 'Select classes...'}
-                                        aria-label="Assign classes"
-                                    />
-                                )}
-                            </div>
-                        )
-                    })}
-                </div>
-            </section>
         </div>
     )
 }

@@ -3,33 +3,14 @@ import { Dispatch, FormEvent, RefObject, SetStateAction } from 'react'
 import { Field, Label, ErrorMessage } from '@/components/UIKit/Fieldset'
 import { Input } from '@/components/UIKit/Input'
 import { Listbox, ListboxOption } from '@/components/UIKit/listbox'
-import { MultiSelectOption } from '../UIKit/MultiSelect'
-
-type Form = {
-    firstName: string;
-    lastName: string;
-    email: string;
-    phone: string;
-    password: string;
-    address: string;
-    sex: string;
-    subjects: MultiSelectOption[];
-    assignedClasses: MultiSelectOption[];
-}
+import { AddTeacherForm, AddTeacherFormErrors } from '@/app/(portal)/teachers/new/page'
 
 interface PersonalInfoFormProps {
     handleSubmit: (event?: FormEvent<HTMLFormElement>) => Promise<void>
     firstNameInputRef: RefObject<HTMLInputElement | null>
-    form: Form
-    setForm: Dispatch<SetStateAction<Form>>
-    errors: {
-        firstName?: string;
-        lastName?: string;
-        email?: string;
-        phone?: string;
-        password?: string;
-        sex?: string;
-    }
+    form: AddTeacherForm
+    setForm: Dispatch<SetStateAction<AddTeacherForm>>
+    errors: AddTeacherFormErrors
 }
 
 const SEX_OPTIONS = [
@@ -46,10 +27,8 @@ const PersonalInfoForm = ({
     errors
 }: PersonalInfoFormProps) => {
     return (
-        <div className="w-9/12 grid gap-6  ">
-
-
-            <section className="rounded-md border border-zinc-200 bg-white p-6 ">
+        <div className="grid gap-6  ">
+            <section className="px-6">
                 <div>
                     <p className="mt-1 text-sm text-gray-500">
                         Fill out personal information .
