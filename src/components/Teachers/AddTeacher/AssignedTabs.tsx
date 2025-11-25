@@ -38,7 +38,7 @@ interface AssignedTabsProps {
 
 const AssignedTabs = ({ form, setForm, classes, loadingClasses }: AssignedTabsProps) => {
 
-    const [activeTab, setActiveTab] = useState<AssignmentTab>('subjects')
+    const [activeTab, setActiveTab] = useState<AssignmentTab>('classes')
 
     return (
         <section className=" border-t border-zinc-200 mt-5 px-6">
@@ -72,7 +72,6 @@ const AssignedTabs = ({ form, setForm, classes, loadingClasses }: AssignedTabsPr
                     return (
                         <SearchableAssignSelect
                             key={tab.id}
-                            title={tab.label}
                             description={tab.description}
                             placeholder={isSubjects ? 'Search subjects…' : 'Search classes…'}
                             options={isSubjects ? SUBJECT_OPTIONS : classes}

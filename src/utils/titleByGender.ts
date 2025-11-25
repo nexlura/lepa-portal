@@ -1,4 +1,4 @@
-export function getTitleFromGender(gender: string): string {
+export function getTitleFromGender(gender: string | undefined): string {
   if (!gender) return '';
 
   const normalized = gender.trim().toLowerCase();

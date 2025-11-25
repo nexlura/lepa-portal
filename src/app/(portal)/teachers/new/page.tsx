@@ -8,7 +8,6 @@ import { MultiSelectOption } from '@/components/UIKit/MultiSelect'
 import FormSubmitFeedback from '@/components/FormAlert'
 import { FeedbackContext } from '@/context/feedback'
 import { postModel, getModel } from '@/lib/connector'
-import revalidatePage from '@/app/actions/revalidate-path'
 import PersonalInfoForm from '@/components/Teachers/AddTeacher/PersonalinfoForm'
 import AssignedTabs from '@/components/Teachers/AddTeacher/AssignedTabs'
 import AddTeacherHeader from '@/components/Teachers/AddTeacher/Header'
@@ -94,12 +93,6 @@ const AddTeacherPage = () => {
                 })
         }
     }, [classes.length, loadingClasses])
-
-    const resetForm = () => {
-        setForm(DEFAULT_FORM)
-        setErrors({})
-        setLocalError(null)
-    }
 
     const validate = () => {
         const next: typeof errors = {}
