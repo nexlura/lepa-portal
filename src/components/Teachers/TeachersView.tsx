@@ -18,6 +18,7 @@ export interface Teacher {
     joinDate: string
     phone?: string
     department?: string
+    sex?: string
 }
 
 interface TeachersViewProps {

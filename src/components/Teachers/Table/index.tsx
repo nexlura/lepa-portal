@@ -1,4 +1,6 @@
+import { getTitleFromGender } from "@/utils/titleByGender"
 import { Teacher } from "../TeachersView"
+import { formatDate } from "@/utils/formatDate"
 
 interface TeachersTableProps {
     teachers: Teacher[]
@@ -9,7 +11,7 @@ const TeachersTable = ({ teachers }: TeachersTableProps) => {
         <div className="bg-white shadow rounded-lg">
             <div className="px-4 py-5 sm:p-6">
                 <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-                    Faculty Directory
+                    All Teachers
                 </h3>
                 <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
@@ -42,8 +44,8 @@ const TeachersTable = ({ teachers }: TeachersTableProps) => {
                             {teachers.map((teacher) => (
                                 <tr key={teacher.id} className="hover:bg-gray-50">
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm font-medium text-gray-900">
-                                            {teacher.name}
+                                        <div className="text-sm font-medium text-gray-900 capitalize">
+                                            {`${getTitleFromGender(teacher.sex)}. ${teacher.name}`}
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
@@ -94,7 +96,7 @@ const TeachersTable = ({ teachers }: TeachersTableProps) => {
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {teacher.joinDate}
+                                        {formatDate(teacher.joinDate)}
                                     </td>
                                 </tr>
                             ))}

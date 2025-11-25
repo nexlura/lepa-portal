@@ -1,14 +1,13 @@
 'use client'
 
 import { useMemo, useState, useRef } from 'react'
-import { MagnifyingGlassIcon, CheckCircleIcon, XMarkIcon } from '@heroicons/react/20/solid'
+import { MagnifyingGlassIcon } from '@heroicons/react/20/solid'
 import { ChevronUpIcon, ChevronDownIcon, MinusCircleIcon } from '@heroicons/react/24/outline'
 import clsx from 'clsx'
 
 import { MultiSelectOption } from '@/components/UIKit/MultiSelect'
 
 interface SearchableAssignSelectProps {
-    title: string
     description: string
     placeholder?: string
     options: MultiSelectOption[]
@@ -19,7 +18,6 @@ interface SearchableAssignSelectProps {
 }
 
 export default function SearchableAssignSelect({
-    title,
     description,
     placeholder = 'Search…',
     options,
@@ -103,8 +101,6 @@ export default function SearchableAssignSelect({
                         ) : (
                             <ul className="space-y-1 px-2 py-2">
                                 {filteredOptions.slice(0, 5).map((option, index) => {
-                                    const isSelected = selected.some((item) => item.id === option.id)
-
                                     return (
                                         <li key={option.id}>
                                             <button

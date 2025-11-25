@@ -16,6 +16,7 @@ interface BackendTeachersData {
     status?: string
     created_at?: string
     join_date?: string
+    sex?: string
 }
 
 const TeachersPage = async ({ params }: PageProps) => {
@@ -48,8 +49,11 @@ const TeachersPage = async ({ params }: PageProps) => {
             status: teacher.status || 'Active',
             joinDate: teacher.join_date || teacher.created_at || '',
             phone: teacher.phone,
+            sex: teacher.sex
         }
     }) || [];
+
+
 
     return (
         <TeachersView teachers={transformedData} session={session} />

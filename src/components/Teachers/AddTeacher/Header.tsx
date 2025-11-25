@@ -1,11 +1,14 @@
 import { Button } from '@/components/UIKit/Button'
 import { useRouter } from 'next/navigation'
+import { FormEvent } from 'react'
 
 interface HeaderProps {
     isLoading: boolean
+    handleSubmit: (event?: FormEvent<HTMLFormElement>) => Promise<void>
+
 }
 
-const AddTeacherHeader = ({ isLoading }: HeaderProps) => {
+const AddTeacherHeader = ({ isLoading, handleSubmit }: HeaderProps) => {
     const router = useRouter()
 
     return (
@@ -20,7 +23,7 @@ const AddTeacherHeader = ({ isLoading }: HeaderProps) => {
                 <Button type="button" plain onClick={() => router.push('/teachers/1')}>
                     Cancel
                 </Button>
-                <Button type="submit" color="primary" data-disabled={isLoading}>
+                <Button type='button' onClick={() => handleSubmit()} color="primary" >
                     {isLoading ? 'Saving...' : 'Save Teacher'}
                 </Button>
             </div>

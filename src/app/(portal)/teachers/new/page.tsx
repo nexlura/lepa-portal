@@ -130,9 +130,7 @@ const AddTeacherPage = () => {
     }
 
     const handleVerificationSuccess = () => {
-        revalidatePage('/teachers/1')
         setFeedback({ status: 'success', text: 'Teacher added successfully!' })
-        resetForm()
         router.push('/teachers/1')
     }
 
@@ -190,13 +188,14 @@ const AddTeacherPage = () => {
 
     return (
         <div className="flex flex-col items-center space-y-8 sm:px-6">
-            <AddTeacherHeader isLoading={isLoading} />
+            <AddTeacherHeader isLoading={isLoading} handleSubmit={handleSubmit} />
 
             {localError && (
                 <div>
                     <FormSubmitFeedback msg={localError} />
                 </div>
             )}
+
             <div className=' lg:w-10/12 xl:w-9/12 rounded-md border border-zinc-200 bg-white py-5'>
 
                 <PersonalInfoForm
