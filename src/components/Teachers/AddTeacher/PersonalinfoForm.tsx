@@ -81,19 +81,6 @@ const PersonalInfoForm = ({
                         />
                         {errors.phone ? <ErrorMessage>{errors.phone}</ErrorMessage> : null}
                     </Field>
-
-                    <Field className='sm:col-span-4'>
-                        <Label>Password *</Label>
-                        <Input
-                            type="password"
-                            placeholder="Minimum 6 characters"
-                            value={form.password}
-                            onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
-                            invalid={Boolean(errors.password)}
-                        />
-                        {errors.password ? <ErrorMessage>{errors.password}</ErrorMessage> : null}
-                    </Field>
-
                     <Field className='sm:col-span-4'>
                         <Label>Sex</Label>
                         <Listbox
@@ -118,6 +105,17 @@ const PersonalInfoForm = ({
                             value={form.address}
                             onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
                         />
+                    </Field>
+                    <Field className='sm:col-span-4'>
+                        <Label>Password *</Label>
+                        <Input
+                            type="password"
+                            placeholder="Minimum 6 characters"
+                            value={form.password}
+                            onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
+                            invalid={Boolean(errors.password)}
+                        />
+                        {errors.password ? <ErrorMessage>{errors.password}</ErrorMessage> : null}
                     </Field>
                 </form>
             </section>

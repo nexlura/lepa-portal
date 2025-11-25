@@ -9,7 +9,7 @@ const AddTeacherHeader = ({ isLoading }: HeaderProps) => {
     const router = useRouter()
 
     return (
-        <div className="w-9/12 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div className="lg:w-10/12 xl:w-9/12 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div>
                 <h1 className="mt-1 text-3xl font-bold text-gray-900">Add a new teacher</h1>
                 <p className="mt-2 text-sm text-gray-500">

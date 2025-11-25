@@ -189,7 +189,7 @@ const AddTeacherPage = () => {
     }
 
     return (
-        <div className="space-y-8 sm:px-6">
+        <div className="flex flex-col items-center space-y-8 sm:px-6">
             <AddTeacherHeader isLoading={isLoading} />
 
             {localError && (
@@ -197,7 +197,7 @@ const AddTeacherPage = () => {
                     <FormSubmitFeedback msg={localError} />
                 </div>
             )}
-            <div className='w-9/12 rounded-md border border-zinc-200 bg-white py-5'>
+            <div className=' lg:w-10/12 xl:w-9/12 rounded-md border border-zinc-200 bg-white py-5'>
 
                 <PersonalInfoForm
                     errors={errors}

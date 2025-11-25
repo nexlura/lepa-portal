@@ -1,8 +1,9 @@
 import { SetStateAction, Dispatch, useState } from "react"
 import clsx from 'clsx'
 
-import { MultiSelect, MultiSelectOption } from "../../UIKit/MultiSelect"
+import { MultiSelectOption } from "../../UIKit/MultiSelect"
 import { AddTeacherForm } from "@/app/(portal)/teachers/new/page"
+import SearchableAssignSelect from "./SearchableAssignSelect"
 
 const SUBJECT_OPTIONS: MultiSelectOption[] = [
     { id: 'math', name: 'Mathematics' },
@@ -21,8 +22,8 @@ const SUBJECT_OPTIONS: MultiSelectOption[] = [
 ]
 
 const ASSIGNMENT_TABS = [
-    { id: 'classes', label: 'Assigned Classes', description: 'Pick the classes they belong to.' },
-    { id: 'subjects', label: 'Assigned Subjects', description: 'Choose all subjects this teacher can cover.' },
+    { id: 'classes', label: 'Assigned Classes', description: 'Link to classes' },
+    { id: 'subjects', label: 'Assigned Subjects', description: 'Link to subjects' },
 ] as const
 
 type AssignmentTab = (typeof ASSIGNMENT_TABS)[number]['id']
@@ -69,26 +70,27 @@ const AssignedTabs = ({ form, setForm, classes, loadingClasses }: AssignedTabsPr
                         return null
                     }
                     return (
-                        <div key={tab.id} className="space-y-4">
-                            <p className="text-sm text-gray-500">{tab.description}</p>
-                            {isSubjects ? (
-                                <MultiSelect
-                                    options={SUBJECT_OPTIONS}
-                                    selected={form.subjects}
-                                    onChange={(selected) => setForm((f) => ({ ...f, subjects: selected }))}
-                                    placeholder="Select subjects..."
-                                    aria-label="Assign subjects"
-                                />
-                            ) : (
-                                <MultiSelect
-                                    options={classes}
-                                    selected={form.assignedClasses}
-                                    onChange={(selected) => setForm((f) => ({ ...f, assignedClasses: selected }))}
-                                    placeholder={loadingClasses ? 'Loading classes...' : 'Select classes...'}
-                                    aria-label="Assign classes"
-                                />
-                            )}
-                        </div>
+                        <SearchableAssignSelect
+                            key={tab.id}
+                            title={tab.label}
+                            description={tab.description}
+                            placeholder={isSubjects ? 'Search subjects…' : 'Search classes…'}
+                            options={isSubjects ? SUBJECT_OPTIONS : classes}
+                            selected={isSubjects ? form.subjects : form.assignedClasses}
+                            loading={!isSubjects && loadingClasses}
+                            emptyLabel={
+                                !isSubjects && !loadingClasses && classes.length === 0
+                                    ? 'No classes available'
+                                    : 'No matches found'
+                            }
+                            onChange={(selected) =>
+                                setForm((f) => ({
+                                    ...f,
+                                    subjects: isSubjects ? selected : f.subjects,
+                                    assignedClasses: isSubjects ? f.assignedClasses : selected,
+                                }))
+                            }
+                        />
                     )
                 })}
             </div>
