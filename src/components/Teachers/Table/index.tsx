@@ -1,12 +1,23 @@
+'use client'
+
+import { useRouter } from "next/navigation"
+
 import { getTitleFromGender } from "@/utils/titleByGender"
 import { Teacher } from "../TeachersView"
 import { formatDate } from "@/utils/formatDate"
+import { ChevronRightIcon } from "@heroicons/react/24/outline"
 
 interface TeachersTableProps {
     teachers: Teacher[]
 }
 
 const TeachersTable = ({ teachers }: TeachersTableProps) => {
+    const router = useRouter()
+
+    const handleRowClick = (teacherId: number) => {
+        router.push(`/teachers/profile/${teacherId}`)
+    }
+
     return (
         <div className="bg-white shadow rounded-lg">
             <div className="px-4 py-5 sm:p-6">
@@ -19,9 +30,6 @@ const TeachersTable = ({ teachers }: TeachersTableProps) => {
                             <tr>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Name
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Email
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Subjects
@@ -38,18 +46,29 @@ const TeachersTable = ({ teachers }: TeachersTableProps) => {
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Join Date
                                 </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                </th>
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
                             {teachers.map((teacher) => (
-                                <tr key={teacher.id} className="hover:bg-gray-50">
+                                <tr
+                                    key={teacher.id}
+                                    className="hover:bg-gray-50 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+                                    tabIndex={0}
+                                    role="button"
+                                    onClick={() => handleRowClick(teacher.id)}
+                                    onKeyDown={(event) => {
+                                        if (event.key === 'Enter' || event.key === ' ') {
+                                            event.preventDefault()
+                                            handleRowClick(teacher.id)
+                                        }
+                                    }}
+                                >
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="text-sm font-medium text-gray-900 capitalize">
                                             {`${getTitleFromGender(teacher.sex)}. ${teacher.name}`}
                                         </div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm text-gray-500">{teacher.email}</div>
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="text-sm text-gray-900">
@@ -97,6 +116,9 @@ const TeachersTable = ({ teachers }: TeachersTableProps) => {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         {formatDate(teacher.joinDate)}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <ChevronRightIcon className="h-5 w-5 text-gray-300" aria-hidden="true" />
                                     </td>
                                 </tr>
                             ))}
