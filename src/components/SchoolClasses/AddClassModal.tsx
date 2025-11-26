@@ -12,7 +12,7 @@ import FormSubmitFeedback from '../FormAlert'
 import { FeedbackContext } from '@/context/feedback'
 import revalidatePage from '@/app/actions/revalidate-path'
 
-interface AddClassModalProps {
+export interface AddModalProps {
     open: boolean;
     onClose: (open: boolean) => void;
 }
@@ -28,7 +28,7 @@ const classes = [
 
 ]
 
-const AddClassModal = ({ open, onClose }: AddClassModalProps) => {
+const AddClassModal = ({ open, onClose }: AddModalProps) => {
     const nameInputRef = useRef<HTMLInputElement>(null);
     const { setFeedback } = useContext(FeedbackContext)
 

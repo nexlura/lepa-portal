@@ -1,5 +1,7 @@
 import { NextResponse, NextRequest } from 'next/server';
+
 import { auth } from './auth';
+import { handlePathRedirect } from './utils/pathRedirect';
 
 export const config = {
   matcher: [
@@ -39,11 +41,11 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
-  //redirect to e.g /teams/agents/1 if user wants to access e.g /teams/agents/
-  if (pathname === '/classes') {
-    const url = req.nextUrl.clone();
-    url.pathname = `${pathname}/1`;
-    return NextResponse.redirect(url);
+  // Call your redirect helper *inside* middleware
+  const redirectResponse = handlePathRedirect(req);
+
+  if (redirectResponse) {
+    return redirectResponse;
   }
 
   return NextResponse.next();

@@ -24,7 +24,7 @@ export default function SelectMenu({ options, selected, setSelected }: SelectMen
                     className={clsx(
                         'relative block w-full appearance-none rounded-lg text-left',
                         'px-[calc(--spacing(3.5)-1px)] py-[calc(--spacing(2)-1px)]',
-                        'sm:px-[calc(--spacing(3)-1px)] sm:py-[calc(--spacing(1.5)-1px)]',
+                        'sm:px-[calc(--spacing(3)-1px)] sm:py-[calc(--spacing(2)-1px)]',
                         'text-base/6 text-zinc-950 placeholder:text-zinc-400 sm:text-sm/6',
                         'border border-zinc-950/15 data-hover:border-zinc-950/20',
                         'bg-transparent focus:outline-hidden',
