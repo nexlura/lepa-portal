@@ -68,7 +68,7 @@ const SidebarNavigation: React.FC<{ collapsed?: boolean }> = ({ collapsed }) => 
         return false;
     };
 
-    const isSubItemActive = (href: string) => pathname.startsWith(href);
+    const isSubItemActive = (href: string) => pathname === href;
 
     return (
         <nav className={`flex-1 py-6 space-y-2 px-4`}>
