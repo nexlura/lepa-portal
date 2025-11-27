@@ -23,7 +23,7 @@ type BackendTeacher = {
     phone?: string
     address?: string
     sex?: string
-    status?: string
+    is_active?: string
     join_date?: string
     created_at?: string
     updated_at?: string
@@ -68,7 +68,7 @@ const TeacherProfilePage = async ({ params }: PageProps) => {
         phone: teacherData.phone || '',
         address: teacherData.address || '',
         sex: teacherData.sex,
-        status: teacherData.status || 'Active',
+        status: teacherData.is_active ? 'active' : 'inactive',
         joinDate: teacherData.join_date || teacherData.created_at || '',
         createdAt: teacherData.created_at,
         updatedAt: teacherData.updated_at,

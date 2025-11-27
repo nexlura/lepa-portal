@@ -111,7 +111,7 @@ const TeachersTable = ({ teachers }: TeachersTableProps) => {
                                         <div className="text-sm text-gray-500">{teacher.phone || '-'}</div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap capitalize">
-                                        <StatusPill status={teacher.status || 'inactive'} />
+                                        <StatusPill status={teacher.status} />
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         {formatDate(teacher.joinDate)}

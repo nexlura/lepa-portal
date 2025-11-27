@@ -13,7 +13,7 @@ interface BackendTeachersData {
     phone?: string
     subjects?: string[]
     assigned_classes?: Array<{ id: string; name: string; grade?: string }>
-    status?: string
+    is_active?: boolean
     created_at?: string
     join_date?: string
     sex?: string
@@ -25,8 +25,12 @@ const TeachersPage = async ({ params }: PageProps) => {
     const session = await auth();
 
     const res = await getModel(`/teachers?page=${pageNumber}&limit=10`);
+    const teachers = res?.data?.teachers
 
-    const transformedData: Teacher[] = res?.data?.teachers?.map((teacher: BackendTeachersData) => {
+    console.log('teachers res', teachers);
+
+
+    const transformedData: Teacher[] = teachers?.map((teacher: BackendTeachersData) => {
         // Format name from first_name and last_name or use name field
         const fullName = teacher.first_name && teacher.last_name
             ? `${teacher.first_name} ${teacher.last_name}`
@@ -46,7 +50,7 @@ const TeachersPage = async ({ params }: PageProps) => {
             email: teacher.email || '',
             subjects: subjects.length > 0 ? subjects : undefined,
             classes: classes.length > 0 ? classes : undefined,
-            status: teacher.status || '',
+            status: teacher.is_active ? 'active' : 'inactive',
             joinDate: teacher.join_date || teacher.created_at || '',
             phone: teacher.phone,
             sex: teacher.sex
