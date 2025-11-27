@@ -38,9 +38,6 @@ const ClassesPage = async ({ params }: PageProps) => {
     const totalPages = res.data?.total_pages
     const classes = res.data?.classes
 
-    console.log('classes', classes);
-
-
     const transformedData: SchoolClass[] = classes.map((classK: BackendClassesData) => {
 
         return {

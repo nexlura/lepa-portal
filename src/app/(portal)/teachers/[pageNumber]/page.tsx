@@ -27,9 +27,6 @@ const TeachersPage = async ({ params }: PageProps) => {
     const res = await getModel(`/teachers?page=${pageNumber}&limit=10`);
     const teachers = res?.data?.teachers
 
-    console.log('teachers res', teachers);
-
-
     const transformedData: Teacher[] = teachers?.map((teacher: BackendTeachersData) => {
         // Format name from first_name and last_name or use name field
         const fullName = teacher.first_name && teacher.last_name
