@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const pathsToRedirect = ['/classes', '/teachers'];
+const pathsToRedirect = ['/classes', '/teachers', '/students', '/admissions'];
 
 //redirect to e.g '/classes/1' if user want to access 'classes'
 export function handlePathRedirect(req: NextRequest) {

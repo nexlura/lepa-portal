@@ -23,6 +23,10 @@ export const metadata: Metadata = {
   description: "The mordern solution for schools to manage admissions",
 };
 
+export type PageProps = {
+  params: Promise<{ pid: string }>;
+}
+
 export default async function RootLayout({
   children,
 }: Readonly<{
