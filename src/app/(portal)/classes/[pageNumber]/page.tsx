@@ -1,5 +1,6 @@
 import { auth } from '@/auth';
 import ClassesView from '@/components/SchoolClasses/ClassView';
+import { MultiSelectOption } from '@/components/UIKit/MultiSelect';
 import { getModel } from '@/lib/connector';
 
 type BackendClassesData = {
@@ -12,15 +13,17 @@ type BackendClassesData = {
     is_active: boolean,
     room_number: string,
     created_at: string
+    teachers: { id: string, full_name: string }[]
 }
 
 export type SchoolClass = {
     id: string
     className: string
     capacity: number
-    teacher?: string
+    teachers?: MultiSelectOption[]
     createdAt?: string
     currentSize?: number
+    grade: string
 }
 
 export type PageProps = {
@@ -35,6 +38,9 @@ const ClassesPage = async ({ params }: PageProps) => {
     const totalPages = res.data?.total_pages
     const classes = res.data?.classes
 
+    console.log('classes', classes);
+
+
     const transformedData: SchoolClass[] = classes.map((classK: BackendClassesData) => {
 
         return {
@@ -42,7 +48,12 @@ const ClassesPage = async ({ params }: PageProps) => {
             capacity: classK.capacity,
             className: classK.name,
             createdAt: classK.created_at,
-            currentSize: classK.current_size.toString()
+            currentSize: classK.current_size.toString(),
+            teachers: classK.teachers.map(t => ({
+                id: t.id,
+                name: t.full_name
+            })),
+            grade: classK.grade
         }
     });
 

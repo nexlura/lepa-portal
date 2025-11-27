@@ -17,9 +17,6 @@ interface ClassesViewProps {
 
 const ClassesView = ({ classes, totalPages, session }: ClassesViewProps) => {
     const [isAddOpen, setIsAddOpen] = useState(false)
-
-    const isLoadingUser = status === 'loading'
-
     //show empty-state component when we have zero items
     if (classes.length < 1) {
         return (
@@ -42,6 +39,7 @@ const ClassesView = ({ classes, totalPages, session }: ClassesViewProps) => {
                 <AddClassModal
                     open={isAddOpen}
                     onClose={setIsAddOpen}
+                    session={session}
                 />
             </>
         )
@@ -65,7 +63,6 @@ const ClassesView = ({ classes, totalPages, session }: ClassesViewProps) => {
 
                     <Button
                         color="primary"
-                        disabled={isLoadingUser}
                         onClick={() => setIsAddOpen(true)}
                     >
                         <PlusIcon data-slot="icon" />
