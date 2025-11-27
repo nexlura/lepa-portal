@@ -46,7 +46,7 @@ const TeachersPage = async ({ params }: PageProps) => {
             email: teacher.email || '',
             subjects: subjects.length > 0 ? subjects : undefined,
             classes: classes.length > 0 ? classes : undefined,
-            status: teacher.status || 'Active',
+            status: teacher.status || '',
             joinDate: teacher.join_date || teacher.created_at || '',
             phone: teacher.phone,
             sex: teacher.sex
