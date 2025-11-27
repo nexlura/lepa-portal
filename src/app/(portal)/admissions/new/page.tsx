@@ -1,15 +1,16 @@
 'use client'
 
-import { FormEvent, useContext, useRef, useState } from 'react'
+import { FormEvent, useContext, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 
 import { FeedbackContext } from '@/context/feedback'
 import FormSubmitFeedback from '@/components/FormAlert'
-import { postModel } from '@/lib/connector'
+import { postFormData, getModel } from '@/lib/connector'
 import AddStudentHeader from '@/components/Students/AddStudent/Header'
 import PersonalInfoForm from '@/components/Students/AddStudent/PersonalInfoForm'
-
+import AssignedClassTabs from '@/components/Students/AddStudent/AssignedClassTabs'
+import { MultiSelectOption } from '@/components/UIKit/MultiSelect'
 
 export type AddStudentForm = {
     firstName: string
@@ -19,6 +20,7 @@ export type AddStudentForm = {
     dateOfBirth: string
     address: string
     enrollmentDate: string
+    assignedClass: MultiSelectOption | null
 }
 
 export type AddStudentFormErrors = Partial<Record<keyof AddStudentForm, string>>
@@ -31,7 +33,7 @@ const DEFAULT_FORM: AddStudentForm = {
     dateOfBirth: '',
     address: '',
     enrollmentDate: new Date().toISOString().split('T')[0],
-
+    assignedClass: null,
 }
 
 const NewStudentAdmissionPage = () => {
@@ -44,6 +46,38 @@ const NewStudentAdmissionPage = () => {
     const [errors, setErrors] = useState<AddStudentFormErrors>({})
     const [localError, setLocalError] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(false)
+    const [classes, setClasses] = useState<MultiSelectOption[]>([])
+    const [loadingClasses, setLoadingClasses] = useState(false)
+
+    type BackendClass = {
+        id: string
+        name: string
+        grade: string
+    }
+
+    // Fetch classes once
+    useEffect(() => {
+        if (!loadingClasses && classes.length === 0) {
+            setLoadingClasses(true)
+            getModel<{ data?: { classes?: BackendClass[] } }>('/classes?page=1&limit=100')
+                .then((res) => {
+                    const serverClasses = res?.data?.classes
+                    if (serverClasses && Array.isArray(serverClasses)) {
+                        const classOptions: MultiSelectOption[] = serverClasses.map((cls) => ({
+                            id: cls.id,
+                            name: `${cls.name} (${cls.grade})`,
+                        }))
+                        setClasses(classOptions)
+                    }
+                })
+                .catch((err) => {
+                    console.error('Error fetching classes:', err)
+                })
+                .finally(() => {
+                    setLoadingClasses(false)
+                })
+        }
+    }, [classes.length, loadingClasses])
 
     const validate = () => {
         const next: AddStudentFormErrors = {}
@@ -63,7 +97,6 @@ const NewStudentAdmissionPage = () => {
 
     const handleSuccess = () => {
         setFeedback({ status: 'success', text: 'Student added successfully!' })
-        setForm(DEFAULT_FORM)
         router.push('/students/1')
     }
 
@@ -80,18 +113,24 @@ const NewStudentAdmissionPage = () => {
         setIsLoading(true)
 
         try {
-            const postData = {
-                tenant_id: session.user.tenantId,
-                first_name: form.firstName.trim(),
-                last_name: form.lastName.trim(),
-                middle_name: form.middleName.trim(),
-                gender: form.gender.trim(),
-                date_of_birth: form.dateOfBirth,
-                ...(form.address && { address: form.address.trim() }),
-                enrollment_date: form.enrollmentDate,
+            const formData = new FormData()
+            formData.append('tenant_id', session.user.tenantId)
+            formData.append('first_name', form.firstName.trim())
+            formData.append('last_name', form.lastName.trim())
+            formData.append('middle_name', form.middleName.trim())
+            formData.append('sex', form.gender.trim())
+            formData.append('date_of_birth', form.dateOfBirth)
+            formData.append('enrollment_date', form.enrollmentDate)
+
+            if (form.address) {
+                formData.append('address', form.address.trim())
             }
 
-            const resp = await postModel('/students', postData)
+            if (form.assignedClass) {
+                formData.append('current_class_id', form.assignedClass.id)
+            }
+
+            const resp = await postFormData('/students', formData)
 
             if (resp && typeof resp === 'object' && 'error' in resp && resp.error) {
                 setLocalError(resp.message || 'Something went wrong. Please try again')
@@ -134,6 +173,12 @@ const NewStudentAdmissionPage = () => {
                     errors={errors}
                     handleSubmit={handleSubmit}
                     firstNameInputRef={firstNameInputRef}
+                />
+                <AssignedClassTabs
+                    form={form}
+                    setForm={setForm}
+                    classes={classes}
+                    loadingClasses={loadingClasses}
                 />
             </div>
         </div>

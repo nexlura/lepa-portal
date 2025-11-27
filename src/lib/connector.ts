@@ -133,13 +133,14 @@ const isClientSide = (): boolean => {
 const sendRequest = async <T = any>(
   method: RequestMethod,
   url: string,
-  body: Record<string, any> | null = null,
+  body: Record<string, any> | FormData | null = null,
   config: AxiosRequestConfig = {}
 ): Promise<T | null> => {
   try {
     // Create a copy of body before trimming to avoid mutating the original
+    // Skip processing if body is FormData
     let processedBody = body;
-    if (body) {
+    if (body && !(body instanceof FormData)) {
       processedBody = JSON.parse(JSON.stringify(body)); // Deep clone
       trimStringValues(processedBody);
     }
@@ -152,41 +153,53 @@ const sendRequest = async <T = any>(
     // Server-side: use direct external API call
     // Automatically get session and host header
     const session = await auth().catch(() => null);
-    
+
     // Dynamically import headers() only on server-side to avoid client-side import errors
     let hostHeader = '';
     try {
       const { headers: getHeaders } = await import('next/headers');
       const headerList = await getHeaders().catch(() => null);
-      const host = headerList?.get('host') || headerList?.get('x-forwarded-host') || '';
+      const host =
+        headerList?.get('host') || headerList?.get('x-forwarded-host') || '';
       hostHeader = getTenantDomain(host);
     } catch {
       // If headers() is not available (e.g., in API routes or client context), use env fallback
       hostHeader = process.env.NEXT_PUBLIC_LEPA_HOST_HEADER || '';
     }
-    
+
     // Ensure we always have a host header - use env as final fallback
     if (!hostHeader) {
       hostHeader = process.env.NEXT_PUBLIC_LEPA_HOST_HEADER || '';
     }
 
     // Get X-Lepa-Host-Header - prioritize config, then auto-extracted, then env
-    const lepaHostHeader = config.headers?.['X-Lepa-Host-Header'] || hostHeader || process.env.NEXT_PUBLIC_LEPA_HOST_HEADER || '';
-    
+    const lepaHostHeader =
+      config.headers?.['X-Lepa-Host-Header'] ||
+      hostHeader ||
+      process.env.NEXT_PUBLIC_LEPA_HOST_HEADER ||
+      '';
+
     // Merge headers: defaults + auto headers + config headers (config takes precedence)
     // IMPORTANT: Always include X-Lepa-Host-Header - it's required for all requests
     const mergedHeaders: Record<string, string> = {
       // Convert axios default headers to strings
       ...Object.fromEntries(
-        Object.entries(axiosInstance.defaults.headers.common || {}).map(([k, v]) => [k, String(v ?? '')])
+        Object.entries(axiosInstance.defaults.headers.common || {}).map(
+          ([k, v]) => [k, String(v ?? '')]
+        )
       ),
       // Always add X-Lepa-Host-Header (REQUIRED - backend will reject without it)
       'X-Lepa-Host-Header': lepaHostHeader,
       // Only add Authorization if session exists and not already provided in config
-      ...(session?.user?.accessToken && !config.headers?.['Authorization'] ? { 'Authorization': `Bearer ${session.user.accessToken}` } : {}),
+      ...(session?.user?.accessToken && !config.headers?.['Authorization']
+        ? { Authorization: `Bearer ${session.user.accessToken}` }
+        : {}),
       // Config headers override everything (except X-Lepa-Host-Header which we ensure above)
       ...Object.fromEntries(
-        Object.entries(config.headers || {}).map(([k, v]) => [k, String(v ?? '')])
+        Object.entries(config.headers || {}).map(([k, v]) => [
+          k,
+          String(v ?? ''),
+        ])
       ),
     };
 
@@ -197,10 +210,18 @@ const sendRequest = async <T = any>(
       data: processedBody ?? undefined,
       headers: mergedHeaders,
     };
-    
+
     // Ensure Content-Type is set for POST/PUT/PATCH requests with body
-    if (['POST', 'PUT', 'PATCH'].includes(method) && processedBody && requestConfig.headers) {
-      if (!requestConfig.headers['Content-Type']) {
+    // Don't set Content-Type for FormData - axios will set it with boundary
+    if (
+      ['POST', 'PUT', 'PATCH'].includes(method) &&
+      processedBody &&
+      requestConfig.headers
+    ) {
+      if (
+        !(processedBody instanceof FormData) &&
+        !requestConfig.headers['Content-Type']
+      ) {
         requestConfig.headers['Content-Type'] = 'application/json';
       }
     }
@@ -258,7 +279,7 @@ const sendRequest = async <T = any>(
 const sendRequestViaProxy = async <T = any>(
   method: RequestMethod,
   url: string,
-  body: Record<string, any> | null = null,
+  body: Record<string, any> | FormData | null = null,
   config: AxiosRequestConfig = {}
 ): Promise<T | null> => {
   try {
@@ -266,7 +287,7 @@ const sendRequestViaProxy = async <T = any>(
     // Handle both absolute URLs and relative paths
     let path: string;
     const searchParams = new URLSearchParams();
-    
+
     if (url.includes('?')) {
       // URL has query params
       const [pathPart, queryPart] = url.split('?');
@@ -279,7 +300,7 @@ const sendRequestViaProxy = async <T = any>(
       // No query params in URL
       path = url.startsWith('/') ? url.slice(1) : url;
     }
-    
+
     // Add query params from config (config params take precedence)
     if (config.params) {
       Object.entries(config.params).forEach(([key, value]) => {
@@ -288,21 +309,36 @@ const sendRequestViaProxy = async <T = any>(
         }
       });
     }
-    
+
     // Build proxy URL
     const proxyUrl = invokeInternalAPIRoute(`proxy/${path}`);
-    const finalUrl = searchParams.toString() 
+    const finalUrl = searchParams.toString()
       ? `${proxyUrl}?${searchParams.toString()}`
       : proxyUrl;
-    
+
+    // Determine if body is FormData
+    const isFormData = body instanceof FormData;
+
+    // Prepare headers - don't set Content-Type for FormData (browser will set it with boundary)
+    const headers: Record<string, string> = {};
+    if (!isFormData) {
+      headers['Content-Type'] = 'application/json';
+    }
+    // Merge any additional headers from config
+    if (config.headers) {
+      Object.entries(config.headers).forEach(([key, value]) => {
+        // Don't override Content-Type for FormData
+        if (!(isFormData && key.toLowerCase() === 'content-type')) {
+          headers[key] = String(value);
+        }
+      });
+    }
+
     // Make request to proxy
     const response = await fetch(finalUrl, {
       method,
-      headers: {
-        'Content-Type': 'application/json',
-        ...(config.headers as Record<string, string> || {}),
-      },
-      body: body ? JSON.stringify(body) : undefined,
+      headers,
+      body: isFormData ? body : body ? JSON.stringify(body) : undefined,
       credentials: 'include', // Include cookies for session
     });
 
@@ -329,7 +365,8 @@ const sendRequestViaProxy = async <T = any>(
     return {
       error: true,
       status: response.status,
-      message: errorData.message || 'An error occurred while processing the request',
+      message:
+        errorData.message || 'An error occurred while processing the request',
     } as any;
   } catch (error: any) {
     // Handle network errors
@@ -353,6 +390,13 @@ export const postModel = async <T = any>(
   body: Record<string, any> | null = null,
   config: AxiosRequestConfig = {}
 ): Promise<T | null> => await sendRequest<T>('POST', path, body, config);
+
+// Post FormData helper - specifically for multipart/form-data requests
+export const postFormData = async <T = any>(
+  path: string,
+  formData: FormData,
+  config: AxiosRequestConfig = {}
+): Promise<T | null> => await sendRequest<T>('POST', path, formData, config);
 
 export const patchModel = async <T = any>(
   path: string,
