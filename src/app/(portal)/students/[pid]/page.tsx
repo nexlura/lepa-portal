@@ -14,6 +14,7 @@ interface BackendStudentData {
     enrollment_date: string,
     status: string
     sex: string
+    current_class_name: string
 }
 
 export type Student = {
@@ -41,18 +42,17 @@ const StudentsPage = async ({ params }: PageProps) => {
     const students = res?.data?.students
     const totalPages = res.data?.total_pages
 
-    console.log('student res', res?.data);
-
-
-
     const transformedData: Student[] = students?.map((student: BackendStudentData) => {
 
         return {
             id: student.id,
-            name: `${student.first_name} ${student.last_name}`,
-            status: student.status || 'Active',
+            firstName: student.first_name,
+            lastName: student.last_name,
+            status: student.status,
             enrollmentDate: student.enrollment_date,
-            sex: student.sex
+            sex: student.sex,
+            currentClassName: student.current_class_name,
+            dateOfBirth: student.date_of_birth,
         }
     }) || [];
 

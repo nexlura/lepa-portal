@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation'
 
 import StudentTableControls from './TableControls'
 import { StudentsViewProps } from '../StudentsView'
+import { formatDate } from '@/utils/formatDate'
+import StatusPill from '@/components/StatusPill'
 
 const StudentsTable = ({ students, totalPages }: StudentsViewProps) => {
     const router = useRouter()
@@ -30,29 +32,19 @@ const StudentsTable = ({ students, totalPages }: StudentsViewProps) => {
                         <thead className="bg-gray-50">
                             <tr>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    <button className="inline-flex items-center gap-1">
-                                        Name
-                                        <ArrowsUpDownIcon className="h-4 w-4 text-gray-400" />
-                                    </button>
+                                    Name
                                 </th>
-                                {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    <button className="inline-flex items-center gap-1">
-                                        Grade
-                                        <ArrowsUpDownIcon className="h-4 w-4 text-gray-400" />
-                                    </button>
-                                </th> */}
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    <button className="inline-flex items-center gap-1">
-                                        DOB
-                                        <ArrowsUpDownIcon className="h-4 w-4 text-gray-400" />
-                                    </button>
+                                    DOB
                                 </th>
-                                {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Guardian</th> */}
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    <button className="inline-flex items-center gap-1">
-                                        Status
-                                        <ArrowsUpDownIcon className="h-4 w-4 text-gray-400" />
-                                    </button>
+                                    Gender
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Class
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Status
                                 </th>
                                 <th className="px-6 py-3"></th>
                             </tr>
@@ -64,20 +56,22 @@ const StudentsTable = ({ students, totalPages }: StudentsViewProps) => {
                                     className="hover:bg-gray-50 cursor-pointer"
                                     onClick={() => router.push(`/dashboard/students/${s.id}`)}
                                 >
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm font-medium text-gray-900">{s.fullName}</div>
+                                    <td className="px-6 py-4 whitespace-nowrap capitalize">
+                                        <div className="text-sm font-medium text-gray-900">
+                                            {`${s.firstName} ${s.lastName}`}
+                                        </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        {/* <div className="text-sm text-gray-900">{s.grade || '-'}</div> */}
+                                        <div className="text-sm text-gray-500">{formatDate(s.dateOfBirth)}</div>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap capitalize">
+                                        <div className="text-sm text-gray-500">{s.sex}</div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm text-gray-500">{s.dateOfBirth || '-'}</div>
+                                        <div className="text-sm text-gray-900">{s.currentClassName}</div>
                                     </td>
-                                    {/* <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm text-gray-500">{s.guardianName || '-'} {s.guardianPhone ? `(${s.guardianPhone})` : ''}</div>
-                                    </td> */}
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">{s.status}</span>
+                                        <StatusPill status={s.status} label='enrolled' />
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <ChevronRightIcon className="h-5 w-5 text-gray-400" />
