@@ -56,8 +56,6 @@ const TeacherProfilePage = async ({ params }: PageProps) => {
     const response = await getModel(`/teachers/${teacherId}`)
     const teacherData: BackendTeacher = response.data
 
-    console.log('response', response);
-
     const fullName =
         teacherData.first_name && teacherData.last_name
             ? `${teacherData.first_name} ${teacherData.last_name}`

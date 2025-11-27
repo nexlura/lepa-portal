@@ -11,10 +11,15 @@ import { postModel } from '@/lib/connector'
 import FormSubmitFeedback from '../FormAlert'
 import { FeedbackContext } from '@/context/feedback'
 import revalidatePage from '@/app/actions/revalidate-path'
+import { Session } from 'next-auth'
 
 export interface AddModalProps {
     open: boolean;
     onClose: (open: boolean) => void;
+}
+
+interface AddClassModalProps extends AddModalProps {
+    session: Session | null
 }
 
 
@@ -28,7 +33,7 @@ const classes = [
 
 ]
 
-const AddClassModal = ({ open, onClose }: AddModalProps) => {
+const AddClassModal = ({ open, onClose, session }: AddClassModalProps) => {
     const nameInputRef = useRef<HTMLInputElement>(null);
     const { setFeedback } = useContext(FeedbackContext)
 
@@ -47,6 +52,9 @@ const AddClassModal = ({ open, onClose }: AddModalProps) => {
         capacity: Number(form.capacity),
         name: form.name,
     }
+
+    console.log('class modal session:', session);
+
 
     const resetForm = () => {
         setForm({
