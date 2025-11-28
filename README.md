@@ -34,6 +34,10 @@ NEXTAUTH_URL=http://localhost:3000
 NEXTAUTH_SECRET=replace-with-generated-secret
 # Needed for running the app in production
 AUTH_TRUST_HOST=http://localhost:3000
+# Needed for sending tenant domain to the backend in dev mode
+NEXT_PUBLIC_LEPA_HOST_HEADER=schoola.lepa.cc
+# Backend api url
+NEXT_PUBLIC_API_URL=https://api.dev.lepa.cc
 ```
 
 ## Generate a NextAuth secret
