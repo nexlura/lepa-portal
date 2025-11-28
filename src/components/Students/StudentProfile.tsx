@@ -1,61 +1,21 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { ArrowLeftIcon, ChevronRightIcon, ShieldExclamationIcon } from '@heroicons/react/24/outline'
+
 import TopCards from '@/components/Students/StudentDetails/TopCards'
-import DocumentsList, { StudentDocument } from '@/components/Students/StudentDetails/DocumentsList'
+import DocumentsList from '@/components/Students/StudentDetails/DocumentsList'
 import PersonalInfoSection from '@/components/Students/StudentDetails/PersonalInfo'
 import Breadcrumbs from '@/components/Students/StudentDetails/BreadCrumbs'
+import { Student } from '@/app/(portal)/students/[pid]/page'
 
-interface StudentRecord {
-    id: number
-    name: string
-    gender?: string
-    dateOfBirth?: string
-    email?: string
-    phone?: string
-    address?: string
-    city?: string
-    state?: string
-    postalCode?: string
-    grade: string
-    classSection?: string
-    enrollmentDate: string
-    previousSchool?: string
-    transferredFromSchool?: string
-    promotedFromGrade?: string | number
-    currentTeacherName?: string
-    guardianName?: string
-    guardianRelationship?: string
-    guardianEmail?: string
-    guardianPhone?: string
-    status: 'Pending' | 'Enrolled'
-    documents?: StudentDocument[]
+interface StudentProfileViewProps {
+    student: Student
 }
 
-const StudentDetailsPage = () => {
-    const params = useParams()
+const StudentProfileView = ({ student }: StudentProfileViewProps) => {
     const router = useRouter()
-    const [student, setStudent] = useState<StudentRecord | null>(null)
-
-    const studentId = useMemo(() => {
-        const idParam = params?.id
-        if (!idParam) return NaN
-        if (Array.isArray(idParam)) return Number(idParam[0])
-        return Number(idParam)
-    }, [params])
-
-    useEffect(() => {
-        try {
-            const raw = localStorage.getItem('students:list')
-            if (!raw) return
-            const rows: StudentRecord[] = JSON.parse(raw)
-            const s = rows.find(r => r.id === studentId) || null
-            setStudent(s)
-        } catch { /* ignore */ }
-    }, [studentId])
 
     if (!student) {
         return (
@@ -107,4 +67,4 @@ const StudentDetailsPage = () => {
     )
 }
 
-export default StudentDetailsPage
+export default StudentProfileView

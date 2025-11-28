@@ -16,6 +16,7 @@ declare module 'next-auth' {
     refreshToken?: string;
     schoolName?: string;
     tenantId?: string;
+    schoolLevel?: string;
   }
 
   export interface Session {
@@ -28,6 +29,7 @@ declare module 'next-auth' {
       refreshToken?: string;
       schoolName?: string;
       tenantId?: string;
+      schoolLevel?: string;
     };
   }
 }
@@ -40,6 +42,7 @@ declare module 'next-auth/jwt' {
     refreshToken?: string;
     schoolName?: string;
     tenantId?: string;
+    schoolLevel?: string;
   }
 }
 
@@ -54,6 +57,7 @@ type BackendAuthUser = {
 type BackendAuthTenant = {
   id?: string;
   school_name?: string; // ✅ if your backend returns it
+  level?: string;
 };
 
 type APIAuthResponseData = {
@@ -75,7 +79,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       async authorize(credentials, req): Promise<NextAuthUser | null> {
         // Get host header using helper function
         const host = await getHostHeaderForRequest(req?.headers);
-        
+
         if (!host) {
           console.error('No host header available for login request');
           return null;
@@ -105,18 +109,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!parsed.success) return null;
 
         try {
-          const resp = await postModel<APIAuthResponse>(
-            '/auth/login',
-            {
-              identifier: parsed.data.identifier,
-              password: parsed.data.password,
-            },
-            {
-              headers: {
-                'X-Lepa-Host-Header': host,
-              },
-            }
-          );
+          const resp = await postModel<APIAuthResponse>('/auth/login', {
+            identifier: parsed.data.identifier,
+            password: parsed.data.password,
+          });
 
           // Check if response is an error
           if (isErrorResponse(resp)) {
@@ -146,6 +142,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
               refreshToken: resp.data.refresh_token,
               schoolName: tenant?.school_name || '',
               tenantId: tenant?.id || '',
+              schoolLevel: tenant?.level || '',
             };
           }
         } catch (error) {
@@ -167,12 +164,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           refreshToken?: string;
           schoolName?: string;
           tenantId?: string;
+          schoolLevel?: string;
         };
         if (u.userId) token.userId = u.userId;
         if (u.role) token.role = u.role;
         if (u.accessToken) token.accessToken = u.accessToken;
         if (u.refreshToken) token.refreshToken = u.refreshToken;
         if (u.schoolName) token.schoolName = u.schoolName;
+        if (u.schoolLevel) token.schoolLevel = u.schoolLevel;
         if (u.tenantId) token.tenantId = u.tenantId;
       }
 
@@ -194,6 +193,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         //school name would be null for lepa admins
         if (token.schoolName) {
           session.user.schoolName = token.schoolName;
+          session.user.schoolLevel = token.schoolLevel;
           session.user.tenantId = token.tenantId;
         }
       }

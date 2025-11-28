@@ -1,13 +1,13 @@
 'use client'
 
 import { useState } from 'react'
+import { Session } from 'next-auth'
 import { PlusIcon, ArrowUpTrayIcon, BookOpenIcon } from '@heroicons/react/24/outline'
+
 import { Button } from '@/components/UIKit/Button'
 import AddClassModal from '@/components/SchoolClasses/AddClassModal'
 import ClassesTable from '@/components/SchoolClasses/Table'
 import { SchoolClass } from '@/app/(portal)/classes/[pageNumber]/page'
-import { useSession } from 'next-auth/react'
-import { Session } from 'next-auth'
 import EmptyState from '../EmptyState'
 interface ClassesViewProps {
     classes: SchoolClass[]
@@ -15,12 +15,8 @@ interface ClassesViewProps {
     totalPages: number
 };
 
-const ClassesView = ({ classes, totalPages }: ClassesViewProps) => {
-    const { status } = useSession()
+const ClassesView = ({ classes, totalPages, session }: ClassesViewProps) => {
     const [isAddOpen, setIsAddOpen] = useState(false)
-
-    const isLoadingUser = status === 'loading'
-
     //show empty-state component when we have zero items
     if (classes.length < 1) {
         return (
@@ -43,6 +39,7 @@ const ClassesView = ({ classes, totalPages }: ClassesViewProps) => {
                 <AddClassModal
                     open={isAddOpen}
                     onClose={setIsAddOpen}
+                    session={session}
                 />
             </>
         )
@@ -66,7 +63,6 @@ const ClassesView = ({ classes, totalPages }: ClassesViewProps) => {
 
                     <Button
                         color="primary"
-                        disabled={isLoadingUser}
                         onClick={() => setIsAddOpen(true)}
                     >
                         <PlusIcon data-slot="icon" />
@@ -78,10 +74,7 @@ const ClassesView = ({ classes, totalPages }: ClassesViewProps) => {
             {/* Classes table */}
             <ClassesTable classes={classes} totalPages={totalPages} />
 
-            {/* Only mount modal when user session is loaded */}
-            {status === 'authenticated' && (
-                <AddClassModal open={isAddOpen} onClose={setIsAddOpen} />
-            )}
+            <AddClassModal open={isAddOpen} onClose={setIsAddOpen} session={session} />
         </div>
     );
 };

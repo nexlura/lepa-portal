@@ -1,6 +1,7 @@
 import { AcademicCapIcon, CalendarIcon, BookOpenIcon, UserGroupIcon } from '@heroicons/react/24/outline'
 import { TeacherProfile } from '../TeacherProfileView'
 import { formatDate } from '@/utils/formatDate'
+import StatusPill from '@/components/StatusPill'
 
 interface TopCardsProps {
     teacher: TeacherProfile
@@ -42,11 +43,7 @@ const TopCards = ({ teacher }: TopCardsProps) => {
                         )}
                     </div>
                     <div className="flex gap-x-2">
-                        {teacher.status && (
-                            <span className="inline-flex items-center rounded-full bg-green-100 text-green-900 px-3 py-1 text-xs">
-                                {teacher.status}
-                            </span>
-                        )}
+                        <StatusPill status={teacher.status || ''} />
                     </div>
                 </div>
             </div>

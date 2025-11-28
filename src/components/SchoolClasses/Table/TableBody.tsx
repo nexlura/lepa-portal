@@ -13,13 +13,31 @@ const ClassesTableBody = ({ classes }: ClassesTableBodyProps) => {
                         <div className="text-sm font-medium text-gray-900 capitalize">{klass.className}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">{klass.grade ?? '-'}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900">{klass.capacity ?? '-'}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900">{klass.currentSize || '-'}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{klass.teacher || '-'}</div>
+                        <div className="text-sm text-gray-900">
+                            {klass.teachers && klass.teachers.length > 0 ? (
+                                <div className="flex flex-wrap gap-1">
+                                    {klass.teachers.map((teacher, idx) => (
+                                        <span
+                                            key={idx}
+                                            className="capitalize inline-flex px-2 py-1 text-xs font-medium rounded-md bg-green-100 text-green-800"
+                                        >
+                                            {teacher.name}
+                                        </span>
+                                    ))}
+                                </div>
+                            ) : (
+                                <span className="text-gray-400">-</span>
+                            )}
+                        </div>
                     </td>
                 </tr>
             ))}

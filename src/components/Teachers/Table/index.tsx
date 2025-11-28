@@ -6,6 +6,7 @@ import { getTitleFromGender } from "@/utils/titleByGender"
 import { Teacher } from "../TeachersView"
 import { formatDate } from "@/utils/formatDate"
 import { ChevronRightIcon } from "@heroicons/react/24/outline"
+import StatusPill from "@/components/StatusPill"
 
 interface TeachersTableProps {
     teachers: Teacher[]
@@ -109,10 +110,8 @@ const TeachersTable = ({ teachers }: TeachersTableProps) => {
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="text-sm text-gray-500">{teacher.phone || '-'}</div>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                                            {teacher.status}
-                                        </span>
+                                    <td className="px-6 py-4 whitespace-nowrap capitalize">
+                                        <StatusPill status={teacher.status} />
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         {formatDate(teacher.joinDate)}

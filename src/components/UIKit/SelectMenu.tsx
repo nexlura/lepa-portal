@@ -6,7 +6,7 @@ import { CheckIcon } from '@heroicons/react/20/solid'
 import clsx from 'clsx'
 
 type Option = {
-    id: number, name: string
+    id: string, name: string
 }
 
 interface SelectMenuProps {

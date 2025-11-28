@@ -1,6 +1,7 @@
 'use client'
 
 import { useContext, useEffect, useRef, useState } from 'react'
+import { Session } from 'next-auth'
 
 import { Dialog, DialogActions, DialogBody, DialogDescription, DialogTitle } from '@/components/UIKit/Dialog'
 import { Field, Label, ErrorMessage } from '@/components/UIKit/Fieldset'
@@ -11,24 +12,23 @@ import { postModel } from '@/lib/connector'
 import FormSubmitFeedback from '../FormAlert'
 import { FeedbackContext } from '@/context/feedback'
 import revalidatePage from '@/app/actions/revalidate-path'
+import {
+    SIERRA_LEONE_EDUCATION_LEVELS,
+    SL_LEVEL_BY_ID,
+} from '@/data/sierraleone-grades'
+
 
 export interface AddModalProps {
     open: boolean;
     onClose: (open: boolean) => void;
 }
 
+interface AddClassModalProps extends AddModalProps {
+    session: Session | null
+}
 
-const classes = [
-    { id: 1, name: 'class 1' },
-    { id: 2, name: 'class 2' },
-    { id: 3, name: 'class 3' },
-    { id: 4, name: 'class 4' },
-    { id: 5, name: 'class 5' },
-    { id: 6, name: 'class 6' },
 
-]
-
-const AddClassModal = ({ open, onClose }: AddModalProps) => {
+const AddClassModal = ({ open, onClose, session }: AddClassModalProps) => {
     const nameInputRef = useRef<HTMLInputElement>(null);
     const { setFeedback } = useContext(FeedbackContext)
 
@@ -39,8 +39,19 @@ const AddClassModal = ({ open, onClose }: AddModalProps) => {
         capacity: '',
         teacher: '',
     })
+
+    const schoolLevel = session?.user?.schoolLevel; // e.g., 'primary', 'jss', 'sss
+
+    const gradeOptions =
+        SL_LEVEL_BY_ID[schoolLevel || 'primary']?.years.map((y) => ({
+            id: y.id,
+            name: y.name,
+        })) ?? [];
+
     const [errors, setErrors] = useState<{ name?: string; grade?: string }>({})
-    const [selectedLevel, setSelectedLevel] = useState(classes[0])
+    const [selectedLevel, setSelectedLevel] = useState(
+        gradeOptions[0] || { id: '', name: '' }
+    );
 
     const postData = {
         grade: selectedLevel.name,
@@ -56,7 +67,7 @@ const AddClassModal = ({ open, onClose }: AddModalProps) => {
         });
         setErrors({});
         setLocalError(null);
-        setSelectedLevel(classes[0]); // reset dropdown to default
+        // setSelectedLevel(classes[0]); // reset dropdown to default
     };
 
     const handleVerificationSuccess = () => {
@@ -146,8 +157,11 @@ const AddClassModal = ({ open, onClose }: AddModalProps) => {
                     </Field>
                     <Field className="sm:col-span-2">
                         <Label className="block text-sm/6 font-medium text-gray-900 ">Class</Label>
-                        <SelectMenu options={classes} selected={selectedLevel} setSelected={setSelectedLevel} />
-                    </Field>
+                        <SelectMenu
+                            options={gradeOptions}
+                            selected={selectedLevel}
+                            setSelected={setSelectedLevel}
+                        />                    </Field>
                     <Field className="sm:col-span-2">
                         <Label className="text-sm/6 text-gray-900 font-medium">Capacity</Label>
                         <Input
