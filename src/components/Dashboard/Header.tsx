@@ -53,10 +53,7 @@ export default function Header({ onMenuClick }: { onMenuClick?: () => void }) {
                     {/* Right side - User menu and notifications */}
                     <div className="flex items-center space-x-4">
                         {/* Notifications */}
-                        <button className="p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 relative">
-                            <BellIcon className="h-6 w-6" />
-                            <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-400"></span>
-                        </button>
+
 
                         {/* User avatar and menu */}
                         <div className="flex items-center space-x-3">
