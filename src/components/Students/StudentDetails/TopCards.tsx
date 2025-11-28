@@ -1,19 +1,8 @@
+import { CalendarIcon, UserIcon, BookOpenIcon } from "@heroicons/react/24/outline"
+
 import { Student } from "@/app/(portal)/students/[pid]/page"
 import StatusPill from "@/components/StatusPill"
 import { formatDate } from "@/utils/formatDate"
-import { BuildingOffice2Icon, CalendarIcon, UserIcon, ArrowTrendingUpIcon, BookOpenIcon } from "@heroicons/react/24/outline"
-
-interface StudentLikeRecord {
-    id: number
-    name: string
-    grade: string
-    classSection?: string
-    enrollmentDate: string
-    previousSchool?: string
-    transferredFromSchool?: string
-    promotedFromGrade?: string | number
-    currentTeacherName?: string
-}
 
 interface TopCardsProps {
     student: Student

@@ -48,19 +48,19 @@ const PersonalInfoSection = ({ student }: PersonalInfoProps) => {
                 <dl className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
                     <div>
                         <dt className="text-xs text-gray-500">Name</dt>
-                        <dd className="text-sm text-gray-900">{student.guardianName || '-'}</dd>
+                        <dd className="text-sm text-gray-900">-</dd>
                     </div>
                     <div>
                         <dt className="text-xs text-gray-500">Relationship</dt>
-                        <dd className="text-sm text-gray-900">{student.guardianRelationship || '-'}</dd>
+                        <dd className="text-sm text-gray-900">-</dd>
                     </div>
                     <div>
                         <dt className="text-xs text-gray-500">Email</dt>
-                        <dd className="text-sm text-gray-900">{student.guardianEmail || '-'}</dd>
+                        <dd className="text-sm text-gray-900">-</dd>
                     </div>
                     <div>
                         <dt className="text-xs text-gray-500">Phone</dt>
-                        <dd className="text-sm text-gray-900">{student.guardianPhone || '-'}</dd>
+                        <dd className="text-sm text-gray-900">-</dd>
                     </div>
                 </dl>
             </div>

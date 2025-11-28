@@ -13,16 +13,12 @@ import FormSubmitFeedback from '../FormAlert'
 import { FeedbackContext } from '@/context/feedback'
 import revalidatePage from '@/app/actions/revalidate-path'
 import {
-    SIERRA_LEONE_EDUCATION_LEVELS,
     SL_LEVEL_BY_ID,
 } from '@/data/sierraleone-grades'
-
-
 export interface AddModalProps {
     open: boolean;
     onClose: (open: boolean) => void;
 }
-
 interface AddClassModalProps extends AddModalProps {
     session: Session | null
 }

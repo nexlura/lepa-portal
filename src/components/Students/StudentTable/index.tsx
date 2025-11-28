@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronRightIcon, ArrowsUpDownIcon } from '@heroicons/react/24/outline'
+import { ChevronRightIcon } from '@heroicons/react/24/outline'
 import { useRouter } from 'next/navigation'
 
 import StudentTableControls from './TableControls'
@@ -9,7 +9,7 @@ import { StudentsViewProps } from '../StudentsView'
 import { formatDate } from '@/utils/formatDate'
 import StatusPill from '@/components/StatusPill'
 
-const StudentsTable = ({ students, totalPages }: StudentsViewProps) => {
+const StudentsTable = ({ students }: StudentsViewProps) => {
     const router = useRouter()
 
     const [search, setSearch] = useState('')

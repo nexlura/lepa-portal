@@ -7,7 +7,7 @@ import EmailForm from '@/components/SignIn/EmailForm'
 import PhoneForm from '@/components/SignIn/PhoneForm'
 import { useQueryKeys } from '@/hooks'
 
-export const formatPhoneNumber = (value: string) => {
+const formatPhoneNumber = (value: string) => {
     const digits = value.replace(/\D/g, '')
     if (digits.length <= 2) return digits
     return `(${digits.slice(0, 2)}) ${digits.slice(2, 9)}`
