@@ -54,7 +54,7 @@ const StudentsTable = ({ students, totalPages }: StudentsViewProps) => {
                                 <tr
                                     key={s.id}
                                     className="hover:bg-gray-50 cursor-pointer"
-                                    onClick={() => router.push(`/dashboard/students/${s.id}`)}
+                                    onClick={() => router.push(`/students/profile/${s.id}`)}
                                 >
                                     <td className="px-6 py-4 whitespace-nowrap capitalize">
                                         <div className="text-sm font-medium text-gray-900">

@@ -1,40 +1,44 @@
-import { StudentRecord } from "@/app/(portal)/admissions/page"
+import { Student } from "@/app/(portal)/students/[pid]/page"
+import { formatPhoneNumber } from "@/utils"
+import { formatDate } from "@/utils/formatDate"
 
 interface PersonalInfoProps {
-    student: StudentRecord
+    student: Student
 }
 
 const PersonalInfoSection = ({ student }: PersonalInfoProps) => {
     return (
         <div className="bg-white rounded-lg shadow p-6 space-y-4 lg:col-span-2">
             <div className="text-base font-semibold text-gray-900">Student Information</div>
-            <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+            <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 capitalize">
                 <div>
                     <dt className="text-xs text-gray-500">Full name</dt>
-                    <dd className="text-sm text-gray-900">{student.name}</dd>
+                    <dd className="text-sm text-gray-900 ">{student.fullName}</dd>
                 </div>
                 <div>
                     <dt className="text-xs text-gray-500">Gender</dt>
-                    <dd className="text-sm text-gray-900">{student.gender || '-'}</dd>
+                    <dd className="text-sm text-gray-900">{student.sex}</dd>
                 </div>
                 <div>
                     <dt className="text-xs text-gray-500">Date of birth</dt>
-                    <dd className="text-sm text-gray-900">{student.dateOfBirth || '-'}</dd>
+                    <dd className="text-sm text-gray-900">{formatDate(student.dateOfBirth)}</dd>
                 </div>
                 <div>
                     <dt className="text-xs text-gray-500">Email</dt>
-                    <dd className="text-sm text-gray-900 inline-flex items-center">
-                        {student.email || '-'}</dd>
+                    <dd className="text-sm text-gray-900 inline-flex items-center lowercase">
+                        student@springfield.edu
+                    </dd>
                 </div>
                 <div>
                     <dt className="text-xs text-gray-500">Phone</dt>
                     <dd className="text-sm text-gray-900 inline-flex items-center">
-                        {student.phone || '-'}</dd>
+                        {formatPhoneNumber(23230967676)}
+                    </dd>
                 </div>
                 <div>
                     <dt className="text-xs text-gray-500">Address</dt>
                     <dd className="text-sm text-gray-900 inline-flex items-start">
-                        <span>{student.address || '-'}{student.city ? `, ${student.city}` : ''}{student.state ? `, ${student.state}` : ''}{student.postalCode ? `, ${student.postalCode}` : ''}</span>
+                        <span>{student.address || ''}</span>
                     </dd>
                 </div>
             </dl>

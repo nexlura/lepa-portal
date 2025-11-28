@@ -2,19 +2,21 @@ import { getModel } from '@/lib/connector'
 import StudentsView from '@/components/Students/StudentsView'
 import { PageProps } from '@/app/layout'
 
-interface BackendStudentData {
+export type BackendStudentData = {
     id: string
-    tenant_id: string,
-    first_name: string,
-    last_name: string,
-    middle_name: string,
-    gender: string,
-    date_of_birth: string,
-    address: string,
-    enrollment_date: string,
+    tenant_id: string
+    first_name: string
+    last_name: string
+    middle_name: string
+    gender: string
+    date_of_birth: string
+    address: string
+    enrollment_date: string
     status: string
     sex: string
     current_class_name: string
+    note: string
+    photo_url: string
 }
 
 export type Student = {
