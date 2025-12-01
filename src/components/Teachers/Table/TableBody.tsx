@@ -5,6 +5,7 @@ import { Teacher } from "../TeachersView"
 import { formatDate } from "@/utils/formatDate"
 import StatusPill from "@/components/StatusPill"
 import { getTitleFromGender } from "@/utils/titleByGender"
+import { formatPhoneNumber } from "@/utils"
 
 interface TeachersTableBodyProps {
     teachers: Teacher[]
@@ -36,6 +37,11 @@ const TeachersTableBody = ({ teachers }: TeachersTableBodyProps) => {
                     <td className="px-6 py-3 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900 capitalize">
                             {`${getTitleFromGender(teacher.sex)}. ${teacher.name}`}
+                        </div>
+                    </td>
+                    <td className="px-6 py-3 whitespace-nowrap">
+                        <div className="text-sm text-gray-500">
+                            {formatPhoneNumber(teacher.phone || '')}
                         </div>
                     </td>
                     <td className="px-6 py-3">
@@ -74,14 +80,11 @@ const TeachersTableBody = ({ teachers }: TeachersTableBodyProps) => {
                             )}
                         </div>
                     </td>
-                    <td className="px-6 py-3 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">{teacher.phone || '-'}</div>
+                    <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-500">
+                        {formatDate(teacher.joinDate)}
                     </td>
                     <td className="px-6 py-3 whitespace-nowrap capitalize">
                         <StatusPill status={teacher.status} />
-                    </td>
-                    <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-500">
-                        {formatDate(teacher.joinDate)}
                     </td>
                     <td className="px-6 py-3 whitespace-nowrap text-right text-sm font-medium">
                         <ChevronRightIcon className="h-5 w-5 text-gray-300" aria-hidden="true" />
