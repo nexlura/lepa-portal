@@ -8,7 +8,6 @@ import clsx from 'clsx'
 import { MultiSelectOption } from '@/components/UIKit/MultiSelect'
 
 interface SearchableAssignSelectProps {
-    description: string
     placeholder?: string
     options: MultiSelectOption[]
     selected: MultiSelectOption[]
@@ -18,7 +17,6 @@ interface SearchableAssignSelectProps {
 }
 
 export default function SearchableAssignSelect({
-    description,
     placeholder = 'Search…',
     options,
     selected,
@@ -62,10 +60,6 @@ export default function SearchableAssignSelect({
 
     return (
         <div ref={containerRef} onBlur={handleBlur} className="space-y-4 relative">
-            <div>
-                <p className="text-sm text-gray-500">{description}</p>
-            </div>
-
             <div className="relative">
                 {/* SEARCH FIELD */}
                 <label className="flex items-center gap-2 border-b border-zinc-200 px-4 py-2.5 rounded-md border">
