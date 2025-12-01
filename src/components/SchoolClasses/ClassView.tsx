@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Session } from 'next-auth'
-import { PlusIcon, ArrowUpTrayIcon, BookOpenIcon } from '@heroicons/react/24/outline'
+import { PlusIcon, BookOpenIcon } from '@heroicons/react/24/outline'
 
 import { Button } from '@/components/UIKit/Button'
 import AddClassModal from '@/components/SchoolClasses/AddClassModal'
@@ -57,11 +57,6 @@ const ClassesView = ({ classes, totalPages, session }: ClassesViewProps) => {
                     </p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <Button outline>
-                        <ArrowUpTrayIcon data-slot="icon" />
-                        Import CSV
-                    </Button>
-
                     <Button
                         color="primary"
                         onClick={() => setIsAddOpen(true)}
