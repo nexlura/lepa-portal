@@ -59,12 +59,6 @@ const TeachersView = ({ teachers, totalPages }: TeachersViewProps) => {
                 </div>
                 <div className="flex space-x-3">
                     <Button
-                        outline
-                    >
-                        <ArrowDownTrayIcon className="h-4 w-4 mr-2" />
-                        Import CSV
-                    </Button>
-                    <Button
                         href="/teachers/new"
                         color='primary'
                     >
