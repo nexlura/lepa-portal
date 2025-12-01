@@ -9,12 +9,12 @@ const SettingsNavigation = (props: { collapsed?: boolean | undefined }) => {
     const pathname = usePathname()
     const { collapsed } = props
 
-    const isActive = pathname === '/dashboard/settings'
+    const isActive = pathname === '/settings'
 
 
     const linkContent = (
         <Link
-            href={'/dashboard/settings'}
+            href={'/settings'}
             className={`group flex text-gray-500 items-center ${props.collapsed ? 'justify-center' : 'px-3'} py-2 text-sm font-medium rounded-md transition-colors ${isActive
                 ? 'bg-primary-100 text-gray-900'
                 : 'hover:bg-primary-50 hover:text-gray-900'
