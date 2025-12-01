@@ -3,7 +3,6 @@
 import { AcademicCapIcon, PlusIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline'
 
 import { Button } from '@/components/UIKit/Button'
-import { Session } from 'next-auth'
 import TeachersTable from './Table'
 import TeachersStats from './TeachersStats'
 import EmptyState from '../EmptyState'
@@ -23,10 +22,10 @@ export interface Teacher {
 
 interface TeachersViewProps {
     teachers: Teacher[];
-    session?: Session | null;
+    totalPages: number
 };
 
-const TeachersView = ({ teachers }: TeachersViewProps) => {
+const TeachersView = ({ teachers, totalPages }: TeachersViewProps) => {
     if (teachers?.length < 1) {
         return (
             <>
@@ -78,7 +77,7 @@ const TeachersView = ({ teachers }: TeachersViewProps) => {
             {/* Stats */}
             <TeachersStats />
 
-            <TeachersTable teachers={teachers} />
+            <TeachersTable teachers={teachers} totalPages={totalPages} />
         </div>
     )
 }
