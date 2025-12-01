@@ -71,7 +71,6 @@ const ClassesView = ({ classes, totalPages, session }: ClassesViewProps) => {
                     </Button>
                 </div>
             </div>
-
             <ClassesStats />
 
             {/* Classes table */}

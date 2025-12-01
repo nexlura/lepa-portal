@@ -47,6 +47,7 @@ const StudentsView = ({ students, totalPages }: StudentsViewProps) => {
                     </p>
                 </div>
             </div>
+
             <StudentsTable totalPages={totalPages} students={students} />
         </div>
     )
