@@ -28,7 +28,7 @@ const ClassesTableBody = ({ classes }: ClassesTableBodyProps) => {
                                     {klass.teachers.map((teacher, idx) => (
                                         <span
                                             key={idx}
-                                            className="capitalize inline-flex px-2 py-1 text-xs font-medium rounded-md bg-green-100 text-green-800"
+                                            className="capitalize inline-flex px-2 py-1 text-xs font-medium bg-gre"
                                         >
                                             {teacher.name}
                                         </span>

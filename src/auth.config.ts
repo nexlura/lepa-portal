@@ -3,7 +3,7 @@ import type { NextAuthConfig } from 'next-auth';
 export const authConfig = {
   session: {
     strategy: 'jwt',
-    maxAge: 60 * 60, // session valid for 1 hour total
+    maxAge: 60 * 60 * 24, // session valid for 1 hour total
     updateAge: 15 * 60, // refresh session every 15 mins of activity
   },
 
