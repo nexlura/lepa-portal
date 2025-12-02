@@ -1,6 +1,6 @@
 'use client'
 
-import { AcademicCapIcon, PlusIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline'
+import { AcademicCapIcon, PlusIcon } from '@heroicons/react/24/outline'
 
 import { Button } from '@/components/UIKit/Button'
 import TeachersTable from './Table'

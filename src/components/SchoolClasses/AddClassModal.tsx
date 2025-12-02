@@ -69,6 +69,7 @@ const AddClassModal = ({ open, onClose, session }: AddClassModalProps) => {
         name: form.name,
     }
 
+
     const resetForm = () => {
         setForm({
             name: '',
@@ -141,6 +142,7 @@ const AddClassModal = ({ open, onClose, session }: AddClassModalProps) => {
         if (!open) {
             resetForm();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [open]);
 
     return (

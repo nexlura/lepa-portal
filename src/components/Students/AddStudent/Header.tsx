@@ -24,7 +24,12 @@ const AddStudentHeader = ({ isLoading, handleSubmit }: HeaderProps) => {
                 <Button type="button" plain onClick={() => router.push('/students/1')}>
                     Cancel
                 </Button>
-                <Button type="button" onClick={() => handleSubmit()} color="primary" data-disabled={isLoading}>
+                <Button
+                    type="button"
+                    onClick={() => handleSubmit()}
+                    color="primary"
+                    disabled={isLoading}
+                >
                     {isLoading ? 'Saving...' : 'Save Student'}
                 </Button>
             </div>
