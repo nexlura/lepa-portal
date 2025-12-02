@@ -48,14 +48,20 @@ const TeachersTableBody = ({ teachers }: TeachersTableBodyProps) => {
                         <div className="text-sm text-gray-900">
                             {teacher.subjects && teacher.subjects.length > 0 ? (
                                 <div className="flex flex-wrap gap-1">
-                                    {teacher.subjects.map((subject, idx) => (
-                                        <span
-                                            key={idx}
-                                            className="inline-flex px-2 py-1 text-xs font-medium rounded-md bg-blue-100 text-blue-800"
-                                        >
-                                            {subject}
-                                        </span>
-                                    ))}
+                                    {(() => {
+                                        const names = teacher.subjects.map((t) => t);
+                                        const first = names[0];
+                                        const count = names.length - 1;
+
+                                        return (
+                                            <span className="capitalize inline-flex py-1 text-xs font-medium">
+                                                {first}
+                                                {count > 0 && (
+                                                    <span className="text-gray-500 ml-1">+{count} more</span>
+                                                )}
+                                            </span>
+                                        );
+                                    })()}
                                 </div>
                             ) : (
                                 <span className="text-gray-400">-</span>
@@ -66,14 +72,20 @@ const TeachersTableBody = ({ teachers }: TeachersTableBodyProps) => {
                         <div className="text-sm text-gray-900">
                             {teacher.classes && teacher.classes.length > 0 ? (
                                 <div className="flex flex-wrap gap-1">
-                                    {teacher.classes.map((className, idx) => (
-                                        <span
-                                            key={idx}
-                                            className="inline-flex px-2 py-1 text-xs font-medium rounded-md bg-green-100 text-green-800"
-                                        >
-                                            {className}
-                                        </span>
-                                    ))}
+                                    {(() => {
+                                        const names = teacher.classes.map((t) => t);
+                                        const first = names[0];
+                                        const count = names.length - 1;
+
+                                        return (
+                                            <span className="capitalize inline-flex py-1 text-xs font-medium">
+                                                {first}
+                                                {count > 0 && (
+                                                    <span className="text-gray-500 ml-1">+{count} more</span>
+                                                )}
+                                            </span>
+                                        );
+                                    })()}
                                 </div>
                             ) : (
                                 <span className="text-gray-400">-</span>

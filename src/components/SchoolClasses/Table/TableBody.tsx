@@ -25,14 +25,20 @@ const ClassesTableBody = ({ classes }: ClassesTableBodyProps) => {
                         <div className="text-sm text-gray-900">
                             {klass.teachers && klass.teachers.length > 0 ? (
                                 <div className="flex flex-wrap gap-1">
-                                    {klass.teachers.map((teacher, idx) => (
-                                        <span
-                                            key={idx}
-                                            className="capitalize inline-flex px-2 py-1 text-xs font-medium bg-gre"
-                                        >
-                                            {teacher.name}
-                                        </span>
-                                    ))}
+                                    {(() => {
+                                        const names = klass.teachers.map((t) => t.name);
+                                        const first = names[0];
+                                        const count = names.length - 1;
+
+                                        return (
+                                            <span className="capitalize inline-flex py-1 text-xs font-medium">
+                                                {first}
+                                                {count > 0 && (
+                                                    <span className="text-gray-500 ml-1">+{count} more</span>
+                                                )}
+                                            </span>
+                                        );
+                                    })()}
                                 </div>
                             ) : (
                                 <span className="text-gray-400">-</span>
