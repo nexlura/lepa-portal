@@ -4,23 +4,32 @@ import { useContext, useEffect, useRef, useState } from 'react'
 import { Session } from 'next-auth'
 
 import { Dialog, DialogActions, DialogBody, DialogDescription, DialogTitle } from '@/components/UIKit/Dialog'
-import { Field, Label, ErrorMessage } from '@/components/UIKit/Fieldset'
-import { Input } from '@/components/UIKit/Input'
+
 import { Button } from '../UIKit/Button'
-import SelectMenu from '../UIKit/SelectMenu'
 import { postModel } from '@/lib/connector'
-import FormSubmitFeedback from '../FormAlert'
 import { FeedbackContext } from '@/context/feedback'
 import revalidatePage from '@/app/actions/revalidate-path'
 import {
     SL_LEVEL_BY_ID,
 } from '@/data/sierraleone-grades'
+import AddClassForm from './AddClassForm'
 export interface AddModalProps {
     open: boolean;
     onClose: (open: boolean) => void;
 }
 interface AddClassModalProps extends AddModalProps {
     session: Session | null
+}
+
+export type ClassForm = {
+    name: string,
+    capacity: string,
+    teacher: string,
+}
+
+export type ClassformErrors = {
+    name?: string;
+    grade?: string;
 }
 
 
@@ -38,11 +47,16 @@ const AddClassModal = ({ open, onClose, session }: AddClassModalProps) => {
 
     const schoolLevel = session?.user?.schoolLevel; // e.g., 'primary', 'jss', 'sss
 
+    const getYears = (level: string) =>
+        SL_LEVEL_BY_ID[level]?.years.map(y => ({ id: y.id, name: y.name })) ?? [];
+
     const gradeOptions =
-        SL_LEVEL_BY_ID[schoolLevel || 'primary']?.years.map((y) => ({
-            id: y.id,
-            name: y.name,
-        })) ?? [];
+        schoolLevel === 'secondary'
+            ? [
+                ...getYears('jss'),
+                ...getYears('sss'),
+            ]
+            : getYears(schoolLevel || 'primary');
 
     const [errors, setErrors] = useState<{ name?: string; grade?: string }>({})
     const [selectedLevel, setSelectedLevel] = useState(
@@ -55,6 +69,7 @@ const AddClassModal = ({ open, onClose, session }: AddClassModalProps) => {
         name: form.name,
     }
 
+
     const resetForm = () => {
         setForm({
             name: '',
@@ -63,7 +78,7 @@ const AddClassModal = ({ open, onClose, session }: AddClassModalProps) => {
         });
         setErrors({});
         setLocalError(null);
-        // setSelectedLevel(classes[0]); // reset dropdown to default
+        setSelectedLevel(gradeOptions[0] || { id: '', name: '' }); // reset dropdown to default
     };
 
     const handleVerificationSuccess = () => {
@@ -127,6 +142,7 @@ const AddClassModal = ({ open, onClose, session }: AddClassModalProps) => {
         if (!open) {
             resetForm();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [open]);
 
     return (
@@ -134,39 +150,16 @@ const AddClassModal = ({ open, onClose, session }: AddClassModalProps) => {
             <DialogTitle>Add a Class</DialogTitle>
             <DialogDescription>Provide details for the new class.</DialogDescription>
             <DialogBody>
-                <form className="mt-4 grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2">
-                    {localError && (
-                        <div className='col-span-2'>
-                            <FormSubmitFeedback msg={localError} />
-                        </div>
-                    )}
-                    <Field className="sm:col-span-2">
-                        <Label className="text-sm/6 text-gray-900 font-medium">Name</Label>
-                        <Input
-                            ref={nameInputRef}
-                            placeholder="e.g., Class 1 Blue"
-                            value={form.name}
-                            onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                            invalid={Boolean(errors.name)}
-                        />
-                        {errors.name ? <ErrorMessage>{errors.name}</ErrorMessage> : null}
-                    </Field>
-                    <Field className="sm:col-span-2">
-                        <Label className="block text-sm/6 font-medium text-gray-900 ">Class</Label>
-                        <SelectMenu
-                            options={gradeOptions}
-                            selected={selectedLevel}
-                            setSelected={setSelectedLevel}
-                        />                    </Field>
-                    <Field className="sm:col-span-2">
-                        <Label className="text-sm/6 text-gray-900 font-medium">Capacity</Label>
-                        <Input
-                            placeholder="e.g., 40"
-                            value={form.capacity}
-                            onChange={(e) => setForm((f) => ({ ...f, capacity: e.target.value }))}
-                        />
-                    </Field>
-                </form>
+                <AddClassForm
+                    errors={errors}
+                    form={form}
+                    gradeOptions={gradeOptions}
+                    localError={localError}
+                    nameInputRef={nameInputRef}
+                    setForm={setForm}
+                    selectedLevel={selectedLevel}
+                    setSelectedLevel={setSelectedLevel}
+                />
             </DialogBody>
             <DialogActions>
                 <Button plain onClick={() => onClose(false)}>Cancel</Button>

@@ -8,7 +8,6 @@ import {
     UserGroupIcon,
     AcademicCapIcon,
     BookOpenIcon,
-    ClipboardDocumentListIcon,
     ChevronDownIcon,
     ChevronRightIcon,
 } from '@heroicons/react/24/outline';
@@ -22,14 +21,6 @@ interface NavigationItem {
 
 const navigation: NavigationItem[] = [
     { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
-    {
-        name: 'Admissions',
-        icon: ClipboardDocumentListIcon,
-        subItems: [
-            { name: 'Admission Form', href: '/admissions/new' },
-            { name: 'Applicants', href: '/admissions' },
-        ],
-    },
     { name: 'Classes', href: '/classes', icon: BookOpenIcon },
     { name: 'Teachers', href: '/teachers', icon: AcademicCapIcon },
     { name: 'Students', href: '/students', icon: UserGroupIcon },

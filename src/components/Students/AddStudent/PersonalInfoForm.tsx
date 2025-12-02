@@ -3,7 +3,7 @@
 import { Dispatch, FormEvent, RefObject, SetStateAction } from 'react'
 import { Field, Label, ErrorMessage } from '@/components/UIKit/Fieldset'
 import { Input } from '@/components/UIKit/Input'
-import { AddStudentForm, AddStudentFormErrors } from '@/app/(portal)/admissions/new/page'
+import { AddStudentForm, AddStudentFormErrors } from '@/app/(portal)/students/new/page'
 
 interface PersonalInfoFormProps {
     form: AddStudentForm
