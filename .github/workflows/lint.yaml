@@ -6,7 +6,7 @@ on:
     types: [opened, synchronize, reopened]
 
 jobs:
-  validate:
+  Build:
     runs-on: ubuntu-latest
 
     steps:
