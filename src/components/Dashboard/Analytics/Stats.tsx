@@ -1,42 +1,45 @@
 import {
     UserGroupIcon,
     AcademicCapIcon,
-    DocumentTextIcon,
+    BookOpenIcon,
     ChartBarIcon,
 } from '@heroicons/react/24/outline';
 
-const stats = [
-    {
-        name: 'Total Students',
-        value: '1,234',
-        change: '+12%',
-        changeType: 'positive',
-        icon: UserGroupIcon,
-    },
-    {
-        name: 'Total Teachers',
-        value: '89',
-        change: '+5%',
-        changeType: 'positive',
-        icon: AcademicCapIcon,
-    },
-    {
-        name: 'Applications',
-        value: '456',
-        change: '+23%',
-        changeType: 'positive',
-        icon: DocumentTextIcon,
-    },
-    {
-        name: 'Admission Rate',
-        value: '78%',
-        change: '+2%',
-        changeType: 'positive',
-        icon: ChartBarIcon,
-    },
-];
+interface DashboardStatsProps {
+    studentsCount: number;
+    teachersCount: number;
+    classesCount: number;
+    studentTeacherRatio: number;
+}
 
-const DashboardStats = () => {
+const DashboardStats = ({ studentsCount, teachersCount, classesCount, studentTeacherRatio }: DashboardStatsProps) => {
+    const formatNumber = (num: number) => {
+        return new Intl.NumberFormat('en-US').format(num);
+    };
+
+    const stats = [
+        {
+            name: 'Students',
+            value: formatNumber(studentsCount),
+            icon: UserGroupIcon,
+        },
+        {
+            name: 'Teachers',
+            value: formatNumber(teachersCount),
+            icon: AcademicCapIcon,
+        },
+        {
+            name: 'Classes',
+            value: formatNumber(classesCount),
+            icon: BookOpenIcon,
+        },
+        {
+            name: 'Student–Teacher Ratio',
+            value: studentTeacherRatio > 0 ? `${studentTeacherRatio.toFixed(1)}:1` : 'N/A',
+            icon: ChartBarIcon,
+        },
+    ];
+
     return (
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {stats.map((stat) => (
@@ -54,12 +57,9 @@ const DashboardStats = () => {
                                     <dt className="text-sm font-medium text-gray-500 truncate">
                                         {stat.name}
                                     </dt>
-                                    <dd className="flex items-baseline">
+                                    <dd>
                                         <div className="text-2xl font-semibold text-gray-900">
                                             {stat.value}
-                                        </div>
-                                        <div className="ml-2 flex items-baseline text-sm font-semibold text-green-600">
-                                            {stat.change}
                                         </div>
                                     </dd>
                                 </dl>
