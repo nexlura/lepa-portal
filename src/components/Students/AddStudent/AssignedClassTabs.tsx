@@ -1,7 +1,7 @@
 import { SetStateAction, Dispatch } from "react"
 
 import { MultiSelectOption } from "../../UIKit/MultiSelect"
-import { AddStudentForm } from "@/app/(portal)/admissions/new/page"
+import { AddStudentForm } from "@/app/(portal)/students/new/page"
 import SearchableAssignSelect from "./SearchableAssignSelect"
 
 interface AssignedClassTabsProps {
@@ -17,12 +17,13 @@ const AssignedClassTabs = ({ form, setForm, classes, loadingClasses }: AssignedC
             <div className="flex flex-col gap-2 mb-4 border-b border-zinc-100">
                 <div className="mt-4">
                     <h3 className="text-sm font-medium text-gray-900">Assigned Class</h3>
-                    <p className="mt-1 text-sm text-gray-500">Link to a class</p>
+                    <p className="mt-1 text-sm text-gray-500">
+                        Select the class this student will be assigned to
+                    </p>
                 </div>
             </div>
             <div className="rounded-md bg-white">
                 <SearchableAssignSelect
-                    description="Select the class this student will be assigned to"
                     placeholder="Search classes…"
                     options={classes}
                     selected={form.assignedClass ? [form.assignedClass] : []}

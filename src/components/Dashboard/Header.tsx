@@ -1,7 +1,6 @@
 'use client';
 
 import {
-    BellIcon,
     Bars3Icon,
 } from '@heroicons/react/24/outline';
 

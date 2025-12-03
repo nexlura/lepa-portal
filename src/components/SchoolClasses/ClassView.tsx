@@ -2,13 +2,14 @@
 
 import { useState } from 'react'
 import { Session } from 'next-auth'
-import { PlusIcon, ArrowUpTrayIcon, BookOpenIcon } from '@heroicons/react/24/outline'
+import { PlusIcon, BookOpenIcon } from '@heroicons/react/24/outline'
 
 import { Button } from '@/components/UIKit/Button'
 import AddClassModal from '@/components/SchoolClasses/AddClassModal'
 import ClassesTable from '@/components/SchoolClasses/Table'
 import { SchoolClass } from '@/app/(portal)/classes/[pageNumber]/page'
 import EmptyState from '../EmptyState'
+import ClassesStats from './ClassesStats'
 interface ClassesViewProps {
     classes: SchoolClass[]
     session: Session | null
@@ -56,11 +57,6 @@ const ClassesView = ({ classes, totalPages, session }: ClassesViewProps) => {
                     </p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <Button outline>
-                        <ArrowUpTrayIcon data-slot="icon" />
-                        Import CSV
-                    </Button>
-
                     <Button
                         color="primary"
                         onClick={() => setIsAddOpen(true)}
@@ -70,6 +66,7 @@ const ClassesView = ({ classes, totalPages, session }: ClassesViewProps) => {
                     </Button>
                 </div>
             </div>
+            <ClassesStats />
 
             {/* Classes table */}
             <ClassesTable classes={classes} totalPages={totalPages} />

@@ -1,6 +1,5 @@
 import TeachersView from '@/components/Teachers/TeachersView'
 import { PageProps } from '../../classes/[pageNumber]/page'
-import { auth } from '@/auth'
 import { getModel } from '@/lib/connector'
 import { Teacher } from '@/components/Teachers/TeachersView'
 
@@ -22,10 +21,9 @@ interface BackendTeachersData {
 const TeachersPage = async ({ params }: PageProps) => {
     const { pageNumber } = await params
 
-    const session = await auth();
-
     const res = await getModel(`/teachers?page=${pageNumber}&limit=10`);
     const teachers = res?.data?.teachers
+    const totalPages = res.data?.total_pages
 
     const transformedData: Teacher[] = teachers?.map((teacher: BackendTeachersData) => {
         // Format name from first_name and last_name or use name field
@@ -57,7 +55,7 @@ const TeachersPage = async ({ params }: PageProps) => {
 
 
     return (
-        <TeachersView teachers={transformedData} session={session} />
+        <TeachersView teachers={transformedData} totalPages={totalPages} />
     )
 }
 

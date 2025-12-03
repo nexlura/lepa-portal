@@ -8,7 +8,6 @@ import {
     UserGroupIcon,
     AcademicCapIcon,
     BookOpenIcon,
-    ClipboardDocumentListIcon,
     ChevronDownIcon,
     ChevronRightIcon,
 } from '@heroicons/react/24/outline';

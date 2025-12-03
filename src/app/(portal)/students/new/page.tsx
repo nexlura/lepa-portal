@@ -55,29 +55,6 @@ const NewStudentAdmissionPage = () => {
         grade: string
     }
 
-    // Fetch classes once
-    useEffect(() => {
-        if (!loadingClasses && classes.length === 0) {
-            setLoadingClasses(true)
-            getModel<{ data?: { classes?: BackendClass[] } }>('/classes?page=1&limit=100')
-                .then((res) => {
-                    const serverClasses = res?.data?.classes
-                    if (serverClasses && Array.isArray(serverClasses)) {
-                        const classOptions: MultiSelectOption[] = serverClasses.map((cls) => ({
-                            id: cls.id,
-                            name: `${cls.name} (${cls.grade})`,
-                        }))
-                        setClasses(classOptions)
-                    }
-                })
-                .catch((err) => {
-                    console.error('Error fetching classes:', err)
-                })
-                .finally(() => {
-                    setLoadingClasses(false)
-                })
-        }
-    }, [classes.length, loadingClasses])
 
     const validate = () => {
         const next: AddStudentFormErrors = {}
@@ -155,6 +132,31 @@ const NewStudentAdmissionPage = () => {
             setIsLoading(false)
         }
     }
+
+    // Fetch classes once
+    useEffect(() => {
+        if (!loadingClasses && classes.length === 0) {
+            setLoadingClasses(true)
+            getModel<{ data?: { classes?: BackendClass[] } }>('/classes?page=1&limit=100')
+                .then((res) => {
+                    const serverClasses = res?.data?.classes
+                    if (serverClasses && Array.isArray(serverClasses)) {
+                        const classOptions: MultiSelectOption[] = serverClasses.map((cls) => ({
+                            id: cls.id,
+                            name: `${cls.name} (${cls.grade})`,
+                        }))
+                        setClasses(classOptions)
+                    }
+                })
+                .catch((err) => {
+                    console.error('Error fetching classes:', err)
+                })
+                .finally(() => {
+                    setLoadingClasses(false)
+                })
+        }
+    }, [classes.length, loadingClasses])
+
 
     return (
         <div className="flex flex-col items-center space-y-8 sm:px-6">

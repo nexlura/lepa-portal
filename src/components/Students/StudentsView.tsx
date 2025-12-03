@@ -46,7 +46,17 @@ const StudentsView = ({ students, totalPages }: StudentsViewProps) => {
                         Manage all student records and information.
                     </p>
                 </div>
+                <div className="flex space-x-3">
+                    <Button
+                        href="/students/new"
+                        color='primary'
+                    >
+                        <PlusIcon className="h-4 w-4 mr-2 text-white" color='white' />
+                        Add Student
+                    </Button>
+                </div>
             </div>
+
             <StudentsTable totalPages={totalPages} students={students} />
         </div>
     )

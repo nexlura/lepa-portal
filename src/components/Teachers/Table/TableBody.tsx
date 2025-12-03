@@ -1,0 +1,110 @@
+import { ChevronRightIcon } from "@heroicons/react/24/outline"
+import { useRouter } from "next/navigation"
+
+import { Teacher } from "../TeachersView"
+import { formatDate } from "@/utils/formatDate"
+import StatusPill from "@/components/StatusPill"
+import { getTitleFromGender } from "@/utils/titleByGender"
+import { formatPhoneNumber } from "@/utils"
+
+interface TeachersTableBodyProps {
+    teachers: Teacher[]
+}
+
+const TeachersTableBody = ({ teachers }: TeachersTableBodyProps) => {
+    const router = useRouter()
+
+    const handleRowClick = (teacherId: number) => {
+        router.push(`/teachers/profile/${teacherId}`)
+    }
+
+    return (
+        <tbody className="bg-white divide-y divide-gray-200">
+            {teachers.map((teacher) => (
+                <tr
+                    key={teacher.id}
+                    className="hover:bg-gray-50 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+                    tabIndex={0}
+                    role="button"
+                    onClick={() => handleRowClick(teacher.id)}
+                    onKeyDown={(event) => {
+                        if (event.key === 'Enter' || event.key === ' ') {
+                            event.preventDefault()
+                            handleRowClick(teacher.id)
+                        }
+                    }}
+                >
+                    <td className="px-6 py-3 whitespace-nowrap">
+                        <div className="text-sm font-medium text-gray-900 capitalize">
+                            {`${getTitleFromGender(teacher.sex)}. ${teacher.name}`}
+                        </div>
+                    </td>
+                    <td className="px-6 py-3 whitespace-nowrap">
+                        <div className="text-sm text-gray-500">
+                            {formatPhoneNumber(teacher.phone || '')}
+                        </div>
+                    </td>
+                    <td className="px-6 py-3">
+                        <div className="text-sm text-gray-900">
+                            {teacher.subjects && teacher.subjects.length > 0 ? (
+                                <div className="flex flex-wrap gap-1">
+                                    {(() => {
+                                        const names = teacher.subjects.map((t) => t);
+                                        const first = names[0];
+                                        const count = names.length - 1;
+
+                                        return (
+                                            <span className="capitalize inline-flex py-1 text-xs font-medium">
+                                                {first}
+                                                {count > 0 && (
+                                                    <span className="text-gray-500 ml-1">+{count} more</span>
+                                                )}
+                                            </span>
+                                        );
+                                    })()}
+                                </div>
+                            ) : (
+                                <span className="text-gray-400">-</span>
+                            )}
+                        </div>
+                    </td>
+                    <td className="px-6 py-3">
+                        <div className="text-sm text-gray-900">
+                            {teacher.classes && teacher.classes.length > 0 ? (
+                                <div className="flex flex-wrap gap-1">
+                                    {(() => {
+                                        const names = teacher.classes.map((t) => t);
+                                        const first = names[0];
+                                        const count = names.length - 1;
+
+                                        return (
+                                            <span className="capitalize inline-flex py-1 text-xs font-medium">
+                                                {first}
+                                                {count > 0 && (
+                                                    <span className="text-gray-500 ml-1">+{count} more</span>
+                                                )}
+                                            </span>
+                                        );
+                                    })()}
+                                </div>
+                            ) : (
+                                <span className="text-gray-400">-</span>
+                            )}
+                        </div>
+                    </td>
+                    <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-500">
+                        {formatDate(teacher.joinDate)}
+                    </td>
+                    <td className="px-6 py-3 whitespace-nowrap capitalize">
+                        <StatusPill status={teacher.status} />
+                    </td>
+                    <td className="px-6 py-3 whitespace-nowrap text-right text-sm font-medium">
+                        <ChevronRightIcon className="h-5 w-5 text-gray-300" aria-hidden="true" />
+                    </td>
+                </tr>
+            ))}
+        </tbody>
+    )
+}
+
+export default TeachersTableBody
