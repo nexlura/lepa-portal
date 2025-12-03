@@ -47,6 +47,7 @@ const RecentActivities = ({ recentStudents = [], recentTeachers = [] }: RecentAc
             icon: AcademicCapIcon,
         })),
     ]
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         .sort((a, b) => {
             // Sort by time (most recent first)
             // This is a simple sort - in production, you'd parse the dates properly
