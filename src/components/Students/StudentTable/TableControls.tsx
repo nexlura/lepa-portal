@@ -1,5 +1,5 @@
 interface TableControlsProps {
-    searchInput: React.ReactElement
+    searchInput: React.ReactNode
 }
 
 const StudentTableControls = ({

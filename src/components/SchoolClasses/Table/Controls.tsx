@@ -4,7 +4,7 @@ interface TableControlsProps {
     gradeOptions: string[]
     gradeFilter: string
     setGradeFilter: Dispatch<SetStateAction<string>>
-    searchInput: React.ReactElement
+    searchInput: React.ReactNode
 }
 
 const SchoolClassesTableControls = ({

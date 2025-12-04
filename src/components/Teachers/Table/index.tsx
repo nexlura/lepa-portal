@@ -1,9 +1,24 @@
 'use client'
 
-import TableFoot from "@/components/TableFoot"
+import DataTable from '@/components/DataTable'
 import { Teacher } from "../TeachersView"
 import TeachersTableBody from "./TableBody"
 import TeachersTableHead from "./TableHead"
+
+interface BackendTeachersData {
+    id: number
+    first_name?: string
+    last_name?: string
+    name?: string
+    email?: string
+    phone?: string
+    subjects?: string[]
+    assigned_classes?: Array<{ id: string; name: string; grade?: string }>
+    is_active?: boolean
+    created_at?: string
+    join_date?: string
+    sex?: string
+}
 
 interface TeachersTableProps {
     teachers: Teacher[]
@@ -11,24 +26,42 @@ interface TeachersTableProps {
 }
 
 const TeachersTable = ({ teachers, totalPages }: TeachersTableProps) => {
-
     return (
-        <div className="bg-white shadow rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
-                <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-                    All Teachers
-                </h3>
-                <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                        <TeachersTableHead />
-                        <TeachersTableBody teachers={teachers} />
-                        {totalPages > 1 && (
-                            <TableFoot totalPages={totalPages} />
-                        )}
-                    </table>
-                </div>
-            </div>
-        </div>
+        <DataTable<Teacher, BackendTeachersData>
+            config={{
+                endpoint: '/teachers',
+                dataKey: 'teachers',
+                transformData: (teacher: BackendTeachersData): Teacher => {
+                    const fullName = teacher.first_name && teacher.last_name
+                        ? `${teacher.first_name} ${teacher.last_name}`
+                        : teacher.name || 'Unknown'
+
+                    const subjects = teacher.subjects || []
+                    const classes = teacher.assigned_classes?.map(cls =>
+                        cls.grade ? `${cls.name} (${cls.grade})` : cls.name
+                    ) || []
+
+                    return {
+                        id: teacher.id,
+                        name: fullName,
+                        email: teacher.email || '',
+                        subjects: subjects.length > 0 ? subjects : undefined,
+                        classes: classes.length > 0 ? classes : undefined,
+                        status: teacher.is_active ? 'active' : 'inactive',
+                        joinDate: teacher.join_date || teacher.created_at || '',
+                        phone: teacher.phone,
+                        sex: teacher.sex
+                    }
+                },
+                title: 'All Teachers',
+                tableHead: <TeachersTableHead />,
+                tableBody: (teachers) => <TeachersTableBody teachers={teachers} />,
+                searchPlaceholder: 'search teachers by name',
+                columnCount: 7,
+            }}
+            initialData={teachers}
+            initialTotalPages={totalPages}
+        />
     )
 }
 
