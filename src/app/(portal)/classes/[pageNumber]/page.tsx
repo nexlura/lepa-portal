@@ -3,7 +3,7 @@ import ClassesView from '@/components/SchoolClasses/ClassView';
 import { MultiSelectOption } from '@/components/UIKit/MultiSelect';
 import { getModel } from '@/lib/connector';
 
-type BackendClassesData = {
+export type BackendClassesData = {
     id: string,
     tenant_id: string,
     name: string,
