@@ -1,15 +1,8 @@
-import { Dispatch, SetStateAction } from 'react'
 interface TableControlsProps {
-    gradeOptions: string[]
-    gradeFilter: string
-    setGradeFilter: Dispatch<SetStateAction<string>>
     searchInput: React.ReactElement
 }
 
 const StudentTableControls = ({
-    gradeFilter,
-    gradeOptions,
-    setGradeFilter,
     searchInput
 }: TableControlsProps) => {
     return (
@@ -22,21 +15,6 @@ const StudentTableControls = ({
 
                 {/* SEARCH INPUT */}
                 {searchInput}
-
-                {/* GRADE FILTER */}
-                <div className='bg-gray-100 px-2 rounded-md'>
-                    <select
-                        value={gradeFilter}
-                        onChange={(e) => setGradeFilter(e.target.value)}
-                        className="rounded-md border-gray-300 py-2 pr-2 text-sm focus:border-primary-500 focus:ring-primary-500"
-                    >
-                        {gradeOptions.map(g => (
-                            <option key={g} value={g}>
-                                {g === 'All' ? 'All grades' : g}
-                            </option>
-                        ))}
-                    </select>
-                </div>
             </div>
         </div>
     )

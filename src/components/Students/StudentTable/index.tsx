@@ -27,7 +27,6 @@ const StudentsTable = ({ students: initialStudents, totalPages: initialTotalPage
     // 👇 NEW: debounced value
     const [debouncedSearch, setDebouncedSearch] = useState(searchQry)
 
-    const [gradeFilter, setGradeFilter] = useState<string>('All')
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
 
@@ -57,7 +56,6 @@ const StudentsTable = ({ students: initialStudents, totalPages: initialTotalPage
             params.set("limit", "10")
 
             if (debouncedSearch) params.set("search", debouncedSearch)
-            if (gradeFilter !== "All") params.set("grade", gradeFilter)
 
             const url = `/students?${params.toString()}`
             const res = await getModel(url)
@@ -91,7 +89,7 @@ const StudentsTable = ({ students: initialStudents, totalPages: initialTotalPage
         } finally {
             setIsLoading(false)
         }
-    }, [currentPage, debouncedSearch, gradeFilter])
+    }, [currentPage, debouncedSearch])
 
 
     /**
@@ -104,7 +102,7 @@ const StudentsTable = ({ students: initialStudents, totalPages: initialTotalPage
 
         router.push(`/students/${currentPage}?${params.toString()}`)
         fetchData()
-    }, [currentPage, debouncedSearch, gradeFilter, router, fetchData])
+    }, [currentPage, debouncedSearch, router, fetchData])
 
 
     const onPageChange = (page: number) => {
@@ -122,9 +120,6 @@ const StudentsTable = ({ students: initialStudents, totalPages: initialTotalPage
 
                 {/* Controls */}
                 <StudentTableControls
-                    gradeFilter={gradeFilter}
-                    gradeOptions={['class 1']}
-                    setGradeFilter={setGradeFilter}
                     searchInput={
                         <SearchInput
                             search={searchQry}
