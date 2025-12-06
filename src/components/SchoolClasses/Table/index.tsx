@@ -29,7 +29,7 @@ const SchoolClassesTable = ({ classes, totalPages }: ClassesTableProps) => {
     return (
         <DataTable<SchoolClass, BackendClassesData>
             config={{
-                endpoint: '/classes',
+                endpoint: '/classes/search',
                 dataKey: 'classes',
                 transformData: (classK: BackendClassesData): SchoolClass => ({
                     id: classK.id,
@@ -57,9 +57,7 @@ const SchoolClassesTable = ({ classes, totalPages }: ClassesTableProps) => {
                 searchPlaceholder: 'search by class name',
                 columnCount: 5,
                 buildQueryParams: (params, search, page) => {
-                    if (gradeFilter && gradeFilter !== 'All') {
-                        params.set('grade', gradeFilter)
-                    }
+                    params.set('name', search)
                 },
             }}
             initialData={classes}

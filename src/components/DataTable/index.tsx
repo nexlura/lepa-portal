@@ -113,7 +113,6 @@ function DataTable<TData, TBackendData>({
             const params = new URLSearchParams()
             params.set("page", page.toString())
             params.set("limit", "10")
-            params.set("search", search.trim())
 
             // Allow custom query params
             if (buildQueryParams) {

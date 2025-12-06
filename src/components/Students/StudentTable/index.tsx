@@ -43,6 +43,9 @@ const StudentsTable = ({ students, totalPages }: StudentsTableProps) => {
                 },
                 searchPlaceholder: 'search students by name',
                 columnCount: 6,
+                buildQueryParams: (params, search, page) => {
+                    params.set('search', search)
+                },
             }}
             initialData={students}
             initialTotalPages={totalPages}
