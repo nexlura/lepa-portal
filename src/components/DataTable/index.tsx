@@ -221,21 +221,7 @@ function DataTable<TData, TBackendData>({
                         {tableHead}
 
                         {/* Loading State */}
-                        {isLoading ? (
-                            <tbody>
-                                <tr>
-                                    <td
-                                        colSpan={columnCount}
-                                        className="text-center py-8 text-gray-500"
-                                    >
-                                        <div className="flex items-center justify-center">
-                                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary-600"></div>
-                                            <span className="ml-2">Searching...</span>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        ) : hasSearch && tableData.length === 0 ? (
+                        {hasSearch && tableData.length === 0 ? (
                             // No Results Found (only when searching)
                             <tbody>
                                 <tr>
