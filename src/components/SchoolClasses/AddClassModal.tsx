@@ -33,7 +33,7 @@ export type ClassformErrors = {
 }
 
 
-const AddClassModal = ({ open, onClose, session }: AddClassModalProps) => {
+const AddSchoolClassModal = ({ open, onClose, session }: AddClassModalProps) => {
     const nameInputRef = useRef<HTMLInputElement>(null);
     const { setFeedback } = useContext(FeedbackContext)
 
@@ -176,4 +176,4 @@ const AddClassModal = ({ open, onClose, session }: AddClassModalProps) => {
     )
 }
 
-export default AddClassModal
+export default AddSchoolClassModal

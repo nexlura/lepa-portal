@@ -5,18 +5,18 @@ import { Session } from 'next-auth'
 import { PlusIcon, BookOpenIcon } from '@heroicons/react/24/outline'
 
 import { Button } from '@/components/UIKit/Button'
-import AddClassModal from '@/components/SchoolClasses/AddClassModal'
-import ClassesTable from '@/components/SchoolClasses/Table'
 import { SchoolClass } from '@/app/(portal)/classes/[pageNumber]/page'
 import EmptyState from '../EmptyState'
 import ClassesStats from './ClassesStats'
+import AddSchoolClassModal from './AddClassModal'
+import SchoolClassesTable from '@/components/SchoolClasses/Table'
 interface ClassesViewProps {
     classes: SchoolClass[]
     session: Session | null
     totalPages: number
 };
 
-const ClassesView = ({ classes, totalPages, session }: ClassesViewProps) => {
+const SchoolClassesView = ({ classes, totalPages, session }: ClassesViewProps) => {
     const [isAddOpen, setIsAddOpen] = useState(false)
     //show empty-state component when we have zero items
     if (classes.length < 1) {
@@ -37,7 +37,7 @@ const ClassesView = ({ classes, totalPages, session }: ClassesViewProps) => {
                     icon={<BookOpenIcon className='size-12 text-gray-500' />}
                 />
                 {/* Modals */}
-                <AddClassModal
+                <AddSchoolClassModal
                     open={isAddOpen}
                     onClose={setIsAddOpen}
                     session={session}
@@ -69,11 +69,11 @@ const ClassesView = ({ classes, totalPages, session }: ClassesViewProps) => {
             <ClassesStats />
 
             {/* Classes table */}
-            <ClassesTable classes={classes} totalPages={totalPages} />
+            <SchoolClassesTable classes={classes} totalPages={totalPages} />
 
-            <AddClassModal open={isAddOpen} onClose={setIsAddOpen} session={session} />
+            <AddSchoolClassModal open={isAddOpen} onClose={setIsAddOpen} session={session} />
         </div>
     );
 };
 
-export default ClassesView;
+export default SchoolClassesView;

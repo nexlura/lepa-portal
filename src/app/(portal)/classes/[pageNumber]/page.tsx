@@ -1,5 +1,5 @@
 import { auth } from '@/auth';
-import ClassesView from '@/components/SchoolClasses/ClassView';
+import SchoolClassesView from '@/components/SchoolClasses/ClassView';
 import { MultiSelectOption } from '@/components/UIKit/MultiSelect';
 import { getModel } from '@/lib/connector';
 
@@ -30,7 +30,7 @@ export type PageProps = {
     params: Promise<{ pageNumber: string }>;
 };
 
-const ClassesPage = async ({ params }: PageProps) => {
+const SchoolClassesPage = async ({ params }: PageProps) => {
     const { pageNumber } = await params
     const session = await auth();
 
@@ -55,7 +55,7 @@ const ClassesPage = async ({ params }: PageProps) => {
     });
 
     return (
-        <ClassesView
+        <SchoolClassesView
             classes={transformedData}
             session={session}
             totalPages={totalPages}
@@ -63,4 +63,4 @@ const ClassesPage = async ({ params }: PageProps) => {
     );
 };
 
-export default ClassesPage
+export default SchoolClassesPage
