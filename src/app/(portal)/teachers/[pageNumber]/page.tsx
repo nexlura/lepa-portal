@@ -22,8 +22,16 @@ const TeachersPage = async ({ params }: PageProps) => {
     const { pageNumber } = await params
 
     const res = await getModel(`/teachers?page=${pageNumber}&limit=10`);
-    const teachers = res?.data?.teachers
-    const totalPages = res.data?.total_pages
+    
+    // Check if response is valid
+    if (!res || !res.data) {
+        return (
+            <TeachersView teachers={[]} totalPages={0} />
+        );
+    }
+    
+    const teachers = res.data.teachers;
+    const totalPages = res.data.total_pages;
 
     const transformedData: Teacher[] = teachers?.map((teacher: BackendTeachersData) => {
         // Format name from first_name and last_name or use name field
