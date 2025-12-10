@@ -203,6 +203,8 @@ const sendRequest = async <T = any>(
       ),
     };
 
+    // console.log(session?.user?.accessToken);
+
     const requestConfig: AxiosRequestConfig = {
       ...config,
       method,

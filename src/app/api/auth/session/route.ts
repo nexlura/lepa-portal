@@ -2,18 +2,14 @@ import { auth } from '@/auth';
 import { NextResponse } from 'next/server';
 
 export async function GET() {
-  const session = await auth();
-
-  if (session?.user) {
-    // ✅ Authenticated → redirect to dashboard
-    return NextResponse.json(
-      { message: 'request successfull' },
-      { status: 200 }
-    );
-  } else {
-    return NextResponse.json(
-      { message: 'user is unauthenticated' },
-      { status: 401 }
-    );
+  try {
+    const session = await auth();
+    
+    // Return session in the format NextAuth expects
+    // If no session, return null (NextAuth handles this)
+    return NextResponse.json(session || null);
+  } catch (error) {
+    console.error('Error fetching session:', error);
+    return NextResponse.json(null, { status: 500 });
   }
 }

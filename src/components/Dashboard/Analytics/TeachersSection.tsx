@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { AcademicCapIcon, UserGroupIcon, ChartBarIcon } from '@heroicons/react/24/outline';
 
 interface TeacherData {
@@ -15,6 +16,7 @@ interface TeachersSectionProps {
 }
 
 const TeachersSection = ({ teachers, averageStudentsPerTeacher }: TeachersSectionProps) => {
+    const [hoveredRow, setHoveredRow] = useState<string | null>(null);
     const teachersWithClasses = teachers.filter(t => t.hasClasses);
     const teachersWithoutClasses = teachers.filter(t => !t.hasClasses);
 
@@ -86,22 +88,30 @@ const TeachersSection = ({ teachers, averageStudentsPerTeacher }: TeachersSectio
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
                             {teachers.slice(0, 10).map((teacher) => (
-                                <tr key={teacher.id}>
-                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                                <tr 
+                                    key={teacher.id}
+                                    className={`transition-colors cursor-pointer ${
+                                        hoveredRow === teacher.id ? 'bg-primary-50' : 'hover:bg-gray-50'
+                                    }`}
+                                    onMouseEnter={() => setHoveredRow(teacher.id)}
+                                    onMouseLeave={() => setHoveredRow(null)}
+                                >
+                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 font-medium">
                                         {teacher.name}
                                     </td>
                                     <td className="px-4 py-3 whitespace-nowrap">
                                         <span
-                                            className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${teacher.hasClasses
-                                                    ? 'bg-green-100 text-green-800'
-                                                    : 'bg-orange-100 text-orange-800'
-                                                }`}
+                                            className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full transition-all ${
+                                                teacher.hasClasses
+                                                    ? 'bg-green-100 text-green-800 hover:bg-green-200'
+                                                    : 'bg-orange-100 text-orange-800 hover:bg-orange-200'
+                                            }`}
                                         >
                                             {teacher.hasClasses ? 'Assigned' : 'Unassigned'}
                                         </span>
                                     </td>
                                     <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                                        {teacher.studentCount}
+                                        <span className="font-medium">{teacher.studentCount}</span>
                                     </td>
                                 </tr>
                             ))}

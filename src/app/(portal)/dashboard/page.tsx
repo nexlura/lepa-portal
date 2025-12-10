@@ -1,4 +1,4 @@
-import { getModel } from '@/lib/connector';
+import { getModel, isErrorResponse } from '@/lib/connector';
 import Calendar from '@/components/Dashboard/Calender';
 import RecentActivities from '@/components/Dashboard/RecentActivities';
 import DashboardStats from '@/components/Dashboard/Analytics/Stats';
@@ -6,154 +6,209 @@ import ClassOverview from '@/components/Dashboard/Analytics/ClassOverview';
 import TeachersSection from '@/components/Dashboard/Analytics/TeachersSection';
 import StudentInsights from '@/components/Dashboard/Analytics/StudentInsights';
 
-interface BackendStudent {
-    id: string;
-    first_name: string;
-    last_name: string;
-    sex?: string;
-    date_of_birth?: string;
-    created_at: string;
+// Type definitions for analytics API response
+interface AnalyticsResponse {
+    success?: boolean;
+    code?: number;
+    message?: string;
+    data?: {
+        total_counts?: {
+            students?: number;
+            teachers?: number;
+            classes?: number;
+            student_per_teacher_ratio?: number;
+        };
+        class_overview?: Array<{
+            class_id: string;
+            class_name: string;
+            student_count?: number;
+        }>;
+        teacher_stats?: {
+            total_teachers?: number;
+            teachers_with_classes?: number;
+            teachers_without_classes?: number;
+            teachers_with_classes_list?: Array<{
+                id: string;
+                first_name?: string;
+                last_name?: string;
+                name?: string;
+                assigned_classes?: Array<{
+                    id: string;
+                    name: string;
+                }>;
+                created_at?: string;
+            }>;
+            teachers_without_classes_list?: Array<{
+                id: string;
+                first_name?: string;
+                last_name?: string;
+                name?: string;
+                created_at?: string;
+            }>;
+        };
+        average_student_per_teacher?: number;
+        teacher_assignment_status?: Array<{
+            teacher_id: string;
+            teacher_name: string;
+            status: string;
+            students?: Array<any>;
+        }>;
+        student_insights?: {
+            gender_distribution?: {
+                male?: number;
+                female?: number;
+                other?: number;
+                unknown?: number;
+            };
+            age_distribution?: {
+                age_0_to_5?: number;
+                age_6_to_10?: number;
+                age_11_to_15?: number;
+                age_16_to_20?: number;
+                age_21_to_25?: number;
+                age_26_plus?: number;
+            };
+        };
+    };
 }
-
-interface BackendTeacher {
-    id: string;
-    first_name?: string;
-    last_name?: string;
-    name?: string;
-    assigned_classes?: { id: string; name: string }[];
-    created_at: string;
-}
-
-interface BackendClass {
-    id: string;
-    name: string;
-    current_size: number;
-    teachers: { id: string; full_name: string }[];
-}
-
-// Calculate age from date of birth
-const calculateAge = (dateOfBirth: string): number | null => {
-    if (!dateOfBirth) return null;
-    const birthDate = new Date(dateOfBirth);
-    if (isNaN(birthDate.getTime())) return null;
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-        age--;
-    }
-    return age;
-};
-
-// Group ages into ranges
-const groupAges = (ages: number[]): { range: string; count: number }[] => {
-    const ranges = [
-        { min: 0, max: 5, label: '0-5 years' },
-        { min: 6, max: 10, label: '6-10 years' },
-        { min: 11, max: 15, label: '11-15 years' },
-        { min: 16, max: 20, label: '16-20 years' },
-        { min: 21, max: 25, label: '21-25 years' },
-        { min: 26, max: 100, label: '26+ years' },
-    ];
-
-    return ranges.map(range => ({
-        range: range.label,
-        count: ages.filter(age => age >= range.min && age <= range.max).length,
-    }));
-};
 
 export default async function AdminDashboard() {
-    // Fetch all data in parallel
-    const [studentsRes, teachersRes, classesRes] = await Promise.all([
-        getModel<{ students: BackendStudent[]; total: number }>('/students?page=1&limit=1000'),
-        getModel<{ teachers: BackendTeacher[]; total: number }>('/teachers?page=1&limit=1000'),
-        getModel<{ classes: BackendClass[]; total: number }>('/classes?page=1&limit=1000'),
-    ]);
+    // Fetch analytics data from API
+    const analyticsRes = await getModel<AnalyticsResponse>('/analytics/tenant');
 
-    const students = studentsRes?.students || [];
-    const teachers = teachersRes?.teachers || [];
-    const classes = classesRes?.classes || [];
+    // Check if response is an error
+    if (isErrorResponse(analyticsRes) || !analyticsRes?.data) {
+        // Return empty state or error message
+        return (
+            <div className="space-y-6">
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+                    <p className="mt-1 text-sm text-gray-500">
+                        Welcome to your Lepa admin dashboard.
+                    </p>
+                </div>
+                <div className="bg-white shadow rounded-lg p-6">
+                    <p className="text-gray-500">
+                        {isErrorResponse(analyticsRes) 
+                            ? `Unable to load analytics: ${analyticsRes.message || 'Unknown error'}`
+                            : 'No analytics data available'}
+                    </p>
+                </div>
+            </div>
+        );
+    }
 
-    // Calculate summary statistics
-    const studentsCount = students.length;
-    const teachersCount = teachers.length;
-    const classesCount = classes.length;
-    const studentTeacherRatio = teachersCount > 0 ? studentsCount / teachersCount : 0;
+    const analytics = analyticsRes.data;
+
+    // Extract summary statistics from total_counts
+    const totalCounts = analytics.total_counts || {};
+    const studentsCount = totalCounts.students || 0;
+    const teachersCount = totalCounts.teachers || 0;
+    const classesCount = totalCounts.classes || 0;
+    const studentTeacherRatio = totalCounts.student_per_teacher_ratio || (teachersCount > 0 ? studentsCount / teachersCount : 0);
 
     // Prepare class overview data
-    const classOverviewData = classes.map(cls => ({
-        id: cls.id,
-        name: cls.name,
-        studentCount: cls.current_size || 0,
-        hasTeacher: cls.teachers && cls.teachers.length > 0,
+    const classOverviewData = (analytics.class_overview || []).map(cls => ({
+        id: cls.class_id,
+        name: cls.class_name,
+        studentCount: cls.student_count || 0,
+        hasTeacher: false, // Will be determined from teacher_stats
     }));
 
-    // Prepare teacher data
-    const teacherData = teachers.map(teacher => {
-        const fullName = teacher.first_name && teacher.last_name
-            ? `${teacher.first_name} ${teacher.last_name}`
-            : teacher.name || 'Unknown';
+    // Prepare teacher-class mapping from teacher_stats
+    const teacherStats = analytics.teacher_stats || {};
+    const teachersWithClassesList = teacherStats.teachers_with_classes_list || [];
+    
+    // Get all class IDs that have teachers assigned
+    const classesWithTeachersSet = new Set<string>();
+    teachersWithClassesList.forEach(teacher => {
+        teacher.assigned_classes?.forEach(cls => {
+            classesWithTeachersSet.add(cls.id);
+        });
+    });
+    
+    // Map teachers to their class names
+    const teachersWithClassesData = teachersWithClassesList
+        .map(teacher => {
+            const teacherName = teacher.name || 
+                (teacher.first_name && teacher.last_name 
+                    ? `${teacher.first_name} ${teacher.last_name}` 
+                    : 'Unknown Teacher');
+            const classNames = teacher.assigned_classes?.map(cls => cls.name) || [];
+            const classCount = classNames.length;
+            
+            return {
+                teacherId: teacher.id,
+                teacherName,
+                classCount,
+                classNames, // Include class names for display
+            };
+        })
+        .filter(teacher => teacher.classCount > 0); // Only show teachers with classes
+    
+    // Count total classes with teachers (sum of all assigned_classes)
+    const totalClassesWithTeachers = teachersWithClassesList.reduce(
+        (sum, teacher) => sum + (teacher.assigned_classes?.length || 0),
+        0
+    );
+    
+    // Get classes without teachers
+    const classesWithoutTeachers = classOverviewData.filter(cls => !classesWithTeachersSet.has(cls.id));
+    const classesWithoutTeacherCount = classesWithoutTeachers.length;
 
-        const hasClasses = !!(teacher.assigned_classes && teacher.assigned_classes.length > 0);
-
-        // Calculate total students for this teacher
-        const teacherClassIds = teacher.assigned_classes?.map(ac => ac.id) || [];
-        const teacherClasses = classes.filter(cls =>
-            teacherClassIds.includes(cls.id)
-        );
-        const studentCount = teacherClasses.reduce((sum, cls) => sum + (cls.current_size || 0), 0);
+    // Prepare teacher data from teacher_assignment_status
+    const teacherData = (analytics.teacher_assignment_status || []).map(teacher => {
+        const hasClasses = teacher.status === 'assigned';
+        const studentCount = teacher.students?.length || 0;
 
         return {
-            id: teacher.id,
-            name: fullName,
+            id: teacher.teacher_id,
+            name: teacher.teacher_name,
             hasClasses,
             studentCount,
         };
     });
 
-    // Calculate average students per teacher
-    const teachersWithClasses = teacherData.filter(t => t.hasClasses);
-    const totalStudentsInClasses = teachersWithClasses.reduce((sum, t) => sum + t.studentCount, 0);
-    const averageStudentsPerTeacher = teachersWithClasses.length > 0
-        ? totalStudentsInClasses / teachersWithClasses.length
-        : 0;
+    // Get average students per teacher from API
+    const averageStudentsPerTeacher = analytics.average_student_per_teacher || 0;
 
-    // Prepare gender distribution
+    // Prepare gender distribution from student_insights
     const genderDistribution = {
-        male: students.filter(s => s.sex?.toLowerCase() === 'male' || s.sex?.toLowerCase() === 'm').length,
-        female: students.filter(s => s.sex?.toLowerCase() === 'female' || s.sex?.toLowerCase() === 'f').length,
-        other: students.filter(s => {
-            const sex = s.sex?.toLowerCase();
-            return sex && sex !== 'male' && sex !== 'm' && sex !== 'female' && sex !== 'f';
-        }).length,
+        male: analytics.student_insights?.gender_distribution?.male ?? 0,
+        female: analytics.student_insights?.gender_distribution?.female ?? 0,
+        other: (analytics.student_insights?.gender_distribution?.other ?? 0) + 
+               (analytics.student_insights?.gender_distribution?.unknown ?? 0),
     };
 
-    // Prepare age ranges
-    const ages = students
-        .map(s => s.date_of_birth ? calculateAge(s.date_of_birth) : null)
-        .filter((age): age is number => age !== null);
-    const ageRanges = groupAges(ages);
+    // Transform age distribution object to array format
+    const ageDistribution = analytics.student_insights?.age_distribution || {};
+    const ageRanges = [
+        { range: '0-5 years', count: ageDistribution.age_0_to_5 || 0 },
+        { range: '6-10 years', count: ageDistribution.age_6_to_10 || 0 },
+        { range: '11-15 years', count: ageDistribution.age_11_to_15 || 0 },
+        { range: '16-20 years', count: ageDistribution.age_16_to_20 || 0 },
+        { range: '21-25 years', count: ageDistribution.age_21_to_25 || 0 },
+        { range: '26+ years', count: ageDistribution.age_26_plus || 0 },
+    ].filter(range => range.count > 0); // Only include ranges with students
 
-    // Prepare recent students and teachers (sorted by created_at, most recent first)
-    const recentStudents = students
-        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-        .slice(0, 5)
-        .map(s => ({
-            id: s.id,
-            name: `${s.first_name} ${s.last_name}`.trim() || 'Unknown Student',
-            addedAt: s.created_at,
-        }));
+    // Prepare recent activities from teacher_stats lists (sorted by created_at, most recent first)
+    const allTeachersForActivity = [
+        ...(teachersWithClassesList || []),
+        ...(teacherStats.teachers_without_classes_list || []),
+    ].sort((a, b) => {
+        const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+        const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+        return dateB - dateA; // Most recent first
+    });
 
-    const recentTeachers = teachers
-        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-        .slice(0, 5)
-        .map(t => ({
-            id: t.id,
-            name: t.first_name && t.last_name
-                ? `${t.first_name} ${t.last_name}`
-                : t.name || 'Unknown Teacher',
-            addedAt: t.created_at,
-        }));
+    const recentTeachers = allTeachersForActivity.slice(0, 5).map(t => ({
+        id: t.id,
+        name: t.name || (t.first_name && t.last_name ? `${t.first_name} ${t.last_name}` : 'Unknown Teacher'),
+        addedAt: t.created_at || new Date().toISOString(),
+    }));
+
+    // Recent students - not provided by API, using empty array
+    const recentStudents: Array<{ id: string; name: string; addedAt: string }> = [];
 
     return (
         <div className="space-y-6">
@@ -178,7 +233,13 @@ export default async function AdminDashboard() {
                 {/* Main content - Left column (3/4 width) */}
                 <div className="lg:col-span-3 space-y-6">
                     {/* Section 1: Class Overview */}
-                    <ClassOverview classes={classOverviewData} />
+                    <ClassOverview 
+                        classes={classOverviewData}
+                        teachersWithClasses={teachersWithClassesData}
+                        classesWithTeacherCount={totalClassesWithTeachers}
+                        classesWithoutTeacherCount={classesWithoutTeacherCount}
+                        classesWithoutTeachers={classesWithoutTeachers}
+                    />
 
                     {/* Section 2: Teachers */}
                     <TeachersSection
