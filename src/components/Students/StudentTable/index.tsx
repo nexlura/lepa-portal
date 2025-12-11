@@ -1,5 +1,8 @@
 'use client'
 
+import { useState } from 'react'
+import { useSearchParams } from 'next/navigation'
+
 import DataTable from '@/components/DataTable'
 import StudentTableControls from './TableControls'
 import StudentsTableBody from './TableBody'
@@ -11,7 +14,18 @@ interface StudentsTableProps {
     totalPages: number
 }
 
+export const genderOptions = [
+    "all genders",
+    "male",
+    "female",
+];
+
 const StudentsTable = ({ students, totalPages }: StudentsTableProps) => {
+    const searchParams = useSearchParams()
+    const [genderFilter, setGenderFilter] = useState<string>(
+        searchParams.get("gender") || 'all genders'
+    )
+
     return (
         <DataTable<Student, BackendStudentData>
             config={{
@@ -39,13 +53,32 @@ const StudentsTable = ({ students, totalPages }: StudentsTableProps) => {
                     return <StudentsTableBody students={students} />
                 },
                 controls: ({ searchInput }) => {
-                    return <StudentTableControls searchInput={searchInput} />
+                    return <StudentTableControls
+                        searchInput={searchInput}
+                        genderFilter={genderFilter}
+                        genderOptions={genderOptions}
+                        setGenderFilter={setGenderFilter}
+                    />
                 },
-                searchPlaceholder: 'search students by name',
+                searchPlaceholder: 'All Students...',
                 columnCount: 6,
-                buildQueryParams: (params, search, page) => {
+                buildQueryParams: (params, search, _page) => {
+                    void _page
                     params.set('search', search)
+                    if (genderFilter === 'all genders') {
+                        return
+                    } else {
+                        params.set('sex', genderFilter)
+                    }
                 },
+                buildUrlParams: (params) => {
+                    if (genderFilter && genderFilter !== 'all genders') {
+                        params.set('gender', genderFilter)
+                    } else {
+                        params.delete('gender')
+                    }
+                },
+                queryDeps: [genderFilter],
             }}
             initialData={students}
             initialTotalPages={totalPages}

@@ -11,7 +11,7 @@ interface SearchInputProps {
 const SearchInput = ({ search, setSearch, placeholder }: SearchInputProps) => {
     return (
         <div className="flex items-center gap-3 w-full sm:w-auto">
-            <div className="relative bg-gray-100 w-full sm:w-72 rounded-md">
+            <div className="relative bg-gray-100 w-full sm:w-72 rounded-md border border-gray-200">
 
                 {/* Search Icon */}
                 <MagnifyingGlassIcon className="pointer-events-none absolute left-3 top-2 h-5 w-5 text-gray-400" />

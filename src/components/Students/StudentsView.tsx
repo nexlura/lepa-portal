@@ -23,7 +23,7 @@ const StudentsView = ({ students, totalPages }: StudentsViewProps) => {
                     subHeading='Get started by importing admissions data'
                     button={
                         <Button
-                            href="/admissions/new"
+                            href="/students/new"
                             color='primary'
                         >
                             <PlusIcon className="h-4 w-4 mr-2 text-white" color='white' />

@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState, useRef, ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, ReactNode } from 'react'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 
 import TableFoot from '@/components/TableFoot'
@@ -30,6 +30,10 @@ export interface DataTableConfig<TData, TBackendData> {
 
     // Additional query params builder
     buildQueryParams?: (params: URLSearchParams, search: string, page: number) => void
+    // Extra dependencies that should trigger a refetch (e.g. filters)
+    queryDeps?: unknown[]
+    // Optional URL builder for router replace (defaults to search + page)
+    buildUrlParams?: (params: URLSearchParams, search: string, page: number) => void
 }
 
 interface DataTableProps<TData, TBackendData> {
@@ -55,6 +59,8 @@ function DataTable<TData, TBackendData>({
         searchPlaceholder = 'search records',
         columnCount,
         buildQueryParams,
+        queryDeps = [],
+        buildUrlParams,
     } = config
 
     const searchParams = useSearchParams()
@@ -77,11 +83,23 @@ function DataTable<TData, TBackendData>({
     // Refs to track previous values and prevent unnecessary updates
     const prevDebouncedSearchRef = useRef(initialSearch)
     const prevCurrentPageRef = useRef(initialPage)
+    const prevQueryDepsKeyRef = useRef(JSON.stringify(queryDeps))
     const isInitialMountRef = useRef(true)
     const initialDataRef = useRef(initialData)
     const initialTotalPagesRef = useRef(initialTotalPages)
     const initialSearchRef = useRef(initialSearch)
     const initialPageRef = useRef(initialPage)
+    const filterChangeRef = useRef(false)
+
+    const queryDepsKey = useMemo(() => JSON.stringify(queryDeps), [queryDeps])
+    const hasActiveFilters = useMemo(
+        () =>
+            queryDeps.some(dep => {
+                if (typeof dep === 'string') return dep.trim() !== ''
+                return dep !== undefined && dep !== null && dep !== false
+            }),
+        [queryDeps]
+    )
 
     // Update refs when props change (but don't trigger re-fetch)
     useEffect(() => {
@@ -99,9 +117,11 @@ function DataTable<TData, TBackendData>({
     }, [searchQry])
 
     /** 🔄 Fetch Data */
-    const fetchData = useCallback(async (page: number, search: string) => {
-        // If no search, use initial data from refs
-        if (!search.trim()) {
+    const fetchData = useCallback(async (page: number, search: string, options?: { useInitialFallback?: boolean }) => {
+        const useInitialFallback = options?.useInitialFallback ?? true
+
+        // If no search and allowed, use initial data from refs
+        if (!search.trim() && useInitialFallback) {
             setLocalData(initialDataRef.current)
             setLocalTotalPages(initialTotalPagesRef.current)
             setIsLoading(false)
@@ -138,6 +158,18 @@ function DataTable<TData, TBackendData>({
         }
     }, [endpoint, dataKey, totalPagesKey, transformData, buildQueryParams])
 
+    // Reset page + mark filter change when external deps change
+    useEffect(() => {
+        if (isInitialMountRef.current) {
+            return
+        }
+
+        if (prevQueryDepsKeyRef.current !== queryDepsKey) {
+            filterChangeRef.current = true
+            setCurrentPage(1)
+        }
+    }, [queryDepsKey])
+
     /** 🔁 Reset page when search changes (but not on initial mount) */
     useEffect(() => {
         // Skip on initial mount
@@ -151,14 +183,16 @@ function DataTable<TData, TBackendData>({
         }
     }, [debouncedSearch])
 
-    /** 🔁 Sync URL + Fetch when page or search changes */
+    /** 🔁 Sync URL + Fetch when page, search, or filters change */
     useEffect(() => {
         // Skip on initial mount
         if (isInitialMountRef.current) {
             isInitialMountRef.current = false
             // If there's an initial search, fetch data on mount
             if (initialSearchRef.current.trim()) {
-                fetchData(initialPageRef.current, initialSearchRef.current)
+                fetchData(initialPageRef.current, initialSearchRef.current, { useInitialFallback: true })
+            } else if (hasActiveFilters) {
+                fetchData(initialPageRef.current, initialSearchRef.current, { useInitialFallback: false })
             }
             return
         }
@@ -166,19 +200,25 @@ function DataTable<TData, TBackendData>({
         // Check if we actually need to update
         const searchChanged = prevDebouncedSearchRef.current !== debouncedSearch
         const pageChanged = prevCurrentPageRef.current !== currentPage
+        const depsChanged = prevQueryDepsKeyRef.current !== queryDepsKey
 
-        if (!searchChanged && !pageChanged) {
+        if (!searchChanged && !pageChanged && !depsChanged) {
             return
         }
 
         // Update refs
         prevDebouncedSearchRef.current = debouncedSearch
         prevCurrentPageRef.current = currentPage
+        prevQueryDepsKeyRef.current = queryDepsKey
 
         // Build URL
         const params = new URLSearchParams()
         if (debouncedSearch.trim()) {
             params.set("search", debouncedSearch.trim())
+        }
+        params.set("page", currentPage.toString())
+        if (buildUrlParams) {
+            buildUrlParams(params, debouncedSearch, currentPage)
         }
 
         const newUrl = `${pathname}${params.toString() ? `?${params.toString()}` : ''}`
@@ -187,13 +227,18 @@ function DataTable<TData, TBackendData>({
         router.replace(newUrl)
 
         // Fetch data
-        fetchData(currentPage, debouncedSearch)
-    }, [currentPage, debouncedSearch, fetchData, router, pathname])
+        const useInitialFallback = filterChangeRef.current ? false : true
+        fetchData(currentPage, debouncedSearch, { useInitialFallback })
+        if (filterChangeRef.current) {
+            filterChangeRef.current = false
+        }
+    }, [currentPage, debouncedSearch, fetchData, router, pathname, buildUrlParams, queryDepsKey, hasActiveFilters])
 
     /** 🧠 Decide which data to show */
     const hasSearch = debouncedSearch.trim() !== ""
-    const tableData = hasSearch ? localData : initialData
-    const displayTotalPages = hasSearch ? localTotalPages : initialTotalPages
+    const shouldUseLocalData = hasSearch || hasActiveFilters
+    const tableData = shouldUseLocalData ? localData : initialData
+    const displayTotalPages = shouldUseLocalData ? localTotalPages : initialTotalPages
 
     const searchInput = (
         <SearchInput
