@@ -1,6 +1,7 @@
 import { Dispatch, SetStateAction } from "react"
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import { ChevronDownIcon } from '@heroicons/react/20/solid'
+import { CheckIcon } from "@heroicons/react/24/outline"
 interface TableControlsProps {
     searchInput: React.ReactNode
     genderOptions: string[]
@@ -41,10 +42,11 @@ const StudentTableControls = ({
                                     <MenuItem key={opt}
                                     >
                                         <a type="button"
-                                            className=" w-full capitalize block px-4 py-2 text-sm text-gray-700 data-focus:bg-gray-100 data-focus:text-gray-900 data-focus:outline-hidden"
+                                            className="capitalize w-full inline-flex justify-between px-4 py-2 text-sm text-gray-700 data-focus:bg-gray-100 data-focus:text-gray-900 data-focus:outline-hidden"
                                             onClick={() => setGenderFilter(opt)}
                                         >
                                             {opt}
+                                            {opt === genderFilter && (<CheckIcon className="size-5 " />)}
                                         </a>
                                     </MenuItem>
                                 ))}

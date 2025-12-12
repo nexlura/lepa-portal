@@ -216,7 +216,7 @@ function DataTable<TData, TBackendData>({
         if (debouncedSearch.trim()) {
             params.set("search", debouncedSearch.trim())
         }
-        params.set("page", currentPage.toString())
+        // params.set("page", currentPage.toString())
         if (buildUrlParams) {
             buildUrlParams(params, debouncedSearch, currentPage)
         }
