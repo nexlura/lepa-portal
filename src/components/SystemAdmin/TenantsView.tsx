@@ -3,6 +3,7 @@
 import { PlusIcon, BuildingOfficeIcon } from '@heroicons/react/24/outline';
 import { Button } from '@/components/UIKit/Button';
 import TenantsTable from './TenantsTable';
+import TenantsStats from './TenantsStats';
 import EmptyState from '../EmptyState';
 import { Tenant } from '@/app/(portal)/system-admin/tenants/page';
 
@@ -53,6 +54,9 @@ const TenantsView = ({ tenants, totalPages }: TenantsViewProps) => {
                     </Button>
                 </div>
             </div>
+
+            {/* Stats */}
+            <TenantsStats tenants={tenants} />
 
             {/* Tenants table */}
             <TenantsTable tenants={tenants} totalPages={totalPages} />

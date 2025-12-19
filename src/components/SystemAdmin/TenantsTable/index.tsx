@@ -32,6 +32,7 @@ const TenantsTable = ({ tenants, totalPages }: TenantsTableProps) => {
                     setSearch={setSearch}
                     statusFilter={statusFilter}
                     setStatusFilter={setStatusFilter}
+                    tenants={tenants}
                 />
                 <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
