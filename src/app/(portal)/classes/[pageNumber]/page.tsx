@@ -45,7 +45,15 @@ type ClassesAnalyticsResponse = {
 
 const ClassesPage = async ({ params }: PageProps) => {
     const { pageNumber } = await params
-    const session = await auth();
+    
+    // Fetch session with error handling
+    let session = null;
+    try {
+        session = await auth();
+    } catch (error: any) {
+        // Silently handle auth errors - session will be null
+        console.warn('Error fetching session:', error?.message || error);
+    }
 
     // Fetch classes data with error handling
     let classes: BackendClassesData[] = [];
