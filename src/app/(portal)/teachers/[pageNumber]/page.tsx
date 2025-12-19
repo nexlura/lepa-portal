@@ -18,6 +18,21 @@ interface BackendTeachersData {
     sex?: string
 }
 
+type TeachersAnalyticsResponse = {
+    success?: boolean;
+    code?: number;
+    data?: {
+        total_teachers?: number;
+        active_teachers?: number;
+        teachers_with_classes?: number;
+        teachers_without_classes?: number;
+        average_students_per_teacher?: number;
+        total_subjects_taught?: number;
+        inactive_teachers?: number;
+    };
+    message?: string;
+};
+
 const TeachersPage = async ({ params }: PageProps) => {
     const { pageNumber } = await params
 
@@ -26,12 +41,24 @@ const TeachersPage = async ({ params }: PageProps) => {
     // Check if response is valid
     if (!res || !res.data) {
         return (
-            <TeachersView teachers={[]} totalPages={0} />
+            <TeachersView teachers={[]} totalPages={0} analytics={{
+                totalTeachers: 0,
+                activeTeachers: 0,
+                teachersWithClasses: 0,
+                teachersWithoutClasses: 0,
+                averageStudentsPerTeacher: 0,
+                totalSubjectsTaught: 0,
+            }} />
         );
     }
     
     const teachers = res.data.teachers;
     const totalPages = res.data.total_pages;
+    const totalTeachers = res.data.total || teachers?.length || 0;
+
+    // Fetch analytics data
+    const analyticsRes = await getModel<TeachersAnalyticsResponse>('/analytics/tenant/teachers');
+    const analytics = analyticsRes?.data || {};
 
     const transformedData: Teacher[] = teachers?.map((teacher: BackendTeachersData) => {
         // Format name from first_name and last_name or use name field
@@ -60,10 +87,19 @@ const TeachersPage = async ({ params }: PageProps) => {
         }
     }) || [];
 
-
-
     return (
-        <TeachersView teachers={transformedData} totalPages={totalPages} />
+        <TeachersView 
+            teachers={transformedData} 
+            totalPages={totalPages}
+            analytics={{
+                totalTeachers: analytics.total_teachers || totalTeachers,
+                activeTeachers: analytics.active_teachers || 0,
+                teachersWithClasses: analytics.teachers_with_classes || 0,
+                teachersWithoutClasses: analytics.teachers_without_classes || 0,
+                averageStudentsPerTeacher: analytics.average_students_per_teacher || 0,
+                totalSubjectsTaught: analytics.total_subjects_taught || 0,
+            }}
+        />
     )
 }
 
