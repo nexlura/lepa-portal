@@ -30,6 +30,19 @@ export type PageProps = {
     params: Promise<{ pageNumber: string }>;
 };
 
+type ClassesAnalyticsResponse = {
+    success?: boolean;
+    code?: number;
+    data?: {
+        total_capacity?: number;
+        total_students?: number;
+        average_class_size?: number;
+        classes_at_full_capacity?: number;
+        average_utilization?: number;
+    };
+    message?: string;
+};
+
 const ClassesPage = async ({ params }: PageProps) => {
     const { pageNumber } = await params
     const session = await auth();
@@ -37,6 +50,11 @@ const ClassesPage = async ({ params }: PageProps) => {
     const res = await getModel(`/classes?page=${pageNumber}&limit=10`);
     const totalPages = res.data?.total_pages
     const classes = res.data?.classes
+    const totalClasses = res.data?.total || classes?.length || 0;
+
+    // Fetch analytics data
+    const analyticsRes = await getModel<ClassesAnalyticsResponse>('/analytics/tenant/classes');
+    const analytics = analyticsRes?.data || {};
 
     const transformedData: SchoolClass[] = classes.map((classK: BackendClassesData) => {
 
@@ -59,6 +77,14 @@ const ClassesPage = async ({ params }: PageProps) => {
             classes={transformedData}
             session={session}
             totalPages={totalPages}
+            analytics={{
+                totalClasses,
+                totalCapacity: analytics.total_capacity || 0,
+                totalStudents: analytics.total_students || 0,
+                averageClassSize: analytics.average_class_size || 0,
+                classesAtFullCapacity: analytics.classes_at_full_capacity || 0,
+                averageUtilizationRate: analytics.average_utilization || 0,
+            }}
         />
     );
 };
