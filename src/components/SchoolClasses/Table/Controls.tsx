@@ -1,3 +1,4 @@
+import CustomDropdown from '@/components/UIKit/CustomDropdown'
 import { Dispatch, SetStateAction } from 'react'
 
 interface TableControlsProps {
@@ -20,16 +21,12 @@ const SchoolClassesTableControls = ({
 
                 {searchInput}
 
-                <div className='bg-gray-100 px-2 rounded-md'>
-                    <select
-                        value={gradeFilter}
-                        onChange={(e) => { setGradeFilter(e.target.value) }}
-                        className="rounded-md border-gray-300 py-2 pr-2 text-sm focus:border-primary-500 focus:ring-primary-500"
-                    >
-                        {gradeOptions.map(g => (
-                            <option key={g} value={g}>{g === 'All' ? 'All grades' : g}</option>
-                        ))}
-                    </select>
+                <div>
+                    <CustomDropdown
+                        label={gradeFilter}
+                        options={gradeOptions}
+                        updateSelected={setGradeFilter}
+                    />
                 </div>
             </div>
         </div>
