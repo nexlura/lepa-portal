@@ -26,81 +26,73 @@ export type PageProps = {
 
 const SystemUsersPage = async ({ searchParams }: PageProps) => {
     // TODO: Replace with API data once endpoint is ready
-    // Dummy data for system users
-    const dummyUsers: BackendSystemUserData[] = [
-        {
-            id: '1',
-            email: 'admin@lepa.gov',
-            first_name: 'John',
-            last_name: 'Doe',
-            role: 'System Administrator',
-            status: 'active',
-            created_at: '2024-01-01T10:00:00Z',
-        },
-        {
-            id: '2',
-            email: 'support@lepa.gov',
-            first_name: 'Jane',
-            last_name: 'Smith',
-            role: 'System Support',
-            status: 'active',
-            created_at: '2024-01-05T14:30:00Z',
-        },
-        {
-            id: '3',
-            email: 'monitor@lepa.gov',
-            first_name: 'Michael',
-            last_name: 'Johnson',
-            role: 'Government Monitor',
-            status: 'active',
-            created_at: '2024-01-10T09:15:00Z',
-        },
-        {
-            id: '4',
-            email: 'auditor@lepa.gov',
-            first_name: 'Sarah',
-            last_name: 'Williams',
-            role: 'Government Auditor',
-            status: 'active',
-            created_at: '2024-01-15T11:45:00Z',
-        },
-        {
-            id: '5',
-            email: 'support2@lepa.gov',
-            first_name: 'David',
-            last_name: 'Brown',
-            role: 'System Support',
-            status: 'active',
-            created_at: '2024-02-01T13:20:00Z',
-        },
-        {
-            id: '6',
-            email: 'admin2@lepa.gov',
-            first_name: 'Emily',
-            last_name: 'Davis',
-            role: 'System Administrator',
-            status: 'inactive',
-            created_at: '2024-02-10T08:30:00Z',
-        },
-        {
-            id: '7',
-            email: 'monitor2@lepa.gov',
-            first_name: 'Robert',
-            last_name: 'Miller',
-            role: 'Government Monitor',
-            status: 'active',
-            created_at: '2024-02-15T10:00:00Z',
-        },
-        {
-            id: '8',
-            email: 'support3@lepa.gov',
-            first_name: 'Lisa',
-            last_name: 'Wilson',
-            role: 'System Support',
-            status: 'active',
-            created_at: '2024-03-01T15:00:00Z',
-        },
+    // Dummy data for system users with random distribution across user types
+    const userTypes = [
+        { role: 'System Administrator', emailDomain: 'lepa.gov', firstNames: ['John', 'Emily', 'Michael', 'Sarah'], lastNames: ['Doe', 'Davis', 'Johnson', 'Williams'] },
+        { role: 'System Support', emailDomain: 'lepa.gov', firstNames: ['Jane', 'David', 'Lisa', 'Robert'], lastNames: ['Smith', 'Brown', 'Wilson', 'Miller'] },
+        { role: 'Government Monitor', emailDomain: 'lepa.gov', firstNames: ['Michael', 'Robert', 'Patricia', 'James'], lastNames: ['Johnson', 'Miller', 'Anderson', 'Taylor'] },
+        { role: 'Tenant Administrator', emailDomain: 'school.edu', firstNames: ['Thomas', 'Jessica', 'Christopher', 'Amanda'], lastNames: ['White', 'Harris', 'Martin', 'Clark'] },
+        { role: 'Tenant User', emailDomain: 'school.edu', firstNames: ['Daniel', 'Michelle', 'Matthew', 'Ashley'], lastNames: ['Lewis', 'Walker', 'Hall', 'Allen'] },
     ];
+
+    const statuses: ('active' | 'inactive')[] = ['active', 'inactive'];
+    
+    // Generate random users with varied distribution
+    const dummyUsers: BackendSystemUserData[] = [];
+    const totalUsers = 25; // Total number of users to generate
+    
+    for (let i = 1; i <= totalUsers; i++) {
+        // Randomly select user type (weighted towards tenant users)
+        const randomType = Math.random();
+        let selectedType;
+        if (randomType < 0.35) {
+            // 35% tenant users
+            selectedType = userTypes[5];
+        } else if (randomType < 0.50) {
+            // 15% tenant administrators
+            selectedType = userTypes[4];
+        } else if (randomType < 0.65) {
+            // 15% system support
+            selectedType = userTypes[1];
+        } else if (randomType < 0.80) {
+            // 15% government monitor
+            selectedType = userTypes[2];
+        } else if (randomType < 0.90) {
+            // 10% government auditor
+            selectedType = userTypes[3];
+        } else {
+            // 10% system administrator
+            selectedType = userTypes[0];
+        }
+
+        const firstName = selectedType.firstNames[Math.floor(Math.random() * selectedType.firstNames.length)];
+        const lastName = selectedType.lastNames[Math.floor(Math.random() * selectedType.lastNames.length)];
+        const status = statuses[Math.random() < 0.85 ? 0 : 1]; // 85% active, 15% inactive
+        const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}${i}@${selectedType.emailDomain}`;
+        
+        // Random creation date within last 6 months
+        const monthsAgo = Math.floor(Math.random() * 6);
+        const daysAgo = Math.floor(Math.random() * 30);
+        const createdDate = new Date();
+        createdDate.setMonth(createdDate.getMonth() - monthsAgo);
+        createdDate.setDate(createdDate.getDate() - daysAgo);
+        
+        dummyUsers.push({
+            id: String(i),
+            email,
+            first_name: firstName,
+            last_name: lastName,
+            role: selectedType.role,
+            status,
+            created_at: createdDate.toISOString(),
+        });
+    }
+    
+    // Shuffle the array to randomize order
+    for (let i = dummyUsers.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [dummyUsers[i], dummyUsers[j]] = [dummyUsers[j], dummyUsers[i]];
+    }
 
     const transformedData: SystemUser[] = dummyUsers.map((user: BackendSystemUserData) => {
         const fullName = user.first_name && user.last_name

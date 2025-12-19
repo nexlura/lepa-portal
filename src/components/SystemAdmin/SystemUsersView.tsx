@@ -3,6 +3,7 @@
 import { PlusIcon, UsersIcon } from '@heroicons/react/24/outline';
 import { Button } from '@/components/UIKit/Button';
 import SystemUsersTable from './SystemUsersTable';
+import SystemUsersStats from './SystemUsersStats';
 import EmptyState from '../EmptyState';
 import { SystemUser } from '@/app/(portal)/system-admin/users/page';
 
@@ -53,6 +54,9 @@ const SystemUsersView = ({ users, totalPages }: SystemUsersViewProps) => {
                     </Button>
                 </div>
             </div>
+
+            {/* Stats */}
+            <SystemUsersStats users={users} />
 
             {/* Users table */}
             <SystemUsersTable users={users} totalPages={totalPages} />

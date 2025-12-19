@@ -32,7 +32,14 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await auth(); // fetch session on server
+  // Fetch session on server with error handling
+  let session = null;
+  try {
+    session = await auth();
+  } catch (error) {
+    // Log error but don't crash the app - session will be null
+    console.warn('Error fetching session in RootLayout:', error);
+  }
 
   return (
     <html lang="en" className="h-full bg-white">

@@ -21,7 +21,15 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  const session = await auth();
+  // Fetch session with error handling
+  let session = null;
+  try {
+    session = await auth();
+  } catch (error) {
+    // Log error but don't crash - treat as no session
+    console.warn('Error fetching session in middleware:', error);
+    // Continue with session = null, which will redirect to login
+  }
 
   // redirect to dashboard or login page if user try to access the "/" route
   if (pathname === '/') {

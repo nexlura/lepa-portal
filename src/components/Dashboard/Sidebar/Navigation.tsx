@@ -13,6 +13,7 @@ import {
     BuildingOfficeIcon,
     UsersIcon,
     ShieldCheckIcon,
+    BuildingOffice2Icon,
 } from '@heroicons/react/24/outline';
 import { Tooltip } from '@/components/UIKit/Tooltip';
 
@@ -34,6 +35,7 @@ const tenantNavigation: NavigationItem[] = [
 // System admin navigation
 const systemAdminNavigation: NavigationItem[] = [
     { name: 'Dashboard', href: '/system-admin/dashboard', icon: HomeIcon },
+    { name: 'Agencies', href: '/system-admin/agencies', icon: BuildingOffice2Icon },
     { name: 'Tenants', href: '/system-admin/tenants', icon: BuildingOfficeIcon },
     { name: 'System Users', href: '/system-admin/users', icon: UsersIcon },
     { name: 'Roles & Permissions', href: '/system-admin/roles', icon: ShieldCheckIcon },

@@ -1,6 +1,6 @@
 import SystemAdminStats from '@/components/SystemAdmin/SystemAdminStats';
 import TenantsOverview from '@/components/SystemAdmin/TenantsOverview';
-import { BuildingOfficeIcon, UsersIcon, ShieldCheckIcon } from '@heroicons/react/24/outline';
+import { BuildingOfficeIcon, UsersIcon, ShieldCheckIcon, BuildingOffice2Icon } from '@heroicons/react/24/outline';
 
 export default async function SystemAdminDashboard() {
     // TODO: Replace with API data once endpoint is ready
@@ -79,7 +79,19 @@ export default async function SystemAdminDashboard() {
             {/* Quick Actions */}
             <div className="bg-white shadow rounded-lg p-6">
                 <h3 className="text-lg font-medium text-gray-900 mb-6">Quick Actions</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <a
+                        href="/system-admin/agencies"
+                        className="group p-5 border-2 border-gray-200 rounded-lg hover:border-primary-500 hover:bg-primary-50 transition-all duration-200"
+                    >
+                        <div className="flex items-center space-x-3 mb-2">
+                            <div className="p-2 bg-emerald-100 rounded-lg group-hover:bg-emerald-200 transition-colors">
+                                <BuildingOffice2Icon className="h-6 w-6 text-emerald-600" />
+                            </div>
+                            <h4 className="font-semibold text-gray-900 group-hover:text-primary-700">Manage Agencies</h4>
+                        </div>
+                        <p className="text-sm text-gray-600 ml-12">Manage government agencies</p>
+                    </a>
                     <a
                         href="/system-admin/tenants"
                         className="group p-5 border-2 border-gray-200 rounded-lg hover:border-primary-500 hover:bg-primary-50 transition-all duration-200"

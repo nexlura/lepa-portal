@@ -42,6 +42,7 @@ const SystemUsersTable = ({ users, totalPages }: SystemUsersTableProps) => {
                     statusFilter={statusFilter}
                     setStatusFilter={setStatusFilter}
                     roles={roles}
+                    users={users}
                 />
                 <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
