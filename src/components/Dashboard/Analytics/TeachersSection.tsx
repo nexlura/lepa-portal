@@ -7,7 +7,7 @@ interface TeacherData {
     id: string;
     name: string;
     hasClasses: boolean;
-    studentCount: number;
+    subjects: string[];
 }
 
 interface TeachersSectionProps {
@@ -82,7 +82,7 @@ const TeachersSection = ({ teachers, averageStudentsPerTeacher }: TeachersSectio
                                     Status
                                 </th>
                                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Students
+                                    Subjects
                                 </th>
                             </tr>
                         </thead>
@@ -110,8 +110,22 @@ const TeachersSection = ({ teachers, averageStudentsPerTeacher }: TeachersSectio
                                             {teacher.hasClasses ? 'Assigned' : 'Unassigned'}
                                         </span>
                                     </td>
-                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                                        <span className="font-medium">{teacher.studentCount}</span>
+                                    <td className="px-4 py-3 text-sm text-gray-500">
+                                        {teacher.subjects.length > 0 ? (
+                                            (() => {
+                                                // Capitalize first letter of each subject
+                                                const capitalizedSubjects = teacher.subjects.map(subject => 
+                                                    subject.charAt(0).toUpperCase() + subject.slice(1).replace(/_/g, ' ')
+                                                );
+                                                // Format: show first 3, then "+X more" if more than 3
+                                                const displaySubjects = capitalizedSubjects.length <= 3
+                                                    ? capitalizedSubjects.join(', ')
+                                                    : `${capitalizedSubjects.slice(0, 3).join(', ')}, +${capitalizedSubjects.length - 3} more`;
+                                                return <span>{displaySubjects}</span>;
+                                            })()
+                                        ) : (
+                                            <span className="text-gray-400">No subjects</span>
+                                        )}
                                     </td>
                                 </tr>
                             ))}

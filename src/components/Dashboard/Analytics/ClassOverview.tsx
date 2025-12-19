@@ -124,7 +124,9 @@ const ClassOverview = ({
                         {teachersWithClasses.length > 0 ? (
                             teachersWithClasses.map((teacher) => {
                                 // Format class names: show first 2, then "+X more" if more than 2
-                                const displayClasses = teacher.classNames.length <= 2
+                                const displayClasses = teacher.classNames.length === 0
+                                    ? 'No classes assigned'
+                                    : teacher.classNames.length <= 2
                                     ? teacher.classNames.join(', ')
                                     : `${teacher.classNames.slice(0, 2).join(', ')}, +${teacher.classNames.length - 2} more`;
                                 

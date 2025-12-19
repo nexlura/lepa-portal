@@ -60,7 +60,14 @@ const AddStudentModal = ({
         const next: Partial<Record<keyof AddStudentFormData, string>> = {}
         if (!form.fullName.trim()) next.fullName = 'Full name is required'
         if (!form.gender.trim()) next.gender = 'Gender is required'
-        if (!form.dateOfBirth.trim()) next.dateOfBirth = 'Date of birth is required'
+        if (!form.dateOfBirth.trim()) {
+            next.dateOfBirth = 'Date of birth is required'
+        } else {
+            const today = new Date().toISOString().split('T')[0]
+            if (form.dateOfBirth >= today) {
+                next.dateOfBirth = 'Date of birth cannot be current or future date'
+            }
+        }
         if (!form.grade.trim()) next.grade = 'Grade is required'
         if (!form.enrollmentDate.trim()) next.enrollmentDate = 'Enrollment date is required'
         if (!form.guardianName.trim()) next.guardianName = 'Guardian name is required'

@@ -51,7 +51,7 @@ interface AnalyticsResponse {
             teacher_id: string;
             teacher_name: string;
             status: string;
-            students?: Array<any>;
+            subjects?: Array<string>;
         }>;
         student_insights?: {
             gender_distribution?: {
@@ -143,8 +143,7 @@ export default async function AdminDashboard() {
                 classCount,
                 classNames, // Include class names for display
             };
-        })
-        .filter(teacher => teacher.classCount > 0); // Only show teachers with classes
+        });
     
     // Count total classes with teachers (sum of all assigned_classes)
     const totalClassesWithTeachers = teachersWithClassesList.reduce(
@@ -159,13 +158,13 @@ export default async function AdminDashboard() {
     // Prepare teacher data from teacher_assignment_status
     const teacherData = (analytics.teacher_assignment_status || []).map(teacher => {
         const hasClasses = teacher.status === 'assigned';
-        const studentCount = teacher.students?.length || 0;
+        const subjects = teacher.subjects || [];
 
         return {
             id: teacher.teacher_id,
             name: teacher.teacher_name,
             hasClasses,
-            studentCount,
+            subjects,
         };
     });
 
