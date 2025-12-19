@@ -53,14 +53,18 @@ const ClassesPage = async ({ params }: PageProps) => {
     let totalClasses = 0;
     
     try {
-        const res = await getModel(`/classes?page=${pageNumber}&limit=10`);
+    const res = await getModel(`/classes?page=${pageNumber}&limit=10`);
         if (res && !isErrorResponse(res) && res.data) {
-            classes = res.data.classes || [];
-            totalPages = res.data.total_pages || 0;
-            totalClasses = res.data.total || classes.length || 0;
+            classes = Array.isArray(res.data.classes) ? res.data.classes : [];
+            totalPages = typeof res.data.total_pages === 'number' ? res.data.total_pages : 0;
+            totalClasses = typeof res.data.total === 'number' ? res.data.total : classes.length || 0;
+        } else if (isErrorResponse(res)) {
+            // Handle error response - use defaults
+            console.warn('Error response from classes API:', res.status, res.message);
         }
-    } catch (error) {
-        console.warn('Error fetching classes:', error);
+    } catch (error: any) {
+        // Handle JSON parse errors and other exceptions
+        console.warn('Error fetching classes:', error?.message || error);
         // Use empty arrays as fallback
     }
 
@@ -70,12 +74,18 @@ const ClassesPage = async ({ params }: PageProps) => {
         const analyticsRes = await getModel<ClassesAnalyticsResponse>('/analytics/tenant/classes');
         if (analyticsRes && !isErrorResponse(analyticsRes) && analyticsRes.data) {
             analytics = analyticsRes.data;
-        } else if (isErrorResponse(analyticsRes) && analyticsRes.status === 404) {
-            // Endpoint doesn't exist yet, silently use defaults
+        } else if (isErrorResponse(analyticsRes)) {
+            // Only log non-404 errors
+            if (analyticsRes.status !== 404) {
+                console.warn('Error response from classes analytics API:', analyticsRes.status, analyticsRes.message);
+            }
         }
-    } catch (error) {
-        // Silently handle errors - endpoint may not exist yet
+    } catch (error: any) {
+        // Silently handle errors - endpoint may not exist yet or return invalid JSON
         // Use empty object as fallback
+        if (error?.message && !error.message.includes('JSON.parse')) {
+            console.warn('Error fetching classes analytics:', error.message);
+        }
     }
 
     const transformedData: SchoolClass[] = classes?.map((classK: BackendClassesData) => {

@@ -44,12 +44,16 @@ const TeachersPage = async ({ params }: PageProps) => {
     try {
         const res = await getModel(`/teachers?page=${pageNumber}&limit=10`);
         if (res && !isErrorResponse(res) && res.data) {
-            teachers = res.data.teachers || [];
-            totalPages = res.data.total_pages || 0;
-            totalTeachers = res.data.total || teachers.length || 0;
+            teachers = Array.isArray(res.data.teachers) ? res.data.teachers : [];
+            totalPages = typeof res.data.total_pages === 'number' ? res.data.total_pages : 0;
+            totalTeachers = typeof res.data.total === 'number' ? res.data.total : teachers.length || 0;
+        } else if (isErrorResponse(res)) {
+            // Handle error response - use defaults
+            console.warn('Error response from teachers API:', res.status, res.message);
         }
-    } catch (error) {
-        console.warn('Error fetching teachers:', error);
+    } catch (error: any) {
+        // Handle JSON parse errors and other exceptions
+        console.warn('Error fetching teachers:', error?.message || error);
         // Use empty arrays as fallback
     }
 
@@ -59,12 +63,18 @@ const TeachersPage = async ({ params }: PageProps) => {
         const analyticsRes = await getModel<TeachersAnalyticsResponse>('/analytics/tenant/teachers');
         if (analyticsRes && !isErrorResponse(analyticsRes) && analyticsRes.data) {
             analytics = analyticsRes.data;
-        } else if (isErrorResponse(analyticsRes) && analyticsRes.status === 404) {
-            // Endpoint doesn't exist yet, silently use defaults
+        } else if (isErrorResponse(analyticsRes)) {
+            // Only log non-404 errors
+            if (analyticsRes.status !== 404) {
+                console.warn('Error response from teachers analytics API:', analyticsRes.status, analyticsRes.message);
+            }
         }
-    } catch (error) {
-        // Silently handle errors - endpoint may not exist yet
+    } catch (error: any) {
+        // Silently handle errors - endpoint may not exist yet or return invalid JSON
         // Use empty object as fallback
+        if (error?.message && !error.message.includes('JSON.parse')) {
+            console.warn('Error fetching teachers analytics:', error.message);
+        }
     }
 
     const transformedData: Teacher[] = teachers?.map((teacher: BackendTeachersData) => {
