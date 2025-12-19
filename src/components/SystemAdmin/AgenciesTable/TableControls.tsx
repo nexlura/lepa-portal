@@ -2,6 +2,7 @@
 
 import { Input } from '@/components/UIKit/Input';
 import { Field, Label } from '@/components/UIKit/Fieldset';
+import { Select } from '@/components/UIKit/Select';
 import { CheckCircleIcon, XCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { Agency } from '@/app/(portal)/system-admin/agencies/page';
 
@@ -47,7 +48,7 @@ const TableControls = ({
                 <Label>Search Agencies</Label>
                 <Input
                     type="text"
-                    placeholder="Search by name or region..."
+                    placeholder="Search by name..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                 />
@@ -122,19 +123,16 @@ const TableControls = ({
 
             {/* Type Filter */}
             <Field>
-                <Label>Filter by Type</Label>
-                <select
-                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm mt-3"
+                <Select
+                    label="Filter by Type"
                     value={typeFilter}
-                    onChange={(e) => setTypeFilter(e.target.value)}
-                >
-                    <option value="All">All Types</option>
-                    {types.map((type) => (
-                        <option key={type} value={type}>
-                            {type}
-                        </option>
-                    ))}
-                </select>
+                    onChange={setTypeFilter}
+                    options={[
+                        { value: 'All', label: 'All Types' },
+                        ...types.map((type) => ({ value: type, label: type })),
+                    ]}
+                    placeholder="Select type..."
+                />
             </Field>
         </div>
     );

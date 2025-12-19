@@ -6,9 +6,10 @@ import { Agency } from '@/app/(portal)/system-admin/agencies/page';
 
 interface AgenciesTableBodyProps {
     agencies: Agency[];
+    onEdit: (agency: Agency) => void;
 }
 
-const AgenciesTableBody = ({ agencies }: AgenciesTableBodyProps) => {
+const AgenciesTableBody = ({ agencies, onEdit }: AgenciesTableBodyProps) => {
     const formatDate = (dateString: string) => {
         try {
             return new Date(dateString).toLocaleDateString('en-US', {
@@ -25,7 +26,7 @@ const AgenciesTableBody = ({ agencies }: AgenciesTableBodyProps) => {
         return (
             <tbody className="bg-white divide-y divide-gray-200">
                 <tr>
-                    <td colSpan={7} className="px-6 py-4 text-center text-sm text-gray-500">
+                    <td colSpan={6} className="px-6 py-4 text-center text-sm text-gray-500">
                         No agencies found
                     </td>
                 </tr>
@@ -45,9 +46,6 @@ const AgenciesTableBody = ({ agencies }: AgenciesTableBodyProps) => {
                         <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
                             {agency.type}
                         </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">{agency.region}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {agency.tenantCount}
@@ -77,13 +75,13 @@ const AgenciesTableBody = ({ agencies }: AgenciesTableBodyProps) => {
                             >
                                 <EyeIcon className="h-5 w-5" />
                             </Link>
-                            <Link
-                                href={`/system-admin/agencies/${agency.id}/edit`}
+                            <button
+                                onClick={() => onEdit(agency)}
                                 className="text-gray-600 hover:text-gray-900"
                                 title="Edit"
                             >
                                 <PencilIcon className="h-5 w-5" />
-                            </Link>
+                            </button>
                         </div>
                     </td>
                 </tr>

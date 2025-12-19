@@ -10,17 +10,17 @@ import TableControls from './TableControls';
 interface AgenciesTableProps {
     agencies: Agency[];
     totalPages: number;
+    onEdit: (agency: Agency) => void;
 }
 
-const AgenciesTable = ({ agencies, totalPages }: AgenciesTableProps) => {
+const AgenciesTable = ({ agencies, totalPages, onEdit }: AgenciesTableProps) => {
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState<string>('All');
     const [typeFilter, setTypeFilter] = useState<string>('All');
 
     // Filter agencies based on search, status, and type
     const filteredAgencies = agencies.filter((agency) => {
-        const matchesSearch = agency.name.toLowerCase().includes(search.toLowerCase()) ||
-                             agency.region.toLowerCase().includes(search.toLowerCase());
+        const matchesSearch = agency.name.toLowerCase().includes(search.toLowerCase());
         const matchesStatus = statusFilter === 'All' || agency.status === statusFilter.toLowerCase();
         const matchesType = typeFilter === 'All' || agency.type === typeFilter;
         return matchesSearch && matchesStatus && matchesType;
@@ -42,7 +42,7 @@ const AgenciesTable = ({ agencies, totalPages }: AgenciesTableProps) => {
                 <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
                         <AgenciesTableHead />
-                        <AgenciesTableBody agencies={filteredAgencies} />
+                        <AgenciesTableBody agencies={filteredAgencies} onEdit={onEdit} />
                         {totalPages > 1 && (
                             <TableFoot totalPages={totalPages} />
                         )}
