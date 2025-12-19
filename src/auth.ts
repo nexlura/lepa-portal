@@ -155,6 +155,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
   callbacks: {
     ...(authConfig.callbacks ?? {}),
+    async redirect({ url, baseUrl }) {
+      // If redirecting to root, let middleware handle role-based routing
+      if (url === baseUrl || url === `${baseUrl}/`) {
+        return `${baseUrl}/`;
+      }
+      // Allow relative callback URLs
+      if (url.startsWith('/')) return `${baseUrl}${url}`;
+      // Allow callback URLs on the same origin
+      if (new URL(url).origin === baseUrl) return url;
+      return baseUrl;
+    },
     async jwt({ token, user, trigger, session }) {
       if (user) {
         const u = user as NextAuthUser & {

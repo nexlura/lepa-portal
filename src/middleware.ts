@@ -26,7 +26,15 @@ export async function middleware(req: NextRequest) {
   // redirect to dashboard or login page if user try to access the "/" route
   if (pathname === '/') {
     if (session?.user) {
-      return NextResponse.redirect(new URL('/dashboard', req.url));
+      // Redirect based on user role
+      const userRole = session.user.role?.toLowerCase() || '';
+      const isSystemAdmin = userRole === 'system_admin' || userRole === 'system admin' || userRole.includes('system');
+      
+      if (isSystemAdmin) {
+        return NextResponse.redirect(new URL('/system-admin/dashboard', req.url));
+      } else {
+        return NextResponse.redirect(new URL('/dashboard', req.url));
+      }
     }
 
     const redirectUrl = new URL('/auth/verify', req.url);
@@ -39,6 +47,23 @@ export async function middleware(req: NextRequest) {
     const redirectUrl = new URL('/auth/verify', req.url);
     redirectUrl.searchParams.set('phone', '');
     return NextResponse.redirect(redirectUrl);
+  }
+
+  // Role-based route protection
+  const userRole = session.user.role?.toLowerCase() || '';
+  const isSystemAdmin = userRole === 'system_admin' || userRole === 'system admin' || userRole.includes('system');
+  
+  // Protect system-admin routes - only system admins can access
+  if (pathname.startsWith('/system-admin')) {
+    if (!isSystemAdmin) {
+      // Redirect non-system admins to their dashboard
+      return NextResponse.redirect(new URL('/dashboard', req.url));
+    }
+  }
+  
+  // Redirect system admins away from tenant admin dashboard to their dashboard
+  if (isSystemAdmin && pathname === '/dashboard') {
+    return NextResponse.redirect(new URL('/system-admin/dashboard', req.url));
   }
 
   // Call your redirect helper *inside* middleware

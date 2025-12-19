@@ -10,8 +10,12 @@ import {
     BookOpenIcon,
     ChevronDownIcon,
     ChevronRightIcon,
+    BuildingOfficeIcon,
+    UsersIcon,
+    ShieldCheckIcon,
 } from '@heroicons/react/24/outline';
 import { Tooltip } from '@/components/UIKit/Tooltip';
+
 interface NavigationItem {
     name: string;
     href?: string;
@@ -19,16 +23,49 @@ interface NavigationItem {
     subItems?: { name: string; href: string }[];
 }
 
-const navigation: NavigationItem[] = [
+// Tenant admin navigation
+const tenantNavigation: NavigationItem[] = [
     { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
     { name: 'Classes', href: '/classes', icon: BookOpenIcon },
     { name: 'Teachers', href: '/teachers', icon: AcademicCapIcon },
     { name: 'Students', href: '/students', icon: UserGroupIcon },
 ];
 
+// System admin navigation
+const systemAdminNavigation: NavigationItem[] = [
+    { name: 'Dashboard', href: '/system-admin/dashboard', icon: HomeIcon },
+    { name: 'Tenants', href: '/system-admin/tenants', icon: BuildingOfficeIcon },
+    { name: 'System Users', href: '/system-admin/users', icon: UsersIcon },
+    { name: 'Roles & Permissions', href: '/system-admin/roles', icon: ShieldCheckIcon },
+];
+
 const SidebarNavigation: React.FC<{ collapsed?: boolean }> = ({ collapsed }) => {
     const pathname = usePathname();
     const [expandedItems, setExpandedItems] = useState<string[]>([]);
+    const [userRole, setUserRole] = useState<string>('');
+    const [isLoading, setIsLoading] = useState(true);
+
+    // Check if user is system admin
+    useEffect(() => {
+        const fetchSession = async () => {
+            try {
+                const response = await fetch('/api/auth/session');
+                const session = await response.json();
+                if (session?.user?.role) {
+                    setUserRole(session.user.role);
+                }
+            } catch (error) {
+                console.warn('Error fetching session:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchSession();
+    }, []);
+
+    // Determine which navigation to show
+    const isSystemAdmin = userRole?.toLowerCase().includes('system') || pathname.startsWith('/system-admin');
+    const navigation = isSystemAdmin ? systemAdminNavigation : tenantNavigation;
 
     const toggleExpanded = (itemName: string) => {
         setExpandedItems(prev =>
@@ -40,6 +77,8 @@ const SidebarNavigation: React.FC<{ collapsed?: boolean }> = ({ collapsed }) => 
 
     // Keep parents expanded if pathname matches any of their subitems
     useEffect(() => {
+        if (isLoading) return;
+        
         const activeParents = navigation
             .filter(item =>
                 item.subItems?.some(subItem => pathname.startsWith(subItem.href))
@@ -47,7 +86,7 @@ const SidebarNavigation: React.FC<{ collapsed?: boolean }> = ({ collapsed }) => 
             .map(item => item.name);
 
         setExpandedItems(activeParents);
-    }, [pathname]);
+    }, [pathname, isLoading, userRole]);
 
     const isItemActive = (item: NavigationItem) => {
         if (item.href) {
@@ -60,6 +99,15 @@ const SidebarNavigation: React.FC<{ collapsed?: boolean }> = ({ collapsed }) => 
     };
 
     const isSubItemActive = (href: string) => pathname === href;
+
+    // Show loading state or empty state while checking role
+    if (isLoading) {
+        return (
+            <nav className={`flex-1 py-6 space-y-2 px-4`}>
+                <div className="text-sm text-gray-400 text-center">Loading...</div>
+            </nav>
+        );
+    }
 
     return (
         <nav className={`flex-1 py-6 space-y-2 px-4`}>
