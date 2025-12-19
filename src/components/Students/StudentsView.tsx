@@ -6,14 +6,29 @@ import { Button } from '@/components/UIKit/Button';
 import EmptyState from '@/components/EmptyState';
 import { Student } from '@/app/(portal)/students/[pid]/page';
 import StudentsTable from '@/components/Students/StudentTable';
+import StudentsStats from './StudentsStats';
+
+interface StudentsAnalytics {
+    totalStudents: number;
+    activeStudents: number;
+    enrolledStudents: number;
+    averageAge: number;
+    studentsByGender: {
+        male: number;
+        female: number;
+        other: number;
+    };
+    newEnrollmentsThisMonth: number;
+}
 
 export interface StudentsViewProps {
     students: Student[]
     totalPages: number
+    analytics: StudentsAnalytics
 }
 
 
-const StudentsView = ({ students, totalPages }: StudentsViewProps) => {
+const StudentsView = ({ students, totalPages, analytics }: StudentsViewProps) => {
 
     if (students.length < 1) {
         return (
@@ -56,6 +71,9 @@ const StudentsView = ({ students, totalPages }: StudentsViewProps) => {
                     </Button>
                 </div>
             </div>
+
+            {/* Stats */}
+            <StudentsStats analytics={analytics} />
 
             <StudentsTable totalPages={totalPages} students={students} />
         </div>

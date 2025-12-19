@@ -73,12 +73,29 @@ interface AnalyticsResponse {
 }
 
 export default async function AdminDashboard() {
-    // Fetch analytics data from API
-    const analyticsRes = await getModel<AnalyticsResponse>('/analytics/tenant');
+    // Fetch analytics data from API with error handling
+    let analytics: AnalyticsResponse['data'] | undefined;
+    let analyticsError: string | null = null;
+    
+    try {
+        const analyticsRes = await getModel<AnalyticsResponse>('/analytics/tenant');
+        
+        // Check if response is an error
+        if (isErrorResponse(analyticsRes)) {
+            // Only show error message if it's not a 404 (endpoint may not exist yet)
+            if (analyticsRes.status !== 404) {
+                analyticsError = analyticsRes.message || 'Unknown error';
+            }
+        } else if (analyticsRes?.data) {
+            analytics = analyticsRes.data;
+        }
+    } catch (error) {
+        // Silently handle errors - endpoint may not exist yet or return invalid JSON
+        console.warn('Error fetching dashboard analytics:', error);
+    }
 
-    // Check if response is an error
-    if (isErrorResponse(analyticsRes) || !analyticsRes?.data) {
-        // Return empty state or error message
+    // If no analytics data and not a handled error, show empty state
+    if (!analytics && analyticsError) {
         return (
             <div className="space-y-6">
                 <div>
@@ -89,26 +106,25 @@ export default async function AdminDashboard() {
                 </div>
                 <div className="bg-white shadow rounded-lg p-6">
                     <p className="text-gray-500">
-                        {isErrorResponse(analyticsRes) 
-                            ? `Unable to load analytics: ${analyticsRes.message || 'Unknown error'}`
-                            : 'No analytics data available'}
+                        Unable to load analytics: {analyticsError}
                     </p>
                 </div>
             </div>
         );
     }
 
-    const analytics = analyticsRes.data;
+    // Use empty object as fallback if analytics is undefined
+    const analyticsData = analytics || {};
 
     // Extract summary statistics from total_counts
-    const totalCounts = analytics.total_counts || {};
+    const totalCounts = analyticsData.total_counts || {};
     const studentsCount = totalCounts.students || 0;
     const teachersCount = totalCounts.teachers || 0;
     const classesCount = totalCounts.classes || 0;
     const studentTeacherRatio = totalCounts.student_per_teacher_ratio || (teachersCount > 0 ? studentsCount / teachersCount : 0);
 
     // Prepare class overview data
-    const classOverviewData = (analytics.class_overview || []).map(cls => ({
+    const classOverviewData = (analyticsData.class_overview || []).map(cls => ({
         id: cls.class_id,
         name: cls.class_name,
         studentCount: cls.student_count || 0,
@@ -116,7 +132,7 @@ export default async function AdminDashboard() {
     }));
 
     // Prepare teacher-class mapping from teacher_stats
-    const teacherStats = analytics.teacher_stats || {};
+    const teacherStats = analyticsData.teacher_stats || {};
     const teachersWithClassesList = teacherStats.teachers_with_classes_list || [];
     
     // Get all class IDs that have teachers assigned
@@ -156,7 +172,7 @@ export default async function AdminDashboard() {
     const classesWithoutTeacherCount = classesWithoutTeachers.length;
 
     // Prepare teacher data from teacher_assignment_status
-    const teacherData = (analytics.teacher_assignment_status || []).map(teacher => {
+    const teacherData = (analyticsData.teacher_assignment_status || []).map(teacher => {
         const hasClasses = teacher.status === 'assigned';
         const subjects = teacher.subjects || [];
 
@@ -169,18 +185,18 @@ export default async function AdminDashboard() {
     });
 
     // Get average students per teacher from API
-    const averageStudentsPerTeacher = analytics.average_student_per_teacher || 0;
+    const averageStudentsPerTeacher = analyticsData.average_student_per_teacher || 0;
 
     // Prepare gender distribution from student_insights
     const genderDistribution = {
-        male: analytics.student_insights?.gender_distribution?.male ?? 0,
-        female: analytics.student_insights?.gender_distribution?.female ?? 0,
-        other: (analytics.student_insights?.gender_distribution?.other ?? 0) + 
-               (analytics.student_insights?.gender_distribution?.unknown ?? 0),
+        male: analyticsData.student_insights?.gender_distribution?.male ?? 0,
+        female: analyticsData.student_insights?.gender_distribution?.female ?? 0,
+        other: (analyticsData.student_insights?.gender_distribution?.other ?? 0) + 
+               (analyticsData.student_insights?.gender_distribution?.unknown ?? 0),
     };
 
     // Transform age distribution object to array format
-    const ageDistribution = analytics.student_insights?.age_distribution || {};
+    const ageDistribution = analyticsData.student_insights?.age_distribution || {};
     const ageRanges = [
         { range: '0-5 years', count: ageDistribution.age_0_to_5 || 0 },
         { range: '6-10 years', count: ageDistribution.age_6_to_10 || 0 },

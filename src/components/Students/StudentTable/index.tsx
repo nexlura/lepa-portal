@@ -3,12 +3,17 @@
 import { useState } from 'react'
 
 import StudentTableControls from './TableControls'
-import { StudentsViewProps } from '../StudentsView'
+import { Student } from '@/app/(portal)/students/[pid]/page'
 import StudentsTableBody from './TableBody'
 import TableFoot from '@/components/TableFoot'
 import StudentsTableHead from './TableHead'
 
-const StudentsTable = ({ students, totalPages }: StudentsViewProps) => {
+interface StudentsTableProps {
+    students: Student[];
+    totalPages: number;
+}
+
+const StudentsTable = ({ students, totalPages }: StudentsTableProps) => {
 
     const [search, setSearch] = useState('')
     const [gradeFilter, setGradeFilter] = useState<string>('All')

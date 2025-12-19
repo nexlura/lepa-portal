@@ -1,6 +1,6 @@
 import TeachersView from '@/components/Teachers/TeachersView'
 import { PageProps } from '../../classes/[pageNumber]/page'
-import { getModel } from '@/lib/connector'
+import { getModel, isErrorResponse } from '@/lib/connector'
 import { Teacher } from '@/components/Teachers/TeachersView'
 
 interface BackendTeachersData {
@@ -36,29 +36,36 @@ type TeachersAnalyticsResponse = {
 const TeachersPage = async ({ params }: PageProps) => {
     const { pageNumber } = await params
 
-    const res = await getModel(`/teachers?page=${pageNumber}&limit=10`);
+    // Fetch teachers data with error handling
+    let teachers: BackendTeachersData[] = [];
+    let totalPages = 0;
+    let totalTeachers = 0;
     
-    // Check if response is valid
-    if (!res || !res.data) {
-        return (
-            <TeachersView teachers={[]} totalPages={0} analytics={{
-                totalTeachers: 0,
-                activeTeachers: 0,
-                teachersWithClasses: 0,
-                teachersWithoutClasses: 0,
-                averageStudentsPerTeacher: 0,
-                totalSubjectsTaught: 0,
-            }} />
-        );
+    try {
+        const res = await getModel(`/teachers?page=${pageNumber}&limit=10`);
+        if (res && !isErrorResponse(res) && res.data) {
+            teachers = res.data.teachers || [];
+            totalPages = res.data.total_pages || 0;
+            totalTeachers = res.data.total || teachers.length || 0;
+        }
+    } catch (error) {
+        console.warn('Error fetching teachers:', error);
+        // Use empty arrays as fallback
     }
-    
-    const teachers = res.data.teachers;
-    const totalPages = res.data.total_pages;
-    const totalTeachers = res.data.total || teachers?.length || 0;
 
-    // Fetch analytics data
-    const analyticsRes = await getModel<TeachersAnalyticsResponse>('/analytics/tenant/teachers');
-    const analytics = analyticsRes?.data || {};
+    // Fetch analytics data with error handling
+    let analytics: TeachersAnalyticsResponse['data'] = {};
+    try {
+        const analyticsRes = await getModel<TeachersAnalyticsResponse>('/analytics/tenant/teachers');
+        if (analyticsRes && !isErrorResponse(analyticsRes) && analyticsRes.data) {
+            analytics = analyticsRes.data;
+        } else if (isErrorResponse(analyticsRes) && analyticsRes.status === 404) {
+            // Endpoint doesn't exist yet, silently use defaults
+        }
+    } catch (error) {
+        // Silently handle errors - endpoint may not exist yet
+        // Use empty object as fallback
+    }
 
     const transformedData: Teacher[] = teachers?.map((teacher: BackendTeachersData) => {
         // Format name from first_name and last_name or use name field

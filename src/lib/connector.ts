@@ -250,13 +250,17 @@ const sendRequest = async <T = any>(
     if (axios.isAxiosError(error)) {
       const statusCode = error.response?.status;
       const message = error.response?.data?.message || error.message;
-      // Log error details in development
+      // Log error details in development (404s are warnings since endpoints may not exist yet)
       if (NODE_ENV === 'development') {
-        console.error(`API Error [${statusCode}]: ${message}`, {
-          url: error.config?.url,
-          method: error.config?.method,
-          data: error.response?.data,
-        });
+        if (statusCode === 404) {
+          console.warn(`API Endpoint not found [404]: ${error.config?.url} - This is expected if the endpoint hasn't been implemented yet.`);
+        } else {
+          console.error(`API Error [${statusCode}]: ${message}`, {
+            url: error.config?.url,
+            method: error.config?.method,
+            data: error.response?.data,
+          });
+        }
       }
 
       // Return structured error response
@@ -373,9 +377,12 @@ const sendRequestViaProxy = async <T = any>(
           // Parse JSON
           const data = JSON.parse(text);
           return data;
-        } catch (parseError) {
+        } catch (parseError: any) {
           // If JSON parsing fails, return null instead of throwing
-          console.error('Failed to parse JSON response:', parseError);
+          // Only log in development to avoid noise
+          if (NODE_ENV === 'development') {
+            console.warn('Failed to parse JSON response:', parseError?.message || 'Invalid JSON');
+          }
           return null;
         }
       }

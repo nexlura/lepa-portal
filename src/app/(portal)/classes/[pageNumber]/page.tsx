@@ -1,7 +1,7 @@
 import { auth } from '@/auth';
 import ClassesView from '@/components/SchoolClasses/ClassView';
 import { MultiSelectOption } from '@/components/UIKit/MultiSelect';
-import { getModel } from '@/lib/connector';
+import { getModel, isErrorResponse } from '@/lib/connector';
 
 type BackendClassesData = {
     id: string,
@@ -47,30 +47,51 @@ const ClassesPage = async ({ params }: PageProps) => {
     const { pageNumber } = await params
     const session = await auth();
 
-    const res = await getModel(`/classes?page=${pageNumber}&limit=10`);
-    const totalPages = res.data?.total_pages
-    const classes = res.data?.classes
-    const totalClasses = res.data?.total || classes?.length || 0;
+    // Fetch classes data with error handling
+    let classes: BackendClassesData[] = [];
+    let totalPages = 0;
+    let totalClasses = 0;
+    
+    try {
+        const res = await getModel(`/classes?page=${pageNumber}&limit=10`);
+        if (res && !isErrorResponse(res) && res.data) {
+            classes = res.data.classes || [];
+            totalPages = res.data.total_pages || 0;
+            totalClasses = res.data.total || classes.length || 0;
+        }
+    } catch (error) {
+        console.warn('Error fetching classes:', error);
+        // Use empty arrays as fallback
+    }
 
-    // Fetch analytics data
-    const analyticsRes = await getModel<ClassesAnalyticsResponse>('/analytics/tenant/classes');
-    const analytics = analyticsRes?.data || {};
+    // Fetch analytics data with error handling
+    let analytics: ClassesAnalyticsResponse['data'] = {};
+    try {
+        const analyticsRes = await getModel<ClassesAnalyticsResponse>('/analytics/tenant/classes');
+        if (analyticsRes && !isErrorResponse(analyticsRes) && analyticsRes.data) {
+            analytics = analyticsRes.data;
+        } else if (isErrorResponse(analyticsRes) && analyticsRes.status === 404) {
+            // Endpoint doesn't exist yet, silently use defaults
+        }
+    } catch (error) {
+        // Silently handle errors - endpoint may not exist yet
+        // Use empty object as fallback
+    }
 
-    const transformedData: SchoolClass[] = classes.map((classK: BackendClassesData) => {
-
+    const transformedData: SchoolClass[] = classes?.map((classK: BackendClassesData) => {
         return {
             id: classK.id,
             capacity: classK.capacity,
             className: classK.name,
             createdAt: classK.created_at,
             currentSize: classK.current_size.toString(),
-            teachers: classK.teachers.map(t => ({
+            teachers: classK.teachers?.map(t => ({
                 id: t.id,
                 name: t.full_name
-            })),
+            })) || [],
             grade: classK.grade
         }
-    });
+    }) || [];
 
     return (
         <ClassesView
