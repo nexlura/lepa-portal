@@ -68,7 +68,12 @@ function DataTable<TData, TBackendData>({
     const pathname = usePathname()
 
     const initialSearch = searchParams.get("search") || ""
-    const initialPage = Number(searchParams.get("page")) || 1
+    
+    // Read page number from pathname (e.g., /students/1) or fall back to query params
+    const pathParts = pathname.split('/').filter(Boolean)
+    const lastPart = pathParts[pathParts.length - 1]
+    const pageFromPath = lastPart && !isNaN(Number(lastPart)) ? Number(lastPart) : null
+    const initialPage = pageFromPath || Number(searchParams.get("page")) || 1
 
     const [localData, setLocalData] = useState<TData[]>(() => {
         return initialSearch ? [] : initialData
@@ -211,23 +216,37 @@ function DataTable<TData, TBackendData>({
         prevCurrentPageRef.current = currentPage
         prevQueryDepsKeyRef.current = queryDepsKey
 
-        // Build URL
+        // Build URL path - handle path-based page routing (e.g., /students/1 -> /students/2)
+        let newPathname = pathname
+        const pathParts = pathname.split('/').filter(Boolean)
+        const lastPart = pathParts[pathParts.length - 1]
+        
+        // Check if last part is a number (page number)
+        if (lastPart && !isNaN(Number(lastPart))) {
+            // Replace the page number in the path
+            pathParts[pathParts.length - 1] = currentPage.toString()
+            newPathname = `/${pathParts.join('/')}`
+        } else {
+            // Append page number if path doesn't end with a number
+            newPathname = `${pathname}/${currentPage}`
+        }
+
+        // Build query params
         const params = new URLSearchParams()
         if (debouncedSearch.trim()) {
             params.set("search", debouncedSearch.trim())
         }
-        // params.set("page", currentPage.toString())
         if (buildUrlParams) {
             buildUrlParams(params, debouncedSearch, currentPage)
         }
 
-        const newUrl = `${pathname}${params.toString() ? `?${params.toString()}` : ''}`
+        const newUrl = `${newPathname}${params.toString() ? `?${params.toString()}` : ''}`
 
         // Update URL
         router.replace(newUrl)
 
-        // Fetch data
-        const useInitialFallback = filterChangeRef.current ? false : true
+        // Fetch data - always fetch when page changes or filters change, use initial fallback only for search changes
+        const useInitialFallback = (filterChangeRef.current || pageChanged) ? false : true
         fetchData(currentPage, debouncedSearch, { useInitialFallback })
         if (filterChangeRef.current) {
             filterChangeRef.current = false
@@ -283,9 +302,10 @@ function DataTable<TData, TBackendData>({
                         )}
 
                         {/* Pagination */}
-                        {displayTotalPages > 1 && !isLoading && (
+                        {displayTotalPages > 1  && (
                             <TableFoot
                                 totalPages={displayTotalPages}
+                                currentPage={currentPage}
                                 onPageChange={setCurrentPage}
                             />
                         )}
