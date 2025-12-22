@@ -203,6 +203,8 @@ const sendRequest = async <T = any>(
       ),
     };
 
+    // console.log(session?.user?.accessToken);
+
     const requestConfig: AxiosRequestConfig = {
       ...config,
       method,
@@ -248,13 +250,17 @@ const sendRequest = async <T = any>(
     if (axios.isAxiosError(error)) {
       const statusCode = error.response?.status;
       const message = error.response?.data?.message || error.message;
-      // Log error details in development
+      // Log error details in development (404s are warnings since endpoints may not exist yet)
       if (NODE_ENV === 'development') {
-        console.error(`API Error [${statusCode}]: ${message}`, {
-          url: error.config?.url,
-          method: error.config?.method,
-          data: error.response?.data,
-        });
+        if (statusCode === 404) {
+          console.warn(`API Endpoint not found [404]: ${error.config?.url} - This is expected if the endpoint hasn't been implemented yet.`);
+        } else {
+          console.error(`API Error [${statusCode}]: ${message}`, {
+            url: error.config?.url,
+            method: error.config?.method,
+            data: error.response?.data,
+          });
+        }
       }
 
       // Return structured error response
@@ -350,17 +356,49 @@ const sendRequestViaProxy = async <T = any>(
     // Handle successful responses
     if (response.status >= 200 && response.status < 300) {
       const contentType = response.headers.get('content-type');
+      const contentLength = response.headers.get('content-length');
+      
+      // Check if response has content before parsing
       if (contentType && contentType.includes('application/json')) {
-        const data = await response.json();
-        return data;
+        // If content-length is 0, return null
+        if (contentLength === '0') {
+          return null;
+        }
+        
+        try {
+          // Read response as text first to check if it's empty
+          const text = await response.text();
+          
+          // If body is empty, return null
+          if (!text || text.trim() === '') {
+            return null;
+          }
+          
+          // Parse JSON
+          const data = JSON.parse(text);
+          return data;
+        } catch (parseError: any) {
+          // If JSON parsing fails, return null instead of throwing
+          // Only log in development to avoid noise
+          if (NODE_ENV === 'development') {
+            console.warn('Failed to parse JSON response:', parseError?.message || 'Invalid JSON');
+          }
+          return null;
+        }
       }
       return null;
     }
 
     // Handle error responses
-    const errorData = await response.json().catch(() => ({
-      message: 'Request failed',
-    }));
+    let errorData = { message: 'Request failed' };
+    try {
+      const text = await response.text();
+      if (text && text.trim() !== '') {
+        errorData = JSON.parse(text);
+      }
+    } catch {
+      // If parsing fails, use default error message
+    }
 
     return {
       error: true,

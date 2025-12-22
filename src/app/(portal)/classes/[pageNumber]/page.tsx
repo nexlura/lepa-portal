@@ -1,7 +1,7 @@
 import { auth } from '@/auth';
 import SchoolClassesView from '@/components/SchoolClasses/ClassView';
 import { MultiSelectOption } from '@/components/UIKit/MultiSelect';
-import { getModel } from '@/lib/connector';
+import { getModel, isErrorResponse } from '@/lib/connector';
 
 export type BackendClassesData = {
     id: string,
@@ -30,35 +30,101 @@ export type PageProps = {
     params: Promise<{ pageNumber: string }>;
 };
 
+// const SchoolClassesPage = async ({ params }: PageProps) => {
+type ClassesAnalyticsResponse = {
+    success?: boolean;
+    code?: number;
+    data?: {
+        total_capacity?: number;
+        total_students?: number;
+        average_class_size?: number;
+        classes_at_full_capacity?: number;
+        average_utilization?: number;
+    };
+    message?: string;
+};
+
 const SchoolClassesPage = async ({ params }: PageProps) => {
     const { pageNumber } = await params
-    const session = await auth();
+    
+    // Fetch session with error handling
+    let session = null;
+    try {
+        session = await auth();
+    } catch (error: any) {
+        // Silently handle auth errors - session will be null
+        console.warn('Error fetching session:', error?.message || error);
+    }
 
+    // Fetch classes data with error handling
+    let classes: BackendClassesData[] = [];
+    let totalPages = 0;
+    let totalClasses = 0;
+    
+    try {
     const res = await getModel(`/classes?page=${pageNumber}&limit=10`);
-    const totalPages = res.data?.total_pages
-    const classes = res.data?.classes
+        if (res && !isErrorResponse(res) && res.data) {
+            classes = Array.isArray(res.data.classes) ? res.data.classes : [];
+            totalPages = typeof res.data.total_pages === 'number' ? res.data.total_pages : 0;
+            totalClasses = typeof res.data.total === 'number' ? res.data.total : classes.length || 0;
+        } else if (isErrorResponse(res)) {
+            // Handle error response - use defaults
+            console.warn('Error response from classes API:', res.status, res.message);
+        }
+    } catch (error: any) {
+        // Handle JSON parse errors and other exceptions
+        console.warn('Error fetching classes:', error?.message || error);
+        // Use empty arrays as fallback
+    }
 
-    const transformedData: SchoolClass[] = classes.map((classK: BackendClassesData) => {
+    // Fetch analytics data with error handling
+    let analytics: ClassesAnalyticsResponse['data'] = {};
+    try {
+        const analyticsRes = await getModel<ClassesAnalyticsResponse>('/analytics/tenant/classes');
+        if (analyticsRes && !isErrorResponse(analyticsRes) && analyticsRes.data) {
+            analytics = analyticsRes.data;
+        } else if (isErrorResponse(analyticsRes)) {
+            // Only log non-404 errors
+            if (analyticsRes.status !== 404) {
+                console.warn('Error response from classes analytics API:', analyticsRes.status, analyticsRes.message);
+            }
+        }
+    } catch (error: any) {
+        // Silently handle errors - endpoint may not exist yet or return invalid JSON
+        // Use empty object as fallback
+        if (error?.message && !error.message.includes('JSON.parse')) {
+            console.warn('Error fetching classes analytics:', error.message);
+        }
+    }
 
+    const transformedData: SchoolClass[] = classes?.map((classK: BackendClassesData) => {
         return {
             id: classK.id,
             capacity: classK.capacity,
             className: classK.name,
             createdAt: classK.created_at,
-            currentSize: classK.current_size.toString(),
-            teachers: classK.teachers.map(t => ({
+            currentSize: classK.current_size,
+            teachers: classK.teachers?.map(t => ({
                 id: t.id,
                 name: t.full_name
-            })),
+            })) || [],
             grade: classK.grade
         }
-    });
+    }) || [];
 
     return (
         <SchoolClassesView
             classes={transformedData}
             session={session}
             totalPages={totalPages}
+            analytics={{
+                totalClasses,
+                totalCapacity: analytics.total_capacity || 0,
+                totalStudents: analytics.total_students || 0,
+                averageClassSize: analytics.average_class_size || 0,
+                classesAtFullCapacity: analytics.classes_at_full_capacity || 0,
+                averageUtilizationRate: analytics.average_utilization || 0,
+            }}
         />
     );
 };

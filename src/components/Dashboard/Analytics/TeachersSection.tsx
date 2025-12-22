@@ -1,12 +1,13 @@
 'use client';
 
+import { useState } from 'react';
 import { AcademicCapIcon, UserGroupIcon, ChartBarIcon } from '@heroicons/react/24/outline';
 
 interface TeacherData {
     id: string;
     name: string;
     hasClasses: boolean;
-    studentCount: number;
+    subjects: string[];
 }
 
 interface TeachersSectionProps {
@@ -15,6 +16,7 @@ interface TeachersSectionProps {
 }
 
 const TeachersSection = ({ teachers, averageStudentsPerTeacher }: TeachersSectionProps) => {
+    const [hoveredRow, setHoveredRow] = useState<string | null>(null);
     const teachersWithClasses = teachers.filter(t => t.hasClasses);
     const teachersWithoutClasses = teachers.filter(t => !t.hasClasses);
 
@@ -80,28 +82,50 @@ const TeachersSection = ({ teachers, averageStudentsPerTeacher }: TeachersSectio
                                     Status
                                 </th>
                                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Students
+                                    Subjects
                                 </th>
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
                             {teachers.slice(0, 10).map((teacher) => (
-                                <tr key={teacher.id}>
-                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                                <tr 
+                                    key={teacher.id}
+                                    className={`transition-colors cursor-pointer ${
+                                        hoveredRow === teacher.id ? 'bg-primary-50' : 'hover:bg-gray-50'
+                                    }`}
+                                    onMouseEnter={() => setHoveredRow(teacher.id)}
+                                    onMouseLeave={() => setHoveredRow(null)}
+                                >
+                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 font-medium">
                                         {teacher.name}
                                     </td>
                                     <td className="px-4 py-3 whitespace-nowrap">
                                         <span
-                                            className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${teacher.hasClasses
-                                                    ? 'bg-green-100 text-green-800'
-                                                    : 'bg-orange-100 text-orange-800'
-                                                }`}
+                                            className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full transition-all ${
+                                                teacher.hasClasses
+                                                    ? 'bg-green-100 text-green-800 hover:bg-green-200'
+                                                    : 'bg-orange-100 text-orange-800 hover:bg-orange-200'
+                                            }`}
                                         >
                                             {teacher.hasClasses ? 'Assigned' : 'Unassigned'}
                                         </span>
                                     </td>
-                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                                        {teacher.studentCount}
+                                    <td className="px-4 py-3 text-sm text-gray-500">
+                                        {teacher.subjects.length > 0 ? (
+                                            (() => {
+                                                // Capitalize first letter of each subject
+                                                const capitalizedSubjects = teacher.subjects.map(subject => 
+                                                    subject.charAt(0).toUpperCase() + subject.slice(1).replace(/_/g, ' ')
+                                                );
+                                                // Format: show first 3, then "+X more" if more than 3
+                                                const displaySubjects = capitalizedSubjects.length <= 3
+                                                    ? capitalizedSubjects.join(', ')
+                                                    : `${capitalizedSubjects.slice(0, 3).join(', ')}, +${capitalizedSubjects.length - 3} more`;
+                                                return <span>{displaySubjects}</span>;
+                                            })()
+                                        ) : (
+                                            <span className="text-gray-400">No subjects</span>
+                                        )}
                                     </td>
                                 </tr>
                             ))}

@@ -13,7 +13,7 @@ interface StudentsTableProps {
     students: Student[]
     totalPages: number
 }
-
+   
 export const genderOptions = [
     "all genders",
     "male",

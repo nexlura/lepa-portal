@@ -10,13 +10,23 @@ import EmptyState from '../EmptyState'
 import ClassesStats from './ClassesStats'
 import AddSchoolClassModal from './AddClassModal'
 import SchoolClassesTable from '@/components/SchoolClasses/Table'
+interface ClassesAnalytics {
+    totalClasses: number;
+    totalCapacity: number;
+    totalStudents: number;
+    averageClassSize: number;
+    classesAtFullCapacity: number;
+    averageUtilizationRate: number;
+}
+
 interface ClassesViewProps {
     classes: SchoolClass[]
     session: Session | null
     totalPages: number
+    analytics: ClassesAnalytics
 };
 
-const SchoolClassesView = ({ classes, totalPages, session }: ClassesViewProps) => {
+const SchoolClassesView = ({ classes, totalPages, session, analytics }: ClassesViewProps) => {
     const [isAddOpen, setIsAddOpen] = useState(false)
     //show empty-state component when we have zero items
     if (classes.length < 1) {
@@ -66,7 +76,7 @@ const SchoolClassesView = ({ classes, totalPages, session }: ClassesViewProps) =
                     </Button>
                 </div>
             </div>
-            <ClassesStats />
+            <ClassesStats analytics={analytics} />
 
             {/* Classes table */}
             <SchoolClassesTable classes={classes} totalPages={totalPages} />

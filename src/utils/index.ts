@@ -2,9 +2,9 @@ export function formatPhoneNumber(input: string | number): string {
   const str = String(input).replace(/\D/g, ''); // remove non-digits
 
   // Expect Sierra Leone format: 232 + 8 digits
-  if (!str.startsWith('232') || str.length !== 11) {
-    throw new Error('Invalid Sierra Leone phone number');
-  }
+  // if (!str.startsWith('232') || str.length !== 11) {
+  //   throw new Error('Invalid Sierra Leone phone number');
+  // }
 
   const countryCode = str.slice(0, 3); // 232
   const areaCode = str.slice(3, 5); // 76

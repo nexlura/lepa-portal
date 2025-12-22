@@ -74,7 +74,7 @@ const PersonalInfoForm = ({
                         <Label>Phone Number *</Label>
                         <Input
                             type="tel"
-                            placeholder="e.g., +1 (555) 123-4567"
+                            placeholder="e.g., +012 (345) 768-900"
                             value={form.phone}
                             onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
                             invalid={Boolean(errors.phone)}
@@ -83,18 +83,20 @@ const PersonalInfoForm = ({
                     </Field>
                     <Field className='sm:col-span-4'>
                         <Label>Sex</Label>
-                        <Listbox
-                            value={form.sex}
-                            onChange={(value) => setForm((f) => ({ ...f, sex: value }))}
-                            placeholder="Select sex"
-                            invalid={Boolean(errors.sex)}
-                        >
-                            {SEX_OPTIONS.map((option) => (
-                                <ListboxOption key={option.id} value={option.id}>
-                                    {option.name}
-                                </ListboxOption>
-                            ))}
-                        </Listbox>
+                        <div className="relative">
+                            <Listbox
+                                value={form.sex}
+                                onChange={(value) => setForm((f) => ({ ...f, sex: value as string }))}
+                                placeholder="Select sex"
+                                invalid={Boolean(errors.sex)}
+                            >
+                                {SEX_OPTIONS.map((option) => (
+                                    <ListboxOption key={option.id} value={option.id}>
+                                        {option.name}
+                                    </ListboxOption>
+                                ))}
+                            </Listbox>
+                        </div>
                         {errors.sex ? <ErrorMessage>{errors.sex}</ErrorMessage> : null}
                     </Field>
 

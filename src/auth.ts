@@ -194,6 +194,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (token.schoolName) {
           session.user.schoolName = token.schoolName;
           session.user.schoolLevel = token.schoolLevel;
+        }
+        // tenantId should always be set if available, regardless of schoolName
+        if (token.tenantId) {
           session.user.tenantId = token.tenantId;
         }
       }

@@ -20,12 +20,22 @@ export interface Teacher {
     sex?: string
 }
 
+interface TeachersAnalytics {
+    totalTeachers: number;
+    activeTeachers: number;
+    teachersWithClasses: number;
+    teachersWithoutClasses: number;
+    averageStudentsPerTeacher: number;
+    totalSubjectsTaught: number;
+}
+
 interface TeachersViewProps {
     teachers: Teacher[];
-    totalPages: number
+    totalPages: number;
+    analytics: TeachersAnalytics;
 };
 
-const TeachersView = ({ teachers, totalPages }: TeachersViewProps) => {
+const TeachersView = ({ teachers, totalPages, analytics }: TeachersViewProps) => {
     if (teachers?.length < 1) {
         return (
             <>
@@ -69,7 +79,7 @@ const TeachersView = ({ teachers, totalPages }: TeachersViewProps) => {
             </div>
 
             {/* Stats */}
-            <TeachersStats />
+            <TeachersStats analytics={analytics} />
 
             <TeachersTable teachers={teachers} totalPages={totalPages} />
         </div>
