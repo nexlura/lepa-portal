@@ -1,14 +1,24 @@
 import AgenciesView from '@/components/SystemAdmin/AgenciesView';
+import { getModel, isErrorResponse } from '@/lib/connector';
 
 type BackendAgencyData = {
     id: string;
     name: string;
     type: string;
     status: string;
+    domain?: string;
     tenant_count?: number;
     created_at: string;
     region?: string;
     contact_email?: string;
+};
+
+type AgenciesApiResponse = {
+    data?: {
+        agencies?: BackendAgencyData[];
+        total?: number;
+        total_pages?: number;
+    };
 };
 
 export type Agency = {
@@ -28,72 +38,18 @@ export type PageProps = {
 };
 
 const AgenciesPage = async ({ searchParams }: PageProps) => {
-    // TODO: Replace with API data once endpoint is ready
-    // Dummy data for agencies
-    const dummyAgencies: BackendAgencyData[] = [
-        {
-            id: '1',
-            name: 'Ministry of Education',
-            type: 'Ministry',
-            status: 'active',
-            created_at: '2024-01-01T10:00:00Z',
-            tenant_count: 8,
-            region: 'National',
-            contact_email: 'contact@moe.gov',
-        },
-        {
-            id: '2',
-            name: 'District Education Office - North',
-            type: 'District Office',
-            status: 'active',
-            created_at: '2024-01-15T14:30:00Z',
-            tenant_count: 3,
-            region: 'Northern District',
-            contact_email: 'north@deo.gov',
-        },
-        {
-            id: '3',
-            name: 'State Education Board - Central',
-            type: 'State/County Board',
-            status: 'active',
-            created_at: '2024-02-01T09:15:00Z',
-            tenant_count: 5,
-            region: 'Central State',
-            contact_email: 'central@seb.gov',
-        },
-        {
-            id: '4',
-            name: 'District Education Office - South',
-            type: 'District Office',
-            status: 'active',
-            created_at: '2024-02-10T11:45:00Z',
-            tenant_count: 4,
-            region: 'Southern District',
-            contact_email: 'south@deo.gov',
-        },
-        {
-            id: '5',
-            name: 'County Education Board - West',
-            type: 'State/County Board',
-            status: 'suspended',
-            created_at: '2024-01-20T08:30:00Z',
-            tenant_count: 2,
-            region: 'Western County',
-            contact_email: 'west@ceb.gov',
-        },
-        {
-            id: '6',
-            name: 'Ministry of Education - Regional Branch',
-            type: 'Ministry',
-            status: 'active',
-            created_at: '2024-03-01T13:20:00Z',
-            tenant_count: 6,
-            region: 'Eastern Region',
-            contact_email: 'east@moe.gov',
-        },
-    ];
-
-    const transformedData: Agency[] = dummyAgencies.map((agency: BackendAgencyData) => {
+    let agencies: Agency[] = [];
+    let totalPages = 1;
+    
+    try {
+        const res = await getModel<AgenciesApiResponse>('/agencies');
+        
+        if (res && !isErrorResponse(res) && res.data) {
+            const backendAgencies = Array.isArray(res.data.agencies) ? res.data.agencies : [];
+            totalPages = typeof res.data.total_pages === 'number' ? res.data.total_pages : 1;
+            
+            // Transform backend data to frontend format
+            agencies = backendAgencies.map((agency: BackendAgencyData) => {
         return {
             id: agency.id,
             name: agency.name,
@@ -105,9 +61,16 @@ const AgenciesPage = async ({ searchParams }: PageProps) => {
             contactEmail: agency.contact_email || 'N/A',
         };
     });
+        } else if (isErrorResponse(res)) {
+            console.warn('Error response from agencies API:', res.status, res.message);
+        }
+    } catch (error: any) {
+        console.warn('Error fetching agencies:', error?.message || error);
+        // Use empty array as fallback
+    }
 
     return (
-        <AgenciesView agencies={transformedData} totalPages={1} />
+        <AgenciesView agencies={agencies} totalPages={totalPages} />
     );
 };
 
