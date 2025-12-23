@@ -45,6 +45,20 @@ const AgencyModal = ({
     const [errors, setErrors] = useState<Partial<Record<keyof AgencyFormData, string>>>({});
     const [isLoading, setIsLoading] = useState(false);
 
+    // Check if form is valid for submission
+    const isFormValid = () => {
+        if (isEditMode) {
+            // In edit mode, only name is required (domain, type, and status have defaults or are always set)
+            return form.name.trim() !== '';
+        } else {
+            // In create mode, domain and name are required (type and status have defaults)
+            return (
+                form.domain.trim() !== '' &&
+                form.name.trim() !== ''
+            );
+        }
+    };
+
     // Normalize agency type from backend format to form format
     const normalizeType = (type: string): 'Government' | 'NGO' => {
         if (type === 'Ministry' || type === 'District Office' || type === 'State/County Board') {
@@ -78,13 +92,14 @@ const AgencyModal = ({
     const validate = () => {
         const next: Partial<Record<keyof AgencyFormData, string>> = {};
         
-        // Domain validation
+        // Domain validation - supports subdomains (e.g., unicef.lepa.cc)
+        const domainRegex = /^([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/;
+        
         if (isEditMode) {
             // In edit mode, domain is optional (only validate if provided)
             if (form.domain.trim()) {
-                const domainRegex = /^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]?\.[a-zA-Z]{2,}$/;
                 if (!domainRegex.test(form.domain.trim())) {
-                    next.domain = 'Enter a valid domain (e.g., example.com)';
+                    next.domain = 'Enter a valid domain (e.g., example.com or lepa.cc)';
                 }
             }
         } else {
@@ -92,9 +107,8 @@ const AgencyModal = ({
             if (!form.domain.trim()) {
                 next.domain = 'Domain is required';
             } else {
-                const domainRegex = /^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]?\.[a-zA-Z]{2,}$/;
                 if (!domainRegex.test(form.domain.trim())) {
-                    next.domain = 'Enter a valid domain (e.g., agency.lepa.com)';
+                    next.domain = 'Enter a valid domain (e.g., agency.lepa.com or agency.lepa.cc)';
                 }
             }
         }
@@ -254,7 +268,7 @@ const AgencyModal = ({
 
                     {/* Name */}
                     <Field>
-                        <Label className="text-sm/6 text-gray-900 font-medium">Agency Name</Label>
+                        <Label className="text-sm/6 text-gray-900 font-medium">Name</Label>
                         <Input
                             type="text"
                             placeholder="e.g., Ministry of Education"
@@ -307,7 +321,7 @@ const AgencyModal = ({
                 <Button
                     color="primary"
                     onClick={handleSubmit}
-                    disabled={isLoading}
+                    disabled={isLoading || !isFormValid()}
                 >
                     {isLoading 
                         ? (isEditMode ? 'Updating...' : 'Creating...') 

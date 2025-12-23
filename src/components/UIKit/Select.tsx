@@ -30,13 +30,13 @@ export function Select({
     'aria-label': ariaLabel,
 }: SelectProps) {
     return (
-        <div>
+        <div className="w-full">
             {label && (
                 <Label className="text-sm/6 text-gray-900 dark:text-white font-medium mb-2 block">
                     {label}
                 </Label>
             )}
-            <div>
+            <div className="relative">
                 <Listbox
                     value={value || null}
                     onChange={(val) => onChange(String(val))}
@@ -52,7 +52,11 @@ export function Select({
                     ))}
                 </Listbox>
             </div>
-            {error && <ErrorMessage>{error}</ErrorMessage>}
+            {error && (
+                <ErrorMessage className="mt-1.5">
+                    {error}
+                </ErrorMessage>
+            )}
         </div>
     );
 }
