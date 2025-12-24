@@ -36,9 +36,23 @@ export default async function RootLayout({
   let session = null;
   try {
     session = await auth();
-  } catch (error) {
-    // Log error but don't crash the app - session will be null
-    console.warn('Error fetching session in RootLayout:', error);
+  } catch (error: any) {
+    // Handle JWT session errors gracefully
+    // This can happen when:
+    // - Session token is expired or invalid
+    // - JWT secret is missing or changed
+    // - Session cookie is corrupted
+    if (error?.name === 'JWTSessionError' || error?.message?.includes('JWT')) {
+      // Silently handle JWT errors - user will be redirected to login if needed
+      // Don't log to avoid noise in production
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('JWT session error (user may need to re-authenticate):', error.message);
+      }
+    } else {
+      // Log other errors for debugging
+      console.warn('Error fetching session in RootLayout:', error);
+    }
+    // Session will be null, which is fine - middleware/auth will handle redirects
   }
 
   return (
