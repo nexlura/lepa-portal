@@ -4,14 +4,20 @@ interface TableControlsProps {
     searchInput: React.ReactNode
     genderOptions: string[]
     genderFilter: string
+    gradeOptions: string[]
+    gradeFilter: string
     setGenderFilter: Dispatch<SetStateAction<string>>
+    setGradeFilter: Dispatch<SetStateAction<string>>
 }
 
 const StudentTableControls = ({
     searchInput,
     genderFilter,
     genderOptions,
-    setGenderFilter
+    setGenderFilter,
+    gradeFilter,
+    gradeOptions,
+    setGradeFilter
 }: TableControlsProps) => {
     return (
         <div className='flex justify-between items-center mb-6'>
@@ -30,6 +36,14 @@ const StudentTableControls = ({
                         label={genderFilter}
                         options={genderOptions}
                         updateSelected={setGenderFilter}
+                    />
+                </div>
+                {/* GRADE FILTER */}
+                <div>
+                    <CustomDropdown
+                        label={gradeFilter}
+                        options={gradeOptions}
+                        updateSelected={setGradeFilter}
                     />
                 </div>
             </div>

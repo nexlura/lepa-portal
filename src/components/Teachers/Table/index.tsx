@@ -29,9 +29,7 @@ const TeachersTable = ({ teachers, totalPages }: TeachersTableProps) => {
     return (
         <DataTable<Teacher, BackendTeacherData>
         config={{
-            endpoint: '/teachers',
             dataKey: 'teachers',
-           
             title: 'All Teachers',
             tableHead: <TeachersTableHead />,
             searchPlaceholder: 'All Teachers...',
@@ -60,7 +58,11 @@ const TeachersTable = ({ teachers, totalPages }: TeachersTableProps) => {
                          phone: teacher.phone,
                          sex: teacher.sex
                 }
-            }
+            },
+            buildQueryParams: (params, search, _page) => {
+                void _page
+                params.set('search', search)
+            },
         }}
         initialData={teachers}
         initialTotalPages={totalPages}

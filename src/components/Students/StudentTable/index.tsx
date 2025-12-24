@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 
 import DataTable from '@/components/DataTable'
@@ -8,6 +8,8 @@ import StudentTableControls from './TableControls'
 import StudentsTableBody from './TableBody'
 import StudentsTableHead from './TableHead'
 import { BackendStudentData, Student } from '@/app/(portal)/students/[pid]/page'
+import { useSession } from 'next-auth/react'
+import { SL_LEVEL_BY_ID } from '@/data/sierraleone-grades'
 
 interface StudentsTableProps {
     students: Student[]
@@ -26,10 +28,36 @@ const StudentsTable = ({ students, totalPages }: StudentsTableProps) => {
         searchParams.get("gender") || 'all genders'
     )
 
+    const { data: session } = useSession();
+
+    const [gradeFilter, setGradeFilter] = useState<string>(
+        searchParams.get("grade") || 'all grades'
+    )
+
+    const [schoolLevel, setSchoolLevel] = useState<string | null>()
+    // const schoolLevel = session?.user?.schoolLevel; // e.g., 'primary', 'jss', 'sss
+
+    const getYears = (level: string) =>
+        SL_LEVEL_BY_ID[level]?.years.map(y => (y.name)) ?? [];
+
+    const levelGrades = schoolLevel === 'secondary'
+        ? [
+            ...getYears('jss'),
+            ...getYears('sss'),
+        ]
+        : getYears(schoolLevel || 'primary');
+
+    const gradeOptions = ['all grades', ...levelGrades]
+
+    useEffect(() => {
+        if (session?.user) {
+            setSchoolLevel(session.user.schoolLevel)
+        }
+
+    }, [session])
     return (
         <DataTable<Student, BackendStudentData>
             config={{
-                endpoint: '/students',
                 dataKey: 'students',
                 transformData: (s: BackendStudentData): Student => ({
                     id: s.id,
@@ -57,7 +85,10 @@ const StudentsTable = ({ students, totalPages }: StudentsTableProps) => {
                         searchInput={searchInput}
                         genderFilter={genderFilter}
                         genderOptions={genderOptions}
+                        gradeFilter={gradeFilter}
+                        gradeOptions={gradeOptions}
                         setGenderFilter={setGenderFilter}
+                        setGradeFilter={setGradeFilter}
                     />
                 },
                 searchPlaceholder: 'All Students...',
@@ -65,10 +96,13 @@ const StudentsTable = ({ students, totalPages }: StudentsTableProps) => {
                 buildQueryParams: (params, search, _page) => {
                     void _page
                     params.set('search', search)
-                    if (genderFilter === 'all genders') {
-                        return
-                    } else {
+                    
+                    if (genderFilter && genderFilter !== 'all genders') {
                         params.set('sex', genderFilter)
+                    }
+                    
+                    if (gradeFilter && gradeFilter !== 'all grades') {
+                        params.set('grade', gradeFilter)
                     }
                 },
                 buildUrlParams: (params) => {
@@ -77,8 +111,15 @@ const StudentsTable = ({ students, totalPages }: StudentsTableProps) => {
                     } else {
                         params.delete('gender')
                     }
+
+                    if (gradeFilter && gradeFilter !== 'all grades') {
+                        params.set('grade', gradeFilter)
+                    } else {
+                        params.delete('grade')
+                    }
+
                 },
-                queryDeps: [genderFilter],
+                queryDeps: [genderFilter, gradeFilter],
             }}
             initialData={students}
             initialTotalPages={totalPages}

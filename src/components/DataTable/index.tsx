@@ -9,7 +9,7 @@ import { getModel } from '@/lib/connector'
 
 export interface DataTableConfig<TData, TBackendData> {
     // API Configuration
-    endpoint: string
+    endpoint?: string // Optional: defaults to dataKey if not provided
     dataKey: string // Key in response.data (e.g., 'students', 'teachers', 'classes')
     totalPagesKey?: string // Key for total pages (default: 'total_pages')
 
@@ -63,6 +63,9 @@ function DataTable<TData, TBackendData>({
         buildUrlParams,
     } = config
 
+    // Use endpoint if provided, otherwise use dataKey
+    const apiEndpoint = endpoint || `/${dataKey}`
+
     const searchParams = useSearchParams()
     const router = useRouter()
     const pathname = usePathname()
@@ -79,7 +82,6 @@ function DataTable<TData, TBackendData>({
         return initialSearch ? [] : initialData
     })
     const [localTotalPages, setLocalTotalPages] = useState(initialTotalPages)
-    const [isLoading, setIsLoading] = useState(false)
 
     const [currentPage, setCurrentPage] = useState<number>(initialPage)
     const [searchQry, setSearchQry] = useState<string>(initialSearch)
@@ -122,46 +124,45 @@ function DataTable<TData, TBackendData>({
     }, [searchQry])
 
     /** 🔄 Fetch Data */
-    const fetchData = useCallback(async (page: number, search: string, options?: { useInitialFallback?: boolean }) => {
-        const useInitialFallback = options?.useInitialFallback ?? true
+    const fetchData = useCallback(
+        async (page: number, search: string, options?: { useInitialFallback?: boolean }) => {
+            const useInitialFallback = options?.useInitialFallback ?? true
 
-        // If no search and allowed, use initial data from refs
-        if (!search.trim() && useInitialFallback) {
-            setLocalData(initialDataRef.current)
-            setLocalTotalPages(initialTotalPagesRef.current)
-            setIsLoading(false)
-            return
-        }
-
-        setIsLoading(true)
-        try {
-            const params = new URLSearchParams()
-            params.set("page", page.toString())
-            params.set("limit", "10")
-
-            // Allow custom query params
-            if (buildQueryParams) {
-                buildQueryParams(params, search, page)
+            // If no search, no active filters, and allowed, use initial data from refs
+            if (!search.trim() && useInitialFallback && !hasActiveFilters) {
+                setLocalData(initialDataRef.current)
+                setLocalTotalPages(initialTotalPagesRef.current)
+                return
             }
 
-            const res = await getModel(`${endpoint}?${params.toString()}`)
-            if (!res?.data) throw new Error(`Error fetching ${dataKey}`)
+            try {
+                const params = new URLSearchParams()
+                params.set("page", page.toString())
+                params.set("limit", "10")
 
-            const backendData = res.data[dataKey] || []
-            const totalPages = res.data[totalPagesKey] || 1
+                // Allow custom query params (e.g. filters, search)
+                if (buildQueryParams) {
+                    buildQueryParams(params, search, page)
+                }
 
-            const transformed = backendData.map(transformData)
+                const res = await getModel(`${apiEndpoint}?${params.toString()}`)
+                if (!res?.data) throw new Error(`Error fetching ${dataKey}`)
 
-            setLocalData(transformed)
-            setLocalTotalPages(totalPages)
-        } catch (err) {
-            console.error(`Error fetching ${dataKey}:`, err)
-            setLocalData([])
-            setLocalTotalPages(1)
-        } finally {
-            setIsLoading(false)
-        }
-    }, [endpoint, dataKey, totalPagesKey, transformData, buildQueryParams])
+                const backendData = res.data[dataKey] || []
+                const totalPages = res.data[totalPagesKey] || 1
+
+                const transformed = backendData.map(transformData)
+
+                setLocalData(transformed)
+                setLocalTotalPages(totalPages)
+            } catch (err) {
+                console.error(`Error fetching ${dataKey}:`, err)
+                setLocalData([])
+                setLocalTotalPages(1)
+            }
+        },
+        [apiEndpoint, dataKey, totalPagesKey, transformData, buildQueryParams, hasActiveFilters]
+    )
 
     // Reset page + mark filter change when external deps change
     useEffect(() => {
@@ -283,9 +284,7 @@ function DataTable<TData, TBackendData>({
                 <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
                         {tableHead}
-
-                        {/* Loading State */}
-                        {hasSearch && tableData.length === 0 ? (
+                        { hasSearch && tableData.length === 0 ? (
                             // No Results Found (only when searching)
                             <tbody>
                                 <tr>
