@@ -1,19 +1,13 @@
 import { 
     AcademicCapIcon, 
-    UserGroupIcon,
     CheckCircleIcon,
-    XCircleIcon,
     ChartBarIcon,
-    BookOpenIcon
 } from "@heroicons/react/24/outline"
 
 interface TeachersAnalytics {
     totalTeachers: number;
     activeTeachers: number;
-    teachersWithClasses: number;
-    teachersWithoutClasses: number;
     averageStudentsPerTeacher: number;
-    totalSubjectsTaught: number;
 }
 
 interface TeachersStatsProps {
@@ -24,10 +18,7 @@ const TeachersStats = ({ analytics }: TeachersStatsProps) => {
     const stats = {
         totalTeachers: analytics.totalTeachers,
         activeTeachers: analytics.activeTeachers,
-        teachersWithClasses: analytics.teachersWithClasses,
-        teachersWithoutClasses: analytics.teachersWithoutClasses,
         averageStudentsPerTeacher: analytics.averageStudentsPerTeacher,
-        totalSubjectsTaught: analytics.totalSubjectsTaught,
     }
 
     const formatNumber = (num: number) => {
@@ -54,32 +45,11 @@ const TeachersStats = ({ analytics }: TeachersStatsProps) => {
             iconColor: 'text-green-400',
         },
         {
-            name: 'Teachers with Classes',
-            value: formatNumber(stats.teachersWithClasses),
-            description: 'Teachers assigned to one or more classes',
-            icon: UserGroupIcon,
-            iconColor: 'text-blue-400',
-        },
-        {
-            name: 'Teachers without Classes',
-            value: formatNumber(stats.teachersWithoutClasses),
-            description: 'Teachers not yet assigned to any class',
-            icon: XCircleIcon,
-            iconColor: 'text-orange-400',
-        },
-        {
             name: 'Average Students per Teacher',
             value: formatDecimal(stats.averageStudentsPerTeacher),
             description: 'Average number of students assigned per teacher',
             icon: ChartBarIcon,
             iconColor: 'text-purple-400',
-        },
-        {
-            name: 'Total Subjects Taught',
-            value: formatNumber(stats.totalSubjectsTaught),
-            description: 'Unique number of subjects being taught',
-            icon: BookOpenIcon,
-            iconColor: 'text-indigo-400',
         },
     ];
 

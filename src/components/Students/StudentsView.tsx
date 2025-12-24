@@ -10,15 +10,12 @@ import StudentsStats from './StudentsStats';
 
 interface StudentsAnalytics {
     totalStudents: number;
-    activeStudents: number;
     enrolledStudents: number;
-    averageAge: number;
     studentsByGender: {
         male: number;
         female: number;
         other: number;
     };
-    newEnrollmentsThisMonth: number;
 }
 
 export interface StudentsViewProps {

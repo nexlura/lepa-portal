@@ -13,10 +13,7 @@ import SchoolClassesTable from '@/components/SchoolClasses/Table'
 interface ClassesAnalytics {
     totalClasses: number;
     totalCapacity: number;
-    totalStudents: number;
     averageClassSize: number;
-    classesAtFullCapacity: number;
-    averageUtilizationRate: number;
 }
 
 interface ClassesViewProps {

@@ -1,23 +1,17 @@
 import { 
     UserGroupIcon, 
     AcademicCapIcon,
-    ChartBarIcon,
     BookOpenIcon,
-    CalendarIcon,
-    UserIcon
 } from "@heroicons/react/24/outline"
 
 interface StudentsAnalytics {
     totalStudents: number;
-    activeStudents: number;
     enrolledStudents: number;
-    averageAge: number;
     studentsByGender: {
         male: number;
         female: number;
         other: number;
     };
-    newEnrollmentsThisMonth: number;
 }
 
 interface StudentsStatsProps {
@@ -27,20 +21,13 @@ interface StudentsStatsProps {
 const StudentsStats = ({ analytics }: StudentsStatsProps) => {
     const stats = {
         totalStudents: analytics.totalStudents,
-        activeStudents: analytics.activeStudents,
         enrolledStudents: analytics.enrolledStudents,
-        averageAge: analytics.averageAge,
         maleStudents: analytics.studentsByGender.male,
         femaleStudents: analytics.studentsByGender.female,
-        newEnrollmentsThisMonth: analytics.newEnrollmentsThisMonth,
     }
 
     const formatNumber = (num: number) => {
         return new Intl.NumberFormat('en-US').format(num);
-    };
-
-    const formatDecimal = (num: number) => {
-        return num.toFixed(1);
     };
 
     const statCards = [
@@ -51,33 +38,13 @@ const StudentsStats = ({ analytics }: StudentsStatsProps) => {
             icon: UserGroupIcon,
             iconColor: 'text-gray-400',
         },
-        {
-            name: 'Active Students',
-            value: formatNumber(stats.activeStudents),
-            description: 'Students currently enrolled and active',
-            icon: UserIcon,
-            iconColor: 'text-green-400',
-        },
+      
         {
             name: 'Enrolled Students',
             value: formatNumber(stats.enrolledStudents),
             description: 'Students currently enrolled in classes',
             icon: AcademicCapIcon,
             iconColor: 'text-blue-400',
-        },
-        {
-            name: 'Average Age',
-            value: `${stats.averageAge} years`,
-            description: 'Average age of all students',
-            icon: ChartBarIcon,
-            iconColor: 'text-purple-400',
-        },
-        {
-            name: 'New Enrollments',
-            value: formatNumber(stats.newEnrollmentsThisMonth),
-            description: 'Students enrolled this month',
-            icon: CalendarIcon,
-            iconColor: 'text-orange-400',
         },
         {
             name: 'Gender Distribution',

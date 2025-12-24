@@ -23,10 +23,7 @@ export interface Teacher {
 interface TeachersAnalytics {
     totalTeachers: number;
     activeTeachers: number;
-    teachersWithClasses: number;
-    teachersWithoutClasses: number;
     averageStudentsPerTeacher: number;
-    totalSubjectsTaught: number;
 }
 
 interface TeachersViewProps {

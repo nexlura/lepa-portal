@@ -24,11 +24,7 @@ type TeachersAnalyticsResponse = {
     data?: {
         total_teachers?: number;
         active_teachers?: number;
-        teachers_with_classes?: number;
-        teachers_without_classes?: number;
         average_students_per_teacher?: number;
-        total_subjects_taught?: number;
-        inactive_teachers?: number;
     };
     message?: string;
 };
@@ -51,6 +47,7 @@ const TeachersPage = async ({ params }: PageProps) => {
             // Handle error response - use defaults
             console.warn('Error response from teachers API:', res.status, res.message);
         }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         // Handle JSON parse errors and other exceptions
         console.warn('Error fetching teachers:', error?.message || error);
@@ -69,6 +66,7 @@ const TeachersPage = async ({ params }: PageProps) => {
                 console.warn('Error response from teachers analytics API:', analyticsRes.status, analyticsRes.message);
             }
         }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         // Silently handle errors - endpoint may not exist yet or return invalid JSON
         // Use empty object as fallback
@@ -111,10 +109,7 @@ const TeachersPage = async ({ params }: PageProps) => {
             analytics={{
                 totalTeachers: analytics.total_teachers || totalTeachers,
                 activeTeachers: analytics.active_teachers || 0,
-                teachersWithClasses: analytics.teachers_with_classes || 0,
-                teachersWithoutClasses: analytics.teachers_without_classes || 0,
                 averageStudentsPerTeacher: analytics.average_students_per_teacher || 0,
-                totalSubjectsTaught: analytics.total_subjects_taught || 0,
             }}
         />
     )

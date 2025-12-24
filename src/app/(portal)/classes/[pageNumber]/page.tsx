@@ -36,10 +36,7 @@ type ClassesAnalyticsResponse = {
     code?: number;
     data?: {
         total_capacity?: number;
-        total_students?: number;
         average_class_size?: number;
-        classes_at_full_capacity?: number;
-        average_utilization?: number;
     };
     message?: string;
 };
@@ -51,6 +48,7 @@ const SchoolClassesPage = async ({ params }: PageProps) => {
     let session = null;
     try {
         session = await auth();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         // Silently handle auth errors - session will be null
         console.warn('Error fetching session:', error?.message || error);
@@ -71,6 +69,7 @@ const SchoolClassesPage = async ({ params }: PageProps) => {
             // Handle error response - use defaults
             console.warn('Error response from classes API:', res.status, res.message);
         }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         // Handle JSON parse errors and other exceptions
         console.warn('Error fetching classes:', error?.message || error);
@@ -89,6 +88,7 @@ const SchoolClassesPage = async ({ params }: PageProps) => {
                 console.warn('Error response from classes analytics API:', analyticsRes.status, analyticsRes.message);
             }
         }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         // Silently handle errors - endpoint may not exist yet or return invalid JSON
         // Use empty object as fallback
@@ -120,10 +120,7 @@ const SchoolClassesPage = async ({ params }: PageProps) => {
             analytics={{
                 totalClasses,
                 totalCapacity: analytics.total_capacity || 0,
-                totalStudents: analytics.total_students || 0,
                 averageClassSize: analytics.average_class_size || 0,
-                classesAtFullCapacity: analytics.classes_at_full_capacity || 0,
-                averageUtilizationRate: analytics.average_utilization || 0,
             }}
         />
     );

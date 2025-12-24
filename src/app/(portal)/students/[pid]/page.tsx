@@ -70,6 +70,7 @@ const StudentsPage = async ({ params }: PageProps) => {
             // Handle error response - use defaults
             console.warn('Error response from students API:', res.status, res.message);
         }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         // Handle JSON parse errors and other exceptions
         console.warn('Error fetching students:', error?.message || error);
@@ -88,6 +89,7 @@ const StudentsPage = async ({ params }: PageProps) => {
                 console.warn('Error response from students analytics API:', analyticsRes.status, analyticsRes.message);
             }
         }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         // Silently handle errors - endpoint may not exist yet or return invalid JSON
         // Use empty object as fallback
@@ -121,15 +123,12 @@ const StudentsPage = async ({ params }: PageProps) => {
             totalPages={totalPages}
             analytics={{
                 totalStudents: analytics.total_students || totalStudents,
-                activeStudents: analytics.active_students || 0,
                 enrolledStudents: analytics.enrolled_students || 0,
-                averageAge: analytics.average_age || 0,
                 studentsByGender: {
                     male: analytics.male_students || 0,
                     female: analytics.female_students || 0,
                     other: 0, // Not provided in API response
                 },
-                newEnrollmentsThisMonth: analytics.new_enrollments_this_month || 0,
             }}
         />
     )
