@@ -46,8 +46,25 @@ async function handleRequest(
     const { path } = await params;
     const apiPath = path.join('/');
 
-    // Get session for authentication
-    const session = await auth();
+    // Get session for authentication with error handling
+    let session = null;
+    try {
+      session = await auth();
+    } catch (authError: any) {
+      // Handle JWT session errors gracefully
+      // This can happen when session token is invalid/expired
+      if (authError?.name === 'JWTSessionError' || authError?.message?.includes('JWT')) {
+        // Session is invalid, continue without auth token
+        // The API will handle unauthorized requests appropriately
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('JWT session error in proxy route (continuing without auth):', authError.message);
+        }
+      } else {
+        // Log other auth errors
+        console.warn('Error fetching session in proxy route:', authError);
+      }
+      // Continue without session - request will be unauthenticated
+    }
 
     // Get host header from multiple sources (priority order):
     // 1. Explicitly passed from client via X-Lepa-Host-Header header
@@ -127,8 +144,23 @@ async function handleRequest(
       return new NextResponse(null, { status: 204 });
     }
 
+    // Handle empty responses
+    if (!response.data) {
+      return new NextResponse(null, { status: response.status });
+    }
+
     // Return response with original status
-    return NextResponse.json(response.data, { status: response.status });
+    // Ensure response.data is valid JSON-serializable
+    try {
+      return NextResponse.json(response.data, { status: response.status });
+    } catch (jsonError) {
+      // If response.data can't be serialized, return error
+      console.error('Failed to serialize response data:', jsonError);
+      return NextResponse.json(
+        { message: 'Invalid response format from API' },
+        { status: 500 }
+      );
+    }
   } catch (error) {
     if (axios.isAxiosError(error)) {
       const statusCode = error.response?.status || 500;
