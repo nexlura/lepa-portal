@@ -49,7 +49,6 @@ const SchoolClassesTable = ({ classes, totalPages }: ClassesTableProps) => {
     return (
         <DataTable<SchoolClass, BackendClassesData>
             config={{
-                endpoint: '/classes/search',
                 dataKey: 'classes',
                 transformData: (classK: BackendClassesData): SchoolClass => ({
                     id: classK.id,
@@ -82,7 +81,7 @@ const SchoolClassesTable = ({ classes, totalPages }: ClassesTableProps) => {
                     if (gradeFilter === 'all grades') {
                         return
                     } else {
-                        params.set('grades', gradeFilter)
+                        params.set('grade', gradeFilter)
                     }
                 },
                 buildUrlParams: (params) => {
