@@ -1,15 +1,15 @@
 'use client';
 
-import Link from 'next/link';
 import { PencilIcon, EyeIcon } from '@heroicons/react/24/outline';
 import { Agency } from '@/app/(portal)/system-admin/agencies/page';
 
 interface AgenciesTableBodyProps {
     agencies: Agency[];
     onEdit: (agency: Agency) => void;
+    onView: (agency: Agency) => void;
 }
 
-const AgenciesTableBody = ({ agencies, onEdit }: AgenciesTableBodyProps) => {
+const AgenciesTableBody = ({ agencies, onEdit, onView }: AgenciesTableBodyProps) => {
     const formatDate = (dateString: string) => {
         try {
             return new Date(dateString).toLocaleDateString('en-US', {
@@ -40,6 +40,7 @@ const AgenciesTableBody = ({ agencies, onEdit }: AgenciesTableBodyProps) => {
                 <tr key={agency.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">{agency.name}</div>
+                        <div className="text-sm text-gray-500">{agency.domain}</div>
                         <div className="text-sm text-gray-500">{agency.contactEmail}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -68,13 +69,13 @@ const AgenciesTableBody = ({ agencies, onEdit }: AgenciesTableBodyProps) => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <div className="flex items-center justify-end space-x-2">
-                            <Link
-                                href={`/system-admin/agencies/${agency.id}`}
+                            <button
+                                onClick={() => onView(agency)}
                                 className="text-primary-600 hover:text-primary-900"
                                 title="View Details"
                             >
                                 <EyeIcon className="h-5 w-5" />
-                            </Link>
+                            </button>
                             <button
                                 onClick={() => onEdit(agency)}
                                 className="text-gray-600 hover:text-gray-900"

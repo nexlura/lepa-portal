@@ -7,6 +7,7 @@ type BackendAgencyData = {
     type: string;
     status: string;
     domain?: string;
+    managed_schools_count?: number;
     tenant_count?: number;
     created_at: string;
     region?: string;
@@ -26,6 +27,7 @@ export type Agency = {
     name: string;
     type: string;
     status: 'active' | 'inactive' | 'suspended';
+    domain: string;
     tenantCount: number;
     createdAt: string;
     region: string;
@@ -42,7 +44,7 @@ const AgenciesPage = async ({ searchParams }: PageProps) => {
     let totalPages = 1;
     
     try {
-        const res = await getModel<AgenciesApiResponse>('/agencies');
+        const res = await getModel<AgenciesApiResponse>('/agencies?limit=10');
         
         if (res && !isErrorResponse(res) && res.data) {
             const backendAgencies = Array.isArray(res.data.agencies) ? res.data.agencies : [];
@@ -55,7 +57,8 @@ const AgenciesPage = async ({ searchParams }: PageProps) => {
             name: agency.name,
             type: agency.type,
             status: (agency.status === 'active' ? 'active' : agency.status === 'suspended' ? 'suspended' : 'inactive') as 'active' | 'inactive' | 'suspended',
-            tenantCount: agency.tenant_count || 0,
+            domain: agency.domain || 'N/A',
+            tenantCount: agency.managed_schools_count ?? agency.tenant_count ?? 0,
             createdAt: agency.created_at,
             region: agency.region || 'N/A',
             contactEmail: agency.contact_email || 'N/A',

@@ -11,9 +11,10 @@ interface AgenciesTableProps {
     agencies: Agency[];
     totalPages: number;
     onEdit: (agency: Agency) => void;
+    onView: (agency: Agency) => void;
 }
 
-const AgenciesTable = ({ agencies, totalPages, onEdit }: AgenciesTableProps) => {
+const AgenciesTable = ({ agencies, totalPages, onEdit, onView }: AgenciesTableProps) => {
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState<string>('All');
     const [typeFilter, setTypeFilter] = useState<string>('All');
@@ -42,7 +43,7 @@ const AgenciesTable = ({ agencies, totalPages, onEdit }: AgenciesTableProps) => 
                 <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
                         <AgenciesTableHead />
-                        <AgenciesTableBody agencies={filteredAgencies} onEdit={onEdit} />
+                        <AgenciesTableBody agencies={filteredAgencies} onEdit={onEdit} onView={onView} />
                         {totalPages > 1 && (
                             <TableFoot totalPages={totalPages} />
                         )}

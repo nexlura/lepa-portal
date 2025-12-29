@@ -6,6 +6,7 @@ import { Button } from '@/components/UIKit/Button';
 import AgenciesTable from './AgenciesTable';
 import AgenciesStats from './AgenciesStats';
 import AgencyModal from './AgencyModal';
+import AgencyDetailsModal from './AgencyDetailsModal';
 import EmptyState from '../EmptyState';
 import { Agency } from '@/app/(portal)/system-admin/agencies/page';
 
@@ -16,6 +17,7 @@ interface AgenciesViewProps {
 
 const AgenciesView = ({ agencies, totalPages }: AgenciesViewProps) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
     const [selectedAgency, setSelectedAgency] = useState<Agency | null>(null);
 
     const handleAdd = () => {
@@ -28,8 +30,18 @@ const AgenciesView = ({ agencies, totalPages }: AgenciesViewProps) => {
         setIsModalOpen(true);
     };
 
+    const handleView = (agency: Agency) => {
+        setSelectedAgency(agency);
+        setIsViewModalOpen(true);
+    };
+
     const handleCloseModal = () => {
         setIsModalOpen(false);
+        setSelectedAgency(null);
+    };
+
+    const handleCloseViewModal = () => {
+        setIsViewModalOpen(false);
         setSelectedAgency(null);
     };
 
@@ -51,6 +63,12 @@ const AgenciesView = ({ agencies, totalPages }: AgenciesViewProps) => {
                     icon={<BuildingOffice2Icon className="size-12 text-gray-500" />}
                 />
                 <AgencyModal open={isModalOpen} onClose={handleCloseModal} agency={selectedAgency} />
+                <AgencyDetailsModal 
+                    open={isViewModalOpen} 
+                    onClose={handleCloseViewModal} 
+                    agency={selectedAgency} 
+                    onEdit={handleEdit}
+                />
             </>
         );
     }
@@ -61,7 +79,7 @@ const AgenciesView = ({ agencies, totalPages }: AgenciesViewProps) => {
                 {/* Page header */}
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900">Government Agencies</h1>
+                        <h1 className="text-2xl font-bold text-gray-900">Agencies</h1>
                         <p className="mt-1 text-sm text-gray-500">
                             Manage government agencies that oversee schools and enforce compliance.
                         </p>
@@ -81,9 +99,15 @@ const AgenciesView = ({ agencies, totalPages }: AgenciesViewProps) => {
                 <AgenciesStats agencies={agencies} />
 
                 {/* Agencies table */}
-                <AgenciesTable agencies={agencies} totalPages={totalPages} onEdit={handleEdit} />
+                <AgenciesTable agencies={agencies} totalPages={totalPages} onEdit={handleEdit} onView={handleView} />
             </div>
             <AgencyModal open={isModalOpen} onClose={handleCloseModal} agency={selectedAgency} />
+            <AgencyDetailsModal 
+                open={isViewModalOpen} 
+                onClose={handleCloseViewModal} 
+                agency={selectedAgency} 
+                onEdit={handleEdit}
+            />
         </>
     );
 };

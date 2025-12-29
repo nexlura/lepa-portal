@@ -16,7 +16,7 @@ import { Agency } from '@/app/(portal)/system-admin/agencies/page';
 export type AgencyFormData = {
     domain: string;
     name: string;
-    type: 'Government' | 'NGO';
+    type: 'Government' | 'NGO' | 'default';
     status: 'active' | 'suspended' | 'inactive';
 }
 
@@ -60,18 +60,38 @@ const AgencyModal = ({
     };
 
     // Normalize agency type from backend format to form format
-    const normalizeType = (type: string): 'Government' | 'NGO' => {
-        if (type === 'Ministry' || type === 'District Office' || type === 'State/County Board') {
+    const normalizeType = (type: string): 'Government' | 'NGO' | 'default' => {
+        const normalizedType = type?.toLowerCase().trim();
+        
+        // Map government types
+        if (
+            normalizedType === 'ministry' || 
+            normalizedType === 'district office' || 
+            normalizedType === 'state/county board' ||
+            normalizedType === 'government'
+        ) {
             return 'Government';
         }
-        return type as 'Government' | 'NGO';
+        
+        // Map NGO types
+        if (normalizedType === 'ngo' || normalizedType === 'non-governmental organization') {
+            return 'NGO';
+        }
+        
+        // Keep default as default
+        if (normalizedType === 'default') {
+            return 'default';
+        }
+        
+        // Default to Government for any unknown types
+        return 'Government';
     };
 
     // Populate form when agency data is provided (edit mode)
     useEffect(() => {
         if (agency) {
             setForm({
-                domain: '', // Domain is not in Agency response, user can enter if they want to update it
+                domain: agency.domain && agency.domain !== 'N/A' ? agency.domain : '',
                 name: agency.name,
                 type: normalizeType(agency.type),
                 status: agency.status,
@@ -221,7 +241,7 @@ const AgencyModal = ({
         onClose(false);
         if (isEditMode && agency) {
             setForm({
-                domain: '',
+                domain: agency.domain && agency.domain !== 'N/A' ? agency.domain : '',
                 name: agency.name,
                 type: normalizeType(agency.type),
                 status: agency.status,
@@ -283,11 +303,12 @@ const AgencyModal = ({
                     <Field>
                         <Select
                             label="Type"
-                            value={form.type}
-                            onChange={(value: string) => setForm((f) => ({ ...f, type: value as 'Government' | 'NGO' }))}
+                            value={form.type === 'Government' || form.type === 'NGO' || form.type === 'default' ? form.type : 'Government'}
+                            onChange={(value: string) => setForm((f) => ({ ...f, type: value as 'Government' | 'NGO' | 'default' }))}
                             options={[
                                 { value: 'Government', label: 'Government' },
                                 { value: 'NGO', label: 'NGO' },
+                                { value: 'default', label: 'Default' },
                             ]}
                             placeholder="Select type..."
                             error={errors.type}
