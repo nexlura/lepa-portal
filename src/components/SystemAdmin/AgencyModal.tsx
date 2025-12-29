@@ -8,7 +8,7 @@ import { Dialog, DialogActions, DialogBody, DialogDescription, DialogTitle } fro
 import { Field, Label, ErrorMessage } from '@/components/UIKit/Fieldset';
 import { Input } from '@/components/UIKit/Input';
 import { Button } from '@/components/UIKit/Button';
-import { Select } from '@/components/UIKit/Select';
+import SearchableSelect from '@/components/UIKit/SearchableSelect';
 import { FeedbackContext } from '@/context/feedback';
 import { postModel, patchModel, isErrorResponse } from '@/lib/connector';
 import { Agency } from '@/app/(portal)/system-admin/agencies/page';
@@ -305,31 +305,33 @@ const AgencyModal = ({
                     {/* Row 2: Type and Status */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <Field>
-                            <Select
+                            <SearchableSelect
                                 label="Type"
                                 value={form.type === 'Government' || form.type === 'NGO' || form.type === 'default' ? form.type : 'Government'}
-                                onChange={(value: string) => setForm((f) => ({ ...f, type: value as 'Government' | 'NGO' | 'default' }))}
+                                onChange={(value) => setForm((f) => ({ ...f, type: (value || 'Government') as 'Government' | 'NGO' | 'default' }))}
                                 options={[
-                                    { value: 'Government', label: 'Government' },
-                                    { value: 'NGO', label: 'NGO' },
-                                    { value: 'default', label: 'Default' },
+                                    { id: 'Government', name: 'Government' },
+                                    { id: 'NGO', name: 'NGO' },
+                                    { id: 'default', name: 'Default' },
                                 ]}
-                                placeholder="Select type..."
+                                placeholder="Search type..."
+                                emptyLabel="No types found"
                                 error={errors.type}
                             />
                         </Field>
 
                         <Field>
-                            <Select
+                            <SearchableSelect
                                 label="Status"
                                 value={form.status}
-                                onChange={(value: string) => setForm((f) => ({ ...f, status: value as 'active' | 'suspended' | 'inactive' }))}
+                                onChange={(value) => setForm((f) => ({ ...f, status: (value || 'active') as 'active' | 'suspended' | 'inactive' }))}
                                 options={[
-                                    { value: 'active', label: 'Active' },
-                                    { value: 'suspended', label: 'Suspended' },
-                                    { value: 'inactive', label: 'Inactive' },
+                                    { id: 'active', name: 'Active' },
+                                    { id: 'suspended', name: 'Suspended' },
+                                    { id: 'inactive', name: 'Inactive' },
                                 ]}
-                                placeholder="Select status..."
+                                placeholder="Search status..."
+                                emptyLabel="No statuses found"
                                 error={errors.status}
                             />
                         </Field>

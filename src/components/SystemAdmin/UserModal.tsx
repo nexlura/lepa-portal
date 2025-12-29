@@ -8,13 +8,14 @@ import { Dialog, DialogActions, DialogBody, DialogDescription, DialogTitle } fro
 import { Field, Label, ErrorMessage } from '@/components/UIKit/Fieldset';
 import { Input } from '@/components/UIKit/Input';
 import { Button } from '@/components/UIKit/Button';
-import { Select } from '@/components/UIKit/Select';
+import SearchableSelect, { SearchableSelectOption } from '@/components/UIKit/SearchableSelect';
 import { FeedbackContext } from '@/context/feedback';
 import { postModel, getModel, isErrorResponse } from '@/lib/connector';
 
 export type UserFormData = {
     userType: 'agency' | 'system' | 'tenant' | 'support';
     tenantId: string;
+    agencyId: string;
     phone: string;
     password: string;
     email: string;
@@ -46,6 +47,23 @@ type TenantsApiResponse = {
     message?: string;
 };
 
+type BackendAgencyData = {
+    id: string;
+    name: string;
+    type?: string;
+    status?: string;
+    domain?: string;
+    created_at?: string;
+};
+
+type AgenciesApiResponse = {
+    data?: {
+        agencies?: BackendAgencyData[];
+        total?: number;
+        total_pages?: number;
+    };
+};
+
 const UserModal = ({
     open,
     onClose,
@@ -60,6 +78,7 @@ const UserModal = ({
     const [form, setForm] = useState<UserFormData>({
         userType: 'system',
         tenantId: '',
+        agencyId: '',
         phone: '',
         password: '',
         email: '',
@@ -67,34 +86,116 @@ const UserModal = ({
         lastName: '',
     });
 
-    const [tenants, setTenants] = useState<{ id: string; name: string }[]>([]);
+    const [tenants, setTenants] = useState<SearchableSelectOption[]>([]);
+    const [agencies, setAgencies] = useState<SearchableSelectOption[]>([]);
     const [confirmPassword, setConfirmPassword] = useState('');
     const [errors, setErrors] = useState<Partial<Record<keyof UserFormData | 'confirmPassword', string>>>({});
     const [isLoading, setIsLoading] = useState(false);
     const [isLoadingTenants, setIsLoadingTenants] = useState(false);
+    const [isLoadingAgencies, setIsLoadingAgencies] = useState(false);
 
-    // Fetch tenants for dropdown when user type is 'tenant' or 'agency'
+    // Fetch tenants for dropdown when user type is 'tenant'
     useEffect(() => {
-        if (open && (form.userType === 'tenant' || form.userType === 'agency')) {
+        if (open && form.userType === 'tenant') {
             setIsLoadingTenants(true);
             getModel<TenantsApiResponse>('/tenants?limit=100')
                 .then((res) => {
-                    if (res && !isErrorResponse(res) && res.data && Array.isArray(res.data)) {
-                        const transformedTenants = res.data.map((tenant: BackendTenantData) => ({
-                            id: tenant.id,
-                            name: tenant.school_name,
-                        }));
-                        setTenants(transformedTenants);
+                    console.log('Tenants API response:', res);
+                    if (res && !isErrorResponse(res)) {
+                        // Handle different response structures
+                        let tenantsData: BackendTenantData[] = [];
+                        
+                        if (Array.isArray(res.data)) {
+                            // Direct array response
+                            tenantsData = res.data;
+                        } else if (res.data && Array.isArray((res.data as any).tenants)) {
+                            // Nested tenants array
+                            tenantsData = (res.data as any).tenants;
+                        } else if (Array.isArray(res)) {
+                            // Response is directly an array
+                            tenantsData = res;
+                        }
+                        
+                        if (tenantsData.length > 0) {
+                            const transformedTenants: SearchableSelectOption[] = tenantsData.map((tenant: BackendTenantData) => ({
+                                id: tenant.id,
+                                name: tenant.school_name || 'Unnamed Tenant',
+                            }));
+                            console.log('Transformed tenants:', transformedTenants);
+                            setTenants(transformedTenants);
+                        } else {
+                            console.warn('No tenants found in response');
+                            setTenants([]);
+                        }
+                    } else if (isErrorResponse(res)) {
+                        console.error('Error fetching tenants:', res);
+                        setTenants([]);
                     }
                 })
                 .catch((error) => {
-                    console.warn('Error fetching tenants:', error);
+                    console.error('Exception fetching tenants:', error);
+                    setTenants([]);
                 })
                 .finally(() => {
                     setIsLoadingTenants(false);
                 });
         } else {
             setTenants([]);
+        }
+    }, [open, form.userType]);
+
+    // Fetch agencies for dropdown when user type is 'agency'
+    useEffect(() => {
+        if (open && form.userType === 'agency') {
+            setIsLoadingAgencies(true);
+            getModel<AgenciesApiResponse>('/agencies?limit=100')
+                .then((res) => {
+                    console.log('Agencies API response:', res);
+                    if (res && !isErrorResponse(res)) {
+                        // Handle different response structures
+                        let agenciesData: BackendAgencyData[] = [];
+                        
+                        if (res.data) {
+                            if (Array.isArray(res.data.agencies)) {
+                                // Nested agencies array
+                                agenciesData = res.data.agencies;
+                            } else if (Array.isArray(res.data)) {
+                                // Direct array in data
+                                agenciesData = res.data;
+                            }
+                        } else if (Array.isArray(res)) {
+                            // Response is directly an array
+                            agenciesData = res;
+                        } else if (Array.isArray((res as any).agencies)) {
+                            // Agencies at root level
+                            agenciesData = (res as any).agencies;
+                        }
+                        
+                        if (agenciesData.length > 0) {
+                            const transformedAgencies: SearchableSelectOption[] = agenciesData.map((agency: BackendAgencyData) => ({
+                                id: agency.id,
+                                name: agency.name || 'Unnamed Agency',
+                            }));
+                            console.log('Transformed agencies:', transformedAgencies);
+                            setAgencies(transformedAgencies);
+                        } else {
+                            console.warn('No agencies found in response');
+                            setAgencies([]);
+                        }
+                    } else if (isErrorResponse(res)) {
+                        console.error('Error fetching agencies:', res);
+                        setAgencies([]);
+                    }
+                })
+                .catch((error) => {
+                    console.error('Exception fetching agencies:', error);
+                    setAgencies([]);
+                })
+                .finally(() => {
+                    setIsLoadingAgencies(false);
+                });
+        } else {
+            setAgencies([]);
         }
     }, [open, form.userType]);
 
@@ -105,6 +206,7 @@ const UserModal = ({
             setForm({
                 userType: 'system',
                 tenantId: '',
+                agencyId: '',
                 phone: '',
                 password: '',
                 email: '',
@@ -118,6 +220,7 @@ const UserModal = ({
             setForm({
                 userType: 'system',
                 tenantId: '',
+                agencyId: '',
                 phone: '',
                 password: '',
                 email: '',
@@ -137,9 +240,13 @@ const UserModal = ({
             confirmPassword.trim() !== '' &&
             form.password === confirmPassword;
         
-        // Tenant and agency users require tenant_id
-        if (form.userType === 'tenant' || form.userType === 'agency') {
+        // Tenant users require tenant_id
+        if (form.userType === 'tenant') {
             return baseValid && form.tenantId !== '';
+        }
+        // Agency users require agency_id
+        if (form.userType === 'agency') {
+            return baseValid && form.agencyId !== '';
         }
         return baseValid;
     };
@@ -186,9 +293,14 @@ const UserModal = ({
             next.lastName = 'Last name must be between 2 and 50 characters if provided';
         }
         
-        // Tenant ID validation (required if user type is 'tenant' or 'agency')
-        if ((form.userType === 'tenant' || form.userType === 'agency') && !form.tenantId) {
-            next.tenantId = `Tenant is required for ${form.userType} users`;
+        // Tenant ID validation (required if user type is 'tenant')
+        if (form.userType === 'tenant' && !form.tenantId) {
+            next.tenantId = 'Tenant is required for tenant users';
+        }
+        
+        // Agency ID validation (required if user type is 'agency')
+        if (form.userType === 'agency' && !form.agencyId) {
+            next.agencyId = 'Agency is required for agency users';
         }
 
         setErrors(next);
@@ -205,6 +317,7 @@ const UserModal = ({
             const requestData: {
                 user_type: string;
                 tenant_id?: string;
+                agency_id?: string;
                 phone: string;
                 password: string;
                 email: string;
@@ -217,9 +330,14 @@ const UserModal = ({
                 email: form.email.trim(),
             };
 
-            // Only include tenant_id if user type is 'tenant' or 'agency'
-            if ((form.userType === 'tenant' || form.userType === 'agency') && form.tenantId) {
+            // Include tenant_id if user type is 'tenant'
+            if (form.userType === 'tenant' && form.tenantId) {
                 requestData.tenant_id = form.tenantId;
+            }
+
+            // Include agency_id if user type is 'agency'
+            if (form.userType === 'agency' && form.agencyId) {
+                requestData.agency_id = form.agencyId;
             }
 
             // Only include first_name and last_name if provided
@@ -230,25 +348,54 @@ const UserModal = ({
                 requestData.last_name = form.lastName.trim();
             }
 
+            console.log('Creating user with data:', JSON.stringify(requestData, null, 2));
             const response = await postModel('/users', requestData);
+            console.log('User creation response:', JSON.stringify(response, null, 2));
 
-            if (isErrorResponse(response)) {
+            if (!response) {
                 setFeedback({ 
                     status: 'error', 
-                    text: response.message || 'Failed to create user' 
+                    text: 'Failed to create user. No response from server.' 
+                });
+                return;
+            }
+
+            if (isErrorResponse(response)) {
+                // TypeScript now knows response has error: true, status: number, message: string
+                const errorMessage = response.message || 'Failed to create user';
+                const statusCode = response.status;
+                console.error('User creation error:', {
+                    status: statusCode,
+                    message: errorMessage,
+                    fullResponse: response
+                });
+                setFeedback({ 
+                    status: 'error', 
+                    text: statusCode ? `Error ${statusCode}: ${errorMessage}` : errorMessage
                 });
             } else {
-                setFeedback({ 
-                    status: 'success', 
-                    text: 'User created successfully!' 
-                });
-                handleClose();
-                router.refresh();
+                // Check if response indicates success
+                const responseData = response as any;
+                if (responseData.success === false) {
+                    const errorMessage = responseData.message || 'Failed to create user';
+                    setFeedback({ 
+                        status: 'error', 
+                        text: errorMessage
+                    });
+                } else {
+                    setFeedback({ 
+                        status: 'success', 
+                        text: responseData.message || 'User created successfully!' 
+                    });
+                    handleClose();
+                    router.refresh();
+                }
             }
         } catch (error: any) {
+            console.error('User creation exception:', error);
             setFeedback({ 
                 status: 'error', 
-                text: error?.message || 'An unexpected error occurred' 
+                text: error?.message || 'An unexpected error occurred. Please check the console for details.' 
             });
         } finally {
             setIsLoading(false);
@@ -260,12 +407,14 @@ const UserModal = ({
         setForm({
             userType: 'system',
             tenantId: '',
+            agencyId: '',
             phone: '',
             password: '',
             email: '',
             firstName: '',
             lastName: '',
         });
+        setConfirmPassword('');
         setErrors({});
     };
 
@@ -279,24 +428,27 @@ const UserModal = ({
                 <div className="mt-4 space-y-6">
                     {/* Row 1: User Type */}
                     <Field>
-                        <Select
+                        <SearchableSelect
                             label="User Type"
                             value={form.userType}
-                            onChange={(value: string) => {
+                            onChange={(value) => {
+                                const newUserType = value as 'agency' | 'system' | 'tenant' | 'support';
                                 setForm((f) => ({ 
                                     ...f, 
-                                    userType: value as 'agency' | 'system' | 'tenant' | 'support',
-                                    tenantId: '' // Reset tenant when type changes
+                                    userType: newUserType,
+                                    tenantId: '', // Reset tenant when type changes
+                                    agencyId: '' // Reset agency when type changes
                                 }));
-                                setErrors((e) => ({ ...e, tenantId: undefined })); // Clear tenant error
+                                setErrors((e) => ({ ...e, tenantId: undefined, agencyId: undefined })); // Clear tenant/agency errors
                             }}
                             options={[
-                                { value: 'system', label: 'System User' },
-                                { value: 'support', label: 'Support User' },
-                                { value: 'agency', label: 'Agency User' },
-                                { value: 'tenant', label: 'Tenant User' },
+                                { id: 'system', name: 'System User' },
+                                { id: 'support', name: 'Support User' },
+                                { id: 'agency', name: 'Agency User' },
+                                { id: 'tenant', name: 'Tenant User' },
                             ]}
-                            placeholder="Select user type..."
+                            placeholder="Search user type..."
+                            emptyLabel="No user types found"
                             error={errors.userType}
                         />
                     </Field>
@@ -418,22 +570,65 @@ const UserModal = ({
                         </Field>
                     </div>
 
-                    {/* Row 5: Tenant (only show if user type is 'tenant' or 'agency') */}
-                    {(form.userType === 'tenant' || form.userType === 'agency') && (
+                    {/* Row 5: Tenant (only show if user type is 'tenant') */}
+                    {form.userType === 'tenant' && (
                         <Field>
-                            <Select
+                            <SearchableSelect
                                 label="Tenant"
-                                value={form.tenantId}
-                                onChange={(value: string) => setForm((f) => ({ ...f, tenantId: value }))}
-                                options={tenants.map((tenant) => ({
-                                    value: tenant.id,
-                                    label: tenant.name,
-                                }))}
-                                placeholder={isLoadingTenants ? "Loading tenants..." : "Select tenant..."}
+                                value={form.tenantId || null}
+                                onChange={(value) => {
+                                    setForm((f) => ({ ...f, tenantId: value || '' }));
+                                    setErrors((e) => ({ ...e, tenantId: undefined })); // Clear error when value changes
+                                }}
+                                options={tenants}
+                                placeholder={
+                                    isLoadingTenants 
+                                        ? "Loading tenants..." 
+                                        : tenants.length === 0 
+                                        ? "No tenants available" 
+                                        : "Search tenants..."
+                                }
+                                emptyLabel="No tenants found"
+                                loading={isLoadingTenants}
                                 error={errors.tenantId}
-                                disabled={isLoadingTenants}
+                                disabled={isLoadingTenants || tenants.length === 0}
                             />
-                            {errors.tenantId ? <ErrorMessage>{errors.tenantId}</ErrorMessage> : null}
+                            {!isLoadingTenants && tenants.length === 0 && (
+                                <p className="mt-2 text-xs text-gray-500">
+                                    No tenants found. Please ensure tenants exist in the system.
+                                </p>
+                            )}
+                        </Field>
+                    )}
+
+                    {/* Row 6: Agency (only show if user type is 'agency') */}
+                    {form.userType === 'agency' && (
+                        <Field>
+                            <SearchableSelect
+                                label="Agency"
+                                value={form.agencyId || null}
+                                onChange={(value) => {
+                                    setForm((f) => ({ ...f, agencyId: value || '' }));
+                                    setErrors((e) => ({ ...e, agencyId: undefined })); // Clear error when value changes
+                                }}
+                                options={agencies}
+                                placeholder={
+                                    isLoadingAgencies 
+                                        ? "Loading agencies..." 
+                                        : agencies.length === 0 
+                                        ? "No agencies available" 
+                                        : "Search agencies..."
+                                }
+                                emptyLabel="No agencies found"
+                                loading={isLoadingAgencies}
+                                error={errors.agencyId}
+                                disabled={isLoadingAgencies || agencies.length === 0}
+                            />
+                            {!isLoadingAgencies && agencies.length === 0 && (
+                                <p className="mt-2 text-xs text-gray-500">
+                                    No agencies found. Please ensure agencies exist in the system.
+                                </p>
+                            )}
                         </Field>
                     )}
                 </div>

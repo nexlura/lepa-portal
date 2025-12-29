@@ -2,7 +2,7 @@
 
 import { Input } from '@/components/UIKit/Input';
 import { Field, Label } from '@/components/UIKit/Fieldset';
-import { Select } from '@/components/UIKit/Select';
+import SearchableSelect from '@/components/UIKit/SearchableSelect';
 import { CheckCircleIcon, XCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { Agency } from '@/app/(portal)/system-admin/agencies/page';
 
@@ -123,15 +123,16 @@ const TableControls = ({
 
             {/* Type Filter */}
             <Field>
-                <Select
+                <SearchableSelect
                     label="Filter by Type"
-                    value={typeFilter}
-                    onChange={setTypeFilter}
+                    value={typeFilter || null}
+                    onChange={(value) => setTypeFilter(value || 'All')}
                     options={[
-                        { value: 'All', label: 'All Types' },
-                        ...types.map((type) => ({ value: type, label: type })),
+                        { id: 'All', name: 'All Types' },
+                        ...types.map((type) => ({ id: type, name: type })),
                     ]}
-                    placeholder="Select type..."
+                    placeholder="Search type..."
+                    emptyLabel="No types found"
                 />
             </Field>
         </div>

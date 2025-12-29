@@ -8,7 +8,7 @@ import { Dialog, DialogActions, DialogBody, DialogDescription, DialogTitle } fro
 import { Field, Label, ErrorMessage } from '@/components/UIKit/Fieldset';
 import { Input } from '@/components/UIKit/Input';
 import { Button } from '@/components/UIKit/Button';
-import { Select } from '@/components/UIKit/Select';
+import SearchableSelect, { SearchableSelectOption } from '@/components/UIKit/SearchableSelect';
 import { FeedbackContext } from '@/context/feedback';
 import { postModel, patchModel, getModel, isErrorResponse } from '@/lib/connector';
 import { Tenant } from '@/app/(portal)/system-admin/tenants/page';
@@ -95,7 +95,7 @@ const TenantModal = ({
         status: 'active',
     });
 
-    const [agencies, setAgencies] = useState<{ id: string; name: string }[]>([]);
+    const [agencies, setAgencies] = useState<SearchableSelectOption[]>([]);
     const [errors, setErrors] = useState<Partial<Record<keyof TenantFormData, string>>>({});
     const [isLoading, setIsLoading] = useState(false);
     const [isLoadingAgencies, setIsLoadingAgencies] = useState(false);
@@ -108,7 +108,7 @@ const TenantModal = ({
             getModel<AgenciesApiResponse>('/agencies?limit=100')
                 .then((res) => {
                     if (res && !isErrorResponse(res) && res.data?.agencies) {
-                        const transformedAgencies = res.data.agencies.map((agency: BackendAgencyData) => ({
+                        const transformedAgencies: SearchableSelectOption[] = res.data.agencies.map((agency: BackendAgencyData) => ({
                             id: agency.id,
                             name: agency.name,
                         }));
@@ -438,31 +438,33 @@ const TenantModal = ({
                     {/* Row 2: Level and Status */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <Field>
-                            <Select
+                            <SearchableSelect
                                 label="Level"
                                 value={form.level}
-                                onChange={(value: string) => setForm((f) => ({ ...f, level: value as 'kindergarten' | 'nursery' | 'primary' | 'secondary' }))}
+                                onChange={(value) => setForm((f) => ({ ...f, level: (value || 'primary') as 'kindergarten' | 'nursery' | 'primary' | 'secondary' }))}
                                 options={[
-                                    { value: 'kindergarten', label: 'Kindergarten' },
-                                    { value: 'nursery', label: 'Nursery' },
-                                    { value: 'primary', label: 'Primary' },
-                                    { value: 'secondary', label: 'Secondary' },
+                                    { id: 'kindergarten', name: 'Kindergarten' },
+                                    { id: 'nursery', name: 'Nursery' },
+                                    { id: 'primary', name: 'Primary' },
+                                    { id: 'secondary', name: 'Secondary' },
                                 ]}
-                                placeholder="Select level..."
+                                placeholder="Search level..."
+                                emptyLabel="No levels found"
                                 error={errors.level}
                             />
                         </Field>
 
                         <Field>
-                            <Select
+                            <SearchableSelect
                                 label="Status"
                                 value={form.status}
-                                onChange={(value: string) => setForm((f) => ({ ...f, status: value as 'active' | 'inactive' }))}
+                                onChange={(value) => setForm((f) => ({ ...f, status: (value || 'active') as 'active' | 'inactive' }))}
                                 options={[
-                                    { value: 'active', label: 'Active' },
-                                    { value: 'inactive', label: 'Inactive' },
+                                    { id: 'active', name: 'Active' },
+                                    { id: 'inactive', name: 'Inactive' },
                                 ]}
-                                placeholder="Select status..."
+                                placeholder="Search status..."
+                                emptyLabel="No statuses found"
                                 error={errors.status}
                             />
                         </Field>
@@ -470,19 +472,17 @@ const TenantModal = ({
 
                     {/* Row 3: Agency */}
                     <Field>
-                        <Select
+                        <SearchableSelect
                             label="Agency"
-                            value={form.agencyId}
-                            onChange={(value: string) => setForm((f) => ({ ...f, agencyId: value }))}
-                            options={agencies.map((agency) => ({
-                                value: agency.id,
-                                label: agency.name,
-                            }))}
-                            placeholder={isLoadingAgencies ? "Loading agencies..." : "Select agency..."}
+                            value={form.agencyId || null}
+                            onChange={(value) => setForm((f) => ({ ...f, agencyId: value || '' }))}
+                            options={agencies}
+                            placeholder={isLoadingAgencies ? "Loading agencies..." : "Search agencies..."}
+                            emptyLabel="No agencies found"
+                            loading={isLoadingAgencies}
                             error={errors.agencyId}
                             disabled={isLoadingAgencies}
                         />
-                        {errors.agencyId ? <ErrorMessage>{errors.agencyId}</ErrorMessage> : null}
                     </Field>
 
                     {/* Row 4: Address */}

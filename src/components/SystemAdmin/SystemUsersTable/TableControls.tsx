@@ -72,6 +72,9 @@ const TableControls = ({
                     name="search-users-field"
                     id="search-users-field"
                     data-form-type="other"
+                    data-lpignore="true"
+                    data-1p-ignore="true"
+                    data-form-type="search"
                 />
             </Field>
 
