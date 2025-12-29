@@ -355,21 +355,22 @@ const sendRequestViaProxy = async <T = any>(
 
     // Handle successful responses
     if (response.status >= 200 && response.status < 300) {
-      const contentType = response.headers.get('content-type');
+      const contentType = response.headers.get('content-type') || '';
       const contentLength = response.headers.get('content-length');
       
+      // If content-length is 0, return null immediately
+      if (contentLength === '0') {
+        return null;
+      }
+      
       // Check if response has content before parsing
-      if (contentType && contentType.includes('application/json')) {
-        // If content-length is 0, return null
-        if (contentLength === '0') {
-          return null;
-        }
-        
+      // Handle both explicit JSON content-type and cases where it might be missing
+      if (contentType.includes('application/json') || !contentType) {
         try {
           // Read response as text first to check if it's empty
           const text = await response.text();
           
-          // If body is empty, return null
+          // If body is empty or whitespace, return null
           if (!text || text.trim() === '') {
             return null;
           }
@@ -379,13 +380,19 @@ const sendRequestViaProxy = async <T = any>(
           return data;
         } catch (parseError: any) {
           // If JSON parsing fails, return null instead of throwing
+          // This prevents ClientFetchError from breaking the app
           // Only log in development to avoid noise
           if (NODE_ENV === 'development') {
-            console.warn('Failed to parse JSON response:', parseError?.message || 'Invalid JSON');
+            console.warn('Failed to parse JSON response:', parseError?.message || 'Invalid JSON', {
+              url: finalUrl,
+              contentType,
+              contentLength,
+            });
           }
           return null;
         }
       }
+      // For non-JSON responses, return null
       return null;
     }
 

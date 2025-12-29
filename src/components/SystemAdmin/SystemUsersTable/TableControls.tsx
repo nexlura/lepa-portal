@@ -40,6 +40,7 @@ const TableControls = ({
 
     // Get role icons
     const getRoleIcon = (role: string) => {
+        if (!role) return null;
         const roleLower = role.toLowerCase();
         if (roleLower.includes('system') && roleLower.includes('administrator')) return ShieldCheckIcon;
         if (roleLower.includes('tenant') && roleLower.includes('administrator')) return BuildingOfficeIcon;
@@ -63,10 +64,14 @@ const TableControls = ({
             <Field>
                 <Label>Search Users</Label>
                 <Input
-                    type="text"
+                    type="search"
                     placeholder="Search by name or email..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
+                    autoComplete="off"
+                    name="search-users-field"
+                    id="search-users-field"
+                    data-form-type="other"
                 />
             </Field>
 

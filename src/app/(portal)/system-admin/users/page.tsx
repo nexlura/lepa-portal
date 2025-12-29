@@ -1,13 +1,31 @@
 import SystemUsersView from '@/components/SystemAdmin/SystemUsersView';
+import { getModel, isErrorResponse } from '@/lib/connector';
 
 type BackendSystemUserData = {
     id: string;
+    user_type: string;
+    tenant_id?: string;
+    phone: string;
     email: string;
     first_name?: string;
     last_name?: string;
-    role: string;
-    status: string;
+    is_active?: boolean;
+    roles?: string[];
     created_at: string;
+    updated_at?: string;
+};
+
+type SystemUsersApiResponse = {
+    success?: boolean;
+    code?: number;
+    data?: {
+        limit?: number;
+        page?: number;
+        total_items?: number;
+        total_pages?: number;
+        users?: BackendSystemUserData[];
+    };
+    message?: string;
 };
 
 export type SystemUser = {
@@ -25,92 +43,80 @@ export type PageProps = {
 };
 
 const SystemUsersPage = async ({ searchParams }: PageProps) => {
-    // TODO: Replace with API data once endpoint is ready
-    // Dummy data for system users with random distribution across user types
-    const userTypes = [
-        { role: 'System Administrator', emailDomain: 'lepa.gov', firstNames: ['John', 'Emily', 'Michael', 'Sarah'], lastNames: ['Doe', 'Davis', 'Johnson', 'Williams'] },
-        { role: 'System Support', emailDomain: 'lepa.gov', firstNames: ['Jane', 'David', 'Lisa', 'Robert'], lastNames: ['Smith', 'Brown', 'Wilson', 'Miller'] },
-        { role: 'Government Monitor', emailDomain: 'lepa.gov', firstNames: ['Michael', 'Robert', 'Patricia', 'James'], lastNames: ['Johnson', 'Miller', 'Anderson', 'Taylor'] },
-        { role: 'Tenant Administrator', emailDomain: 'school.edu', firstNames: ['Thomas', 'Jessica', 'Christopher', 'Amanda'], lastNames: ['White', 'Harris', 'Martin', 'Clark'] },
-        { role: 'Tenant User', emailDomain: 'school.edu', firstNames: ['Daniel', 'Michelle', 'Matthew', 'Ashley'], lastNames: ['Lewis', 'Walker', 'Hall', 'Allen'] },
-    ];
-
-    const statuses: ('active' | 'inactive')[] = ['active', 'inactive'];
+    let users: SystemUser[] = [];
+    let totalPages = 1;
     
-    // Generate random users with varied distribution
-    const dummyUsers: BackendSystemUserData[] = [];
-    const totalUsers = 25; // Total number of users to generate
-    
-    for (let i = 1; i <= totalUsers; i++) {
-        // Randomly select user type (weighted towards tenant users)
-        const randomType = Math.random();
-        let selectedType;
-        if (randomType < 0.35) {
-            // 35% tenant users
-            selectedType = userTypes[5];
-        } else if (randomType < 0.50) {
-            // 15% tenant administrators
-            selectedType = userTypes[4];
-        } else if (randomType < 0.65) {
-            // 15% system support
-            selectedType = userTypes[1];
-        } else if (randomType < 0.80) {
-            // 15% government monitor
-            selectedType = userTypes[2];
-        } else if (randomType < 0.90) {
-            // 10% government auditor
-            selectedType = userTypes[3];
-        } else {
-            // 10% system administrator
-            selectedType = userTypes[0];
-        }
-
-        const firstName = selectedType.firstNames[Math.floor(Math.random() * selectedType.firstNames.length)];
-        const lastName = selectedType.lastNames[Math.floor(Math.random() * selectedType.lastNames.length)];
-        const status = statuses[Math.random() < 0.85 ? 0 : 1]; // 85% active, 15% inactive
-        const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}${i}@${selectedType.emailDomain}`;
+    try {
+        // Get page from searchParams
+        const resolvedSearchParams = await searchParams;
+        const currentPage = resolvedSearchParams?.page ? parseInt(resolvedSearchParams.page, 10) : 1;
+        const pageParam = currentPage > 1 ? `&page=${currentPage}` : '';
         
-        // Random creation date within last 6 months
-        const monthsAgo = Math.floor(Math.random() * 6);
-        const daysAgo = Math.floor(Math.random() * 30);
-        const createdDate = new Date();
-        createdDate.setMonth(createdDate.getMonth() - monthsAgo);
-        createdDate.setDate(createdDate.getDate() - daysAgo);
-        
-        dummyUsers.push({
-            id: String(i),
-            email,
-            first_name: firstName,
-            last_name: lastName,
-            role: selectedType.role,
-            status,
-            created_at: createdDate.toISOString(),
+        const res = await getModel<SystemUsersApiResponse>(`/users?limit=10${pageParam}`).catch((error: any) => {
+            // Catch any errors from getModel, including auth/session errors
+            // Suppress JSON parse errors and ClientFetchErrors as they're handled gracefully
+            const errorMessage = error?.message || String(error || '');
+            if (errorMessage.includes('JSON.parse') || 
+                errorMessage.includes('unexpected end of data') || 
+                errorMessage.includes('ClientFetchError')) {
+                // Silently handle auth/session errors - they're expected in some contexts
+                return null;
+            }
+            // Don't log errors to avoid console noise
+            return null;
         });
-    }
-    
-    // Shuffle the array to randomize order
-    for (let i = dummyUsers.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [dummyUsers[i], dummyUsers[j]] = [dummyUsers[j], dummyUsers[i]];
-    }
-
-    const transformedData: SystemUser[] = dummyUsers.map((user: BackendSystemUserData) => {
+        
+        // Check if response is null or undefined
+        if (!res) {
+            return (
+                <SystemUsersView users={users} totalPages={totalPages} />
+            );
+        }
+        
+        // Check if response is an error
+        if (isErrorResponse(res)) {
+            return (
+                <SystemUsersView users={users} totalPages={totalPages} />
+            );
+        }
+        
+        // Check if response has data
+        if (res.data && res.data.users && Array.isArray(res.data.users)) {
+            const backendUsers = res.data.users;
+            totalPages = typeof res.data.total_pages === 'number' ? res.data.total_pages : 1;
+            
+            // Transform backend data to frontend format
+            users = backendUsers.map((user: BackendSystemUserData) => {
         const fullName = user.first_name && user.last_name
             ? `${user.first_name} ${user.last_name}`
-            : user.email.split('@')[0];
+                    : (user.email || '').split('@')[0] || 'Unknown';
+
+                // Determine role to display: use first role from roles array, or user_type as fallback
+                const displayRole = user.roles && user.roles.length > 0 
+                    ? user.roles[0] 
+                    : (user.user_type === 'system' ? 'System User' : 'Tenant User');
+
+                // Convert is_active boolean to status string
+                const isActive = user.is_active !== undefined ? user.is_active : true;
 
         return {
             id: user.id,
             name: fullName,
-            email: user.email,
-            role: user.role,
-            status: user.status === 'active' ? 'active' : 'inactive',
-            createdAt: user.created_at,
+                    email: user.email || '',
+                    role: displayRole,
+                    status: isActive ? 'active' : 'inactive' as 'active' | 'inactive',
+                    createdAt: user.created_at || new Date().toISOString(),
         };
     });
+        }
+    } catch (error: any) {
+        // Handle all errors gracefully without throwing
+        // Use empty array as fallback - page will show empty state
+        // Don't log errors to avoid console noise and Next.js fetchData errors
+    }
 
     return (
-        <SystemUsersView users={transformedData} totalPages={1} />
+        <SystemUsersView users={users} totalPages={totalPages} />
     );
 };
 

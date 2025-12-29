@@ -1,4 +1,4 @@
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 
 export interface PaginationProps {
@@ -59,11 +59,10 @@ const generatePagesCounter = (totalPages: number, currentPage: number = 1) => {
 const TablePagination = ({ totalPages, onPageChange }: PaginationProps) => {
     const router = useRouter();
     const pathname = usePathname();
+    const searchParams = useSearchParams();
 
-    // Split the path into parts and remove the last segment if it's a param
-    const parts = pathname.split("/").filter(Boolean);
-    const basePath = parts.length > 2 ? `/${parts.slice(0, -1).join("/")}` : pathname;
-    const currentPage = Number(parts[parts.length - 1]) || 1;
+    // Get current page from query parameters, fallback to 1
+    const currentPage = Number(searchParams.get('page')) || 1;
 
     const handlePageChange = (page: number) => {
         if (onPageChange) {

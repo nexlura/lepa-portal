@@ -1,4 +1,4 @@
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import TablePagination from "./TablePagination";
 
 
@@ -9,6 +9,7 @@ export interface TableFootProps {
 const TableFoot = ({ totalPages }: TableFootProps) => {
     const searchParams = useSearchParams()
     const route = useRouter()
+    const pathname = usePathname()
 
     return (
         <tfoot className="relative h-16">
@@ -17,7 +18,15 @@ const TableFoot = ({ totalPages }: TableFootProps) => {
                     totalPages={totalPages}
                     onPageChange={(page) => {
                         const params = new URLSearchParams(searchParams.toString());
-                        route.push(`/classes/${page}?${params.toString()}`);
+                        // Set or update the page parameter
+                        if (page > 1) {
+                            params.set('page', page.toString());
+                        } else {
+                            params.delete('page');
+                        }
+                        // Use current pathname and update query params
+                        const newPath = `${pathname || ''}${params.toString() ? `?${params.toString()}` : ''}`;
+                        route.push(newPath);
                     }}
                 />
             </tr>

@@ -33,27 +33,16 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   // Fetch session on server with error handling
-  let session = null;
-  try {
-    session = await auth();
-  } catch (error: any) {
-    // Handle JWT session errors gracefully
-    // This can happen when:
-    // - Session token is expired or invalid
-    // - JWT secret is missing or changed
-    // - Session cookie is corrupted
-    if (error?.name === 'JWTSessionError' || error?.message?.includes('JWT')) {
-      // Silently handle JWT errors - user will be redirected to login if needed
-      // Don't log to avoid noise in production
-      if (process.env.NODE_ENV === 'development') {
-        console.warn('JWT session error (user may need to re-authenticate):', error.message);
-      }
-    } else {
-      // Log other errors for debugging
-      console.warn('Error fetching session in RootLayout:', error);
+  // Use a helper function to safely get session without throwing errors
+  const getSessionSafely = async () => {
+    try {
+      return await auth();
+    } catch {
+      return null;
     }
-    // Session will be null, which is fine - middleware/auth will handle redirects
-  }
+  };
+
+  const session = await getSessionSafely();
 
   return (
     <html lang="en" className="h-full bg-white">

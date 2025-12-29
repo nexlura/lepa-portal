@@ -17,16 +17,16 @@ const SystemUsersTable = ({ users, totalPages }: SystemUsersTableProps) => {
     const [roleFilter, setRoleFilter] = useState<string>('All');
     const [statusFilter, setStatusFilter] = useState<string>('All');
 
-    // Get unique roles for filter
-    const roles = Array.from(new Set(users.map(u => u.role)));
+    // Get unique roles for filter (filter out undefined/null roles)
+    const roles = Array.from(new Set(users.map(u => u.role).filter((role): role is string => Boolean(role))));
 
     // Filter users
     const filteredUsers = users.filter((user) => {
         const matchesSearch = 
-            user.name.toLowerCase().includes(search.toLowerCase()) ||
-            user.email.toLowerCase().includes(search.toLowerCase());
-        const matchesRole = roleFilter === 'All' || user.role === roleFilter;
-        const matchesStatus = statusFilter === 'All' || user.status === statusFilter.toLowerCase();
+            (user.name || '').toLowerCase().includes(search.toLowerCase()) ||
+            (user.email || '').toLowerCase().includes(search.toLowerCase());
+        const matchesRole = roleFilter === 'All' || (user.role || '') === roleFilter;
+        const matchesStatus = statusFilter === 'All' || (user.status || '') === statusFilter.toLowerCase();
         return matchesSearch && matchesRole && matchesStatus;
     });
 
