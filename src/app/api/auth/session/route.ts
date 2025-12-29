@@ -3,7 +3,11 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    const session = await auth();
+    const session = await auth().catch((error) => {
+      // Catch any errors from auth() and return null
+      console.warn('Error in auth() call:', error?.message || error);
+      return null;
+    });
     
     // Return session in the format NextAuth expects
     // If no session, return null (NextAuth handles this)

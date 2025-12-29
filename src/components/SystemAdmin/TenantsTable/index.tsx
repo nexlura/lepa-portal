@@ -10,9 +10,11 @@ import TableControls from './TableControls';
 interface TenantsTableProps {
     tenants: Tenant[];
     totalPages: number;
+    onEdit: (tenant: Tenant) => void;
+    onView: (tenant: Tenant) => void;
 }
 
-const TenantsTable = ({ tenants, totalPages }: TenantsTableProps) => {
+const TenantsTable = ({ tenants, totalPages, onEdit, onView }: TenantsTableProps) => {
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState<string>('All');
 
@@ -37,7 +39,7 @@ const TenantsTable = ({ tenants, totalPages }: TenantsTableProps) => {
                 <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
                         <TenantsTableHead />
-                        <TenantsTableBody tenants={filteredTenants} />
+                        <TenantsTableBody tenants={filteredTenants} onEdit={onEdit} onView={onView} />
                         {totalPages > 1 && (
                             <TableFoot totalPages={totalPages} />
                         )}

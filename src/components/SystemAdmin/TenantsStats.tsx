@@ -2,9 +2,6 @@ import {
     BuildingOfficeIcon,
     CheckCircleIcon,
     XCircleIcon,
-    UserGroupIcon,
-    AcademicCapIcon,
-    BookOpenIcon,
 } from '@heroicons/react/24/outline';
 import { Tenant } from '@/app/(portal)/system-admin/tenants/page';
 
@@ -21,9 +18,6 @@ const TenantsStats = ({ tenants }: TenantsStatsProps) => {
     const totalTenants = tenants.length;
     const activeTenants = tenants.filter(t => t.status === 'active').length;
     const inactiveTenants = tenants.filter(t => t.status === 'inactive').length;
-    const totalStudents = tenants.reduce((sum, t) => sum + t.studentCount, 0);
-    const totalTeachers = tenants.reduce((sum, t) => sum + t.teacherCount, 0);
-    const totalClasses = tenants.reduce((sum, t) => sum + t.classCount, 0);
 
     const stats = [
         {
@@ -46,27 +40,6 @@ const TenantsStats = ({ tenants }: TenantsStatsProps) => {
             description: 'Tenants currently inactive',
             icon: XCircleIcon,
             iconColor: 'text-gray-400',
-        },
-        {
-            name: 'Total Students',
-            value: formatNumber(totalStudents),
-            description: 'Students across all tenants',
-            icon: UserGroupIcon,
-            iconColor: 'text-indigo-400',
-        },
-        {
-            name: 'Total Teachers',
-            value: formatNumber(totalTeachers),
-            description: 'Teachers across all tenants',
-            icon: AcademicCapIcon,
-            iconColor: 'text-orange-400',
-        },
-        {
-            name: 'Total Classes',
-            value: formatNumber(totalClasses),
-            description: 'Classes across all tenants',
-            icon: BookOpenIcon,
-            iconColor: 'text-teal-400',
         },
     ];
 

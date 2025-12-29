@@ -1,19 +1,40 @@
 import TenantsView from '@/components/SystemAdmin/TenantsView';
+import { getModel, isErrorResponse } from '@/lib/connector';
 
 type BackendTenantData = {
     id: string;
     school_name: string;
-    status: string;
+    status?: string;
+    is_active?: boolean;
     created_at: string;
-    student_count?: number;
-    teacher_count?: number;
-    class_count?: number;
+    domain?: string;
+    address?: string;
+    phone?: string;
+    level?: string;
+    code?: string;
+    agency_id?: string;
+    total_students?: number;
+    total_teachers?: number;
+    total_classes?: number;
+};
+
+type TenantsApiResponse = {
+    success?: boolean;
+    code?: number;
+    data?: BackendTenantData[];
+    message?: string;
 };
 
 export type Tenant = {
     id: string;
     name: string;
     status: 'active' | 'inactive';
+    domain?: string;
+    address?: string;
+    phone?: string;
+    level?: 'kindergarten' | 'nursery' | 'primary' | 'secondary';
+    code?: string;
+    agencyId?: string;
     studentCount: number;
     teacherCount: number;
     classCount: number;
@@ -26,115 +47,76 @@ export type PageProps = {
 };
 
 const TenantsPage = async ({ searchParams }: PageProps) => {
-    // TODO: Replace with API data once endpoint is ready
-    // Dummy data for tenants
-    const dummyTenants: BackendTenantData[] = [
-        {
-            id: '1',
-            school_name: 'Springfield High School',
-            status: 'active',
-            created_at: '2024-01-15T10:00:00Z',
-            student_count: 450,
-            teacher_count: 35,
-            class_count: 25,
-        },
-        {
-            id: '2',
-            school_name: 'Riverside Academy',
-            status: 'active',
-            created_at: '2024-02-10T14:30:00Z',
-            student_count: 320,
-            teacher_count: 28,
-            class_count: 20,
-        },
-        {
-            id: '3',
-            school_name: 'Central Elementary',
-            status: 'active',
-            created_at: '2024-01-20T09:15:00Z',
-            student_count: 285,
-            teacher_count: 22,
-            class_count: 18,
-        },
-        {
-            id: '4',
-            school_name: 'Westside Middle School',
-            status: 'active',
-            created_at: '2024-03-05T11:45:00Z',
-            student_count: 240,
-            teacher_count: 20,
-            class_count: 16,
-        },
-        {
-            id: '5',
-            school_name: 'North High School',
-            status: 'active',
-            created_at: '2024-02-18T13:20:00Z',
-            student_count: 215,
-            teacher_count: 18,
-            class_count: 14,
-        },
-        {
-            id: '6',
-            school_name: 'Eastside Primary',
-            status: 'active',
-            created_at: '2024-01-25T08:30:00Z',
-            student_count: 180,
-            teacher_count: 15,
-            class_count: 12,
-        },
-        {
-            id: '7',
-            school_name: 'South Academy',
-            status: 'inactive',
-            created_at: '2024-01-10T10:00:00Z',
-            student_count: 150,
-            teacher_count: 12,
-            class_count: 10,
-        },
-        {
-            id: '8',
-            school_name: 'Valley School',
-            status: 'active',
-            created_at: '2024-02-28T15:00:00Z',
-            student_count: 195,
-            teacher_count: 16,
-            class_count: 13,
-        },
-        {
-            id: '9',
-            school_name: 'Mountain View Elementary',
-            status: 'active',
-            created_at: '2024-03-12T09:30:00Z',
-            student_count: 165,
-            teacher_count: 14,
-            class_count: 11,
-        },
-        {
-            id: '10',
-            school_name: 'Ocean Breeze Academy',
-            status: 'active',
-            created_at: '2024-02-22T12:15:00Z',
-            student_count: 220,
-            teacher_count: 19,
-            class_count: 15,
-        },
-    ];
-
-    const transformedData: Tenant[] = dummyTenants.map((tenant: BackendTenantData) => {
-        return {
-            id: tenant.id,
-            name: tenant.school_name,
-            status: tenant.status === 'active' ? 'active' : 'inactive',
-            studentCount: tenant.student_count || 0,
-            teacherCount: tenant.teacher_count || 0,
-            classCount: tenant.class_count || 0,
-            createdAt: tenant.created_at,
-        };
-    });
+    let tenants: Tenant[] = [];
+    let totalPages = 1;
+    
+    try {
+        const res = await getModel<TenantsApiResponse>('/tenants?limit=10').catch((error: any) => {
+            // Catch any errors from getModel, including auth/session errors
+            if (error?.message?.includes('JSON.parse') || error?.message?.includes('unexpected end of data') || error?.message?.includes('ClientFetchError')) {
+                console.warn('Session/auth error when fetching tenants:', error?.message);
+            } else {
+                console.warn('Error in getModel call:', error?.message || error);
+            }
+            return null;
+        });
+        
+        // Check if response is null or undefined
+        if (!res) {
+            console.warn('Empty or failed response from tenants API');
+            return (
+                <TenantsView tenants={tenants} totalPages={totalPages} />
+            );
+        }
+        
+        // Check if response is an error
+        if (isErrorResponse(res)) {
+            console.warn('Error response from tenants API:', res.status, res.message);
+            return (
+                <TenantsView tenants={tenants} totalPages={totalPages} />
+            );
+        }
+        
+        // Check if response has data
+        if (res.data && Array.isArray(res.data)) {
+            const backendTenants = res.data;
+            totalPages = 1; // API doesn't return pagination info in this response
+            
+            // Transform backend data to frontend format
+            tenants = backendTenants.map((tenant: BackendTenantData) => {
+                // Convert is_active boolean to status string, fallback to status string if is_active not present
+                const isActive = tenant.is_active !== undefined ? tenant.is_active : (tenant.status === 'active');
+                return {
+                    id: tenant.id,
+                    name: tenant.school_name,
+                    status: isActive ? 'active' : 'inactive' as 'active' | 'inactive',
+                    domain: tenant.domain,
+                    address: tenant.address,
+                    phone: tenant.phone,
+                    level: tenant.level as 'kindergarten' | 'nursery' | 'primary' | 'secondary' | undefined,
+                    code: tenant.code,
+                    agencyId: tenant.agency_id,
+                    studentCount: tenant.total_students || 0,
+                    teacherCount: tenant.total_teachers || 0,
+                    classCount: tenant.total_classes || 0,
+                    createdAt: tenant.created_at,
+                };
+            });
+        } else {
+            console.warn('Invalid response structure from tenants API:', res);
+        }
+    } catch (error: any) {
+        // Handle JSON parse errors and other exceptions
+        if (error?.message?.includes('JSON.parse') || error?.message?.includes('unexpected end of data') || error?.message?.includes('ClientFetchError')) {
+            console.warn('JSON parse/auth error when fetching tenants:', error?.message);
+        } else {
+            console.warn('Error fetching tenants:', error?.message || error);
+        }
+        // Use empty array as fallback
+    }
 
     return (
-        <TenantsView tenants={transformedData} totalPages={1} />
+        <TenantsView tenants={tenants} totalPages={totalPages} />
     );
 };
 

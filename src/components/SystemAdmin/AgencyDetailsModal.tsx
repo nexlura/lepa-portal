@@ -46,7 +46,7 @@ const AgencyDetailsModal = ({ open, onClose, agency, onEdit }: AgencyDetailsModa
         <Dialog size="lg" open={open} onClose={onClose} className="relative z-20">
             <DialogTitle>Agency Details</DialogTitle>
             <DialogBody>
-                <div className="space-y-6">
+                <div className="space-y-4">
                     {/* Agency Name */}
                     <div>
                         <h3 className="text-lg font-semibold text-gray-900">{agency.name}</h3>
@@ -56,7 +56,7 @@ const AgencyDetailsModal = ({ open, onClose, agency, onEdit }: AgencyDetailsModa
                     </div>
 
                     {/* Details Grid */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                         <div>
                             <dt className="text-xs font-medium text-gray-500 uppercase tracking-wider">Domain</dt>
                             <dd className="mt-1 text-sm text-gray-900">{agency.domain || 'N/A'}</dd>

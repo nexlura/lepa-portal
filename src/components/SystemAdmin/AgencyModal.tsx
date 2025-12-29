@@ -258,7 +258,7 @@ const AgencyModal = ({
     };
 
     return (
-        <Dialog size="lg" open={open} onClose={handleClose} className="relative z-20">
+        <Dialog size="xl" open={open} onClose={handleClose} className="relative z-20">
             <DialogTitle>{isEditMode ? 'Edit Agency' : 'Create New Agency'}</DialogTitle>
             <DialogDescription>
                 {isEditMode 
@@ -267,69 +267,71 @@ const AgencyModal = ({
                 }
             </DialogDescription>
             <DialogBody>
-                <div className="mt-4 space-y-5">
-                    {/* Domain */}
-                    <Field>
-                        <Label className="text-sm/6 text-gray-900 font-medium">Domain</Label>
-                        <Input
-                            type="text"
-                            placeholder="e.g., example.com"
-                            value={form.domain}
-                            onChange={(e) => setForm((f) => ({ ...f, domain: e.target.value }))}
-                            invalid={Boolean(errors.domain)}
-                        />
-                        {errors.domain ? <ErrorMessage>{errors.domain}</ErrorMessage> : null}
-                        {isEditMode && (
-                            <p className="mt-1 text-sm text-gray-500">
-                                Leave empty to keep current domain unchanged
-                            </p>
-                        )}
-                    </Field>
+                <div className="mt-4 space-y-4">
+                    {/* Row 1: Domain and Name */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <Field>
+                            <Label className="text-sm/6 text-gray-900 font-medium">Domain</Label>
+                            <Input
+                                type="text"
+                                placeholder="e.g., example.com"
+                                value={form.domain}
+                                onChange={(e) => setForm((f) => ({ ...f, domain: e.target.value }))}
+                                invalid={Boolean(errors.domain)}
+                            />
+                            {errors.domain ? <ErrorMessage>{errors.domain}</ErrorMessage> : null}
+                            {isEditMode && (
+                                <p className="mt-1 text-xs text-gray-500">
+                                    Leave empty to keep current domain unchanged
+                                </p>
+                            )}
+                        </Field>
 
-                    {/* Name */}
-                    <Field>
-                        <Label className="text-sm/6 text-gray-900 font-medium">Name</Label>
-                        <Input
-                            type="text"
-                            placeholder="e.g., Ministry of Education"
-                            value={form.name}
-                            onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                            invalid={Boolean(errors.name)}
-                        />
-                        {errors.name ? <ErrorMessage>{errors.name}</ErrorMessage> : null}
-                    </Field>
+                        <Field>
+                            <Label className="text-sm/6 text-gray-900 font-medium">Name</Label>
+                            <Input
+                                type="text"
+                                placeholder="e.g., Ministry of Education"
+                                value={form.name}
+                                onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                                invalid={Boolean(errors.name)}
+                            />
+                            {errors.name ? <ErrorMessage>{errors.name}</ErrorMessage> : null}
+                        </Field>
+                    </div>
 
-                    {/* Type */}
-                    <Field>
-                        <Select
-                            label="Type"
-                            value={form.type === 'Government' || form.type === 'NGO' || form.type === 'default' ? form.type : 'Government'}
-                            onChange={(value: string) => setForm((f) => ({ ...f, type: value as 'Government' | 'NGO' | 'default' }))}
-                            options={[
-                                { value: 'Government', label: 'Government' },
-                                { value: 'NGO', label: 'NGO' },
-                                { value: 'default', label: 'Default' },
-                            ]}
-                            placeholder="Select type..."
-                            error={errors.type}
-                        />
-                    </Field>
+                    {/* Row 2: Type and Status */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <Field>
+                            <Select
+                                label="Type"
+                                value={form.type === 'Government' || form.type === 'NGO' || form.type === 'default' ? form.type : 'Government'}
+                                onChange={(value: string) => setForm((f) => ({ ...f, type: value as 'Government' | 'NGO' | 'default' }))}
+                                options={[
+                                    { value: 'Government', label: 'Government' },
+                                    { value: 'NGO', label: 'NGO' },
+                                    { value: 'default', label: 'Default' },
+                                ]}
+                                placeholder="Select type..."
+                                error={errors.type}
+                            />
+                        </Field>
 
-                    {/* Status */}
-                    <Field>
-                        <Select
-                            label="Status"
-                            value={form.status}
-                            onChange={(value: string) => setForm((f) => ({ ...f, status: value as 'active' | 'suspended' | 'inactive' }))}
-                            options={[
-                                { value: 'active', label: 'Active' },
-                                { value: 'suspended', label: 'Suspended' },
-                                { value: 'inactive', label: 'Inactive' },
-                            ]}
-                            placeholder="Select status..."
-                            error={errors.status}
-                        />
-                    </Field>
+                        <Field>
+                            <Select
+                                label="Status"
+                                value={form.status}
+                                onChange={(value: string) => setForm((f) => ({ ...f, status: value as 'active' | 'suspended' | 'inactive' }))}
+                                options={[
+                                    { value: 'active', label: 'Active' },
+                                    { value: 'suspended', label: 'Suspended' },
+                                    { value: 'inactive', label: 'Inactive' },
+                                ]}
+                                placeholder="Select status..."
+                                error={errors.status}
+                            />
+                        </Field>
+                    </div>
                 </div>
             </DialogBody>
             <DialogActions>

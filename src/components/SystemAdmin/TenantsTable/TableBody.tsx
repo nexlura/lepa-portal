@@ -1,14 +1,15 @@
 'use client';
 
-import Link from 'next/link';
 import { PencilIcon, EyeIcon } from '@heroicons/react/24/outline';
 import { Tenant } from '@/app/(portal)/system-admin/tenants/page';
 
 interface TenantsTableBodyProps {
     tenants: Tenant[];
+    onEdit: (tenant: Tenant) => void;
+    onView: (tenant: Tenant) => void;
 }
 
-const TenantsTableBody = ({ tenants }: TenantsTableBodyProps) => {
+const TenantsTableBody = ({ tenants, onEdit, onView }: TenantsTableBodyProps) => {
     const formatDate = (dateString: string) => {
         try {
             return new Date(dateString).toLocaleDateString('en-US', {
@@ -65,20 +66,20 @@ const TenantsTableBody = ({ tenants }: TenantsTableBodyProps) => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <div className="flex items-center justify-end space-x-2">
-                            <Link
-                                href={`/system-admin/tenants/${tenant.id}`}
+                            <button
+                                onClick={() => onView(tenant)}
                                 className="text-primary-600 hover:text-primary-900"
                                 title="View Details"
                             >
                                 <EyeIcon className="h-5 w-5" />
-                            </Link>
-                            <Link
-                                href={`/system-admin/tenants/${tenant.id}/edit`}
+                            </button>
+                            <button
+                                onClick={() => onEdit(tenant)}
                                 className="text-gray-600 hover:text-gray-900"
                                 title="Edit"
                             >
                                 <PencilIcon className="h-5 w-5" />
-                            </Link>
+                            </button>
                         </div>
                     </td>
                 </tr>
