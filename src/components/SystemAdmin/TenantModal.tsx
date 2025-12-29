@@ -405,36 +405,38 @@ const TenantModal = ({
                         <div className="text-sm text-gray-500">Loading tenant details...</div>
                     </div>
                 ) : (
-                <div className="mt-4 space-y-4">
+                <div className="mt-4 space-y-6">
                     {/* Row 1: Domain and School Name */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <Field>
-                            <Label className="text-sm/6 text-gray-900 font-medium">Domain</Label>
+                            <Label className="text-sm font-medium text-gray-900 mb-2 block break-words">Domain</Label>
                             <Input
                                 type="text"
                                 placeholder="e.g., school.lepa.cc"
                                 value={form.domain}
                                 onChange={(e) => setForm((f) => ({ ...f, domain: e.target.value }))}
                                 invalid={Boolean(errors.domain)}
+                                className="w-full min-w-0"
                             />
-                            {errors.domain ? <ErrorMessage>{errors.domain}</ErrorMessage> : null}
+                            {errors.domain ? <ErrorMessage className="mt-2">{errors.domain}</ErrorMessage> : null}
                         </Field>
 
                         <Field>
-                            <Label className="text-sm/6 text-gray-900 font-medium">School Name</Label>
+                            <Label className="text-sm font-medium text-gray-900 mb-2 block break-words">School Name</Label>
                             <Input
                                 type="text"
                                 placeholder="e.g., Springfield High School"
                                 value={form.schoolName}
                                 onChange={(e) => setForm((f) => ({ ...f, schoolName: e.target.value }))}
                                 invalid={Boolean(errors.schoolName)}
+                                className="w-full min-w-0"
                             />
-                            {errors.schoolName ? <ErrorMessage>{errors.schoolName}</ErrorMessage> : null}
+                            {errors.schoolName ? <ErrorMessage className="mt-2">{errors.schoolName}</ErrorMessage> : null}
                         </Field>
                     </div>
 
                     {/* Row 2: Level and Status */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <Field>
                             <Select
                                 label="Level"
@@ -485,33 +487,35 @@ const TenantModal = ({
 
                     {/* Row 4: Address */}
                     <Field>
-                        <Label className="text-sm/6 text-gray-900 font-medium">Address</Label>
+                        <Label className="text-sm font-medium text-gray-900 mb-2 block break-words">Address</Label>
                         <Input
                             type="text"
                             placeholder="e.g., 123 Main Street, City, State"
                             value={form.address}
                             onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
                             invalid={Boolean(errors.address)}
+                            className="w-full min-w-0"
                         />
-                        {errors.address ? <ErrorMessage>{errors.address}</ErrorMessage> : null}
+                        {errors.address ? <ErrorMessage className="mt-2">{errors.address}</ErrorMessage> : null}
                     </Field>
 
                     {/* Row 5: Phone and Code */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <Field>
-                            <Label className="text-sm/6 text-gray-900 font-medium">Phone</Label>
+                            <Label className="text-sm font-medium text-gray-900 mb-2 block">Phone</Label>
                             <Input
                                 type="tel"
                                 placeholder="e.g., +1234567890"
                                 value={form.phone}
                                 onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
                                 invalid={Boolean(errors.phone)}
+                                className="w-full"
                             />
-                            {errors.phone ? <ErrorMessage>{errors.phone}</ErrorMessage> : null}
+                            {errors.phone ? <ErrorMessage className="mt-2">{errors.phone}</ErrorMessage> : null}
                         </Field>
 
                         <Field>
-                            <Label className="text-sm/6 text-gray-900 font-medium">
+                            <Label className="text-sm font-medium text-gray-900 mb-2 block">
                                 Code <span className="text-gray-400 font-normal">(Optional)</span>
                             </Label>
                             <Input
@@ -520,8 +524,9 @@ const TenantModal = ({
                                 value={form.code}
                                 onChange={(e) => setForm((f) => ({ ...f, code: e.target.value }))}
                                 invalid={Boolean(errors.code)}
+                                className="w-full"
                             />
-                            {errors.code ? <ErrorMessage>{errors.code}</ErrorMessage> : null}
+                            {errors.code ? <ErrorMessage className="mt-2">{errors.code}</ErrorMessage> : null}
                         </Field>
                     </div>
                 </div>

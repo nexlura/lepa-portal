@@ -51,19 +51,18 @@ const TenantsPage = async ({ searchParams }: PageProps) => {
     let totalPages = 1;
     
     try {
-        const res = await getModel<TenantsApiResponse>('/tenants?limit=10').catch((error: any) => {
-            // Catch any errors from getModel, including auth/session errors
-            if (error?.message?.includes('JSON.parse') || error?.message?.includes('unexpected end of data') || error?.message?.includes('ClientFetchError')) {
-                console.warn('Session/auth error when fetching tenants:', error?.message);
-            } else {
-                console.warn('Error in getModel call:', error?.message || error);
-            }
+        // Get page from searchParams
+        const resolvedSearchParams = await searchParams;
+        const currentPage = resolvedSearchParams?.page ? parseInt(resolvedSearchParams.page, 10) : 1;
+        const pageParam = currentPage > 1 ? `&page=${currentPage}` : '';
+        
+        const res = await getModel<TenantsApiResponse>(`/tenants?limit=10${pageParam}`).catch(() => {
+            // Silently handle errors - don't log to avoid console noise
             return null;
         });
         
         // Check if response is null or undefined
         if (!res) {
-            console.warn('Empty or failed response from tenants API');
             return (
                 <TenantsView tenants={tenants} totalPages={totalPages} />
             );
@@ -71,7 +70,6 @@ const TenantsPage = async ({ searchParams }: PageProps) => {
         
         // Check if response is an error
         if (isErrorResponse(res)) {
-            console.warn('Error response from tenants API:', res.status, res.message);
             return (
                 <TenantsView tenants={tenants} totalPages={totalPages} />
             );
@@ -102,17 +100,11 @@ const TenantsPage = async ({ searchParams }: PageProps) => {
                     createdAt: tenant.created_at,
                 };
             });
-        } else {
-            console.warn('Invalid response structure from tenants API:', res);
         }
-    } catch (error: any) {
-        // Handle JSON parse errors and other exceptions
-        if (error?.message?.includes('JSON.parse') || error?.message?.includes('unexpected end of data') || error?.message?.includes('ClientFetchError')) {
-            console.warn('JSON parse/auth error when fetching tenants:', error?.message);
-        } else {
-            console.warn('Error fetching tenants:', error?.message || error);
-        }
-        // Use empty array as fallback
+    } catch {
+        // Handle all errors gracefully without throwing
+        // Use empty array as fallback - page will show empty state
+        // Don't log errors to avoid console noise and Next.js fetchData errors
     }
 
     return (

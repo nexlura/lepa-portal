@@ -276,7 +276,7 @@ const UserModal = ({
                 Add a new user to the platform. Select the user type to determine their access level.
             </DialogDescription>
             <DialogBody>
-                <div className="mt-4 space-y-4">
+                <div className="mt-4 space-y-6">
                     {/* Row 1: User Type */}
                     <Field>
                         <Select
@@ -302,9 +302,9 @@ const UserModal = ({
                     </Field>
 
                     {/* Row 2: Email and Phone */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <Field>
-                            <Label className="text-sm/6 text-gray-900 font-medium">Email</Label>
+                            <Label className="text-sm font-medium text-gray-900 mb-2 block break-words">Email</Label>
                             <Input
                                 type="email"
                                 placeholder="e.g., user@example.com"
@@ -314,27 +314,29 @@ const UserModal = ({
                                 autoComplete="new-password"
                                 name="new-user-email"
                                 id="new-user-email"
+                                className="w-full min-w-0"
                             />
-                            {errors.email ? <ErrorMessage>{errors.email}</ErrorMessage> : null}
+                            {errors.email ? <ErrorMessage className="mt-2">{errors.email}</ErrorMessage> : null}
                         </Field>
 
                         <Field>
-                            <Label className="text-sm/6 text-gray-900 font-medium">Phone</Label>
+                            <Label className="text-sm font-medium text-gray-900 mb-2 block">Phone</Label>
                             <Input
                                 type="tel"
                                 placeholder="e.g., +1234567890"
                                 value={form.phone}
                                 onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
                                 invalid={Boolean(errors.phone)}
+                                className="w-full"
                             />
-                            {errors.phone ? <ErrorMessage>{errors.phone}</ErrorMessage> : null}
+                            {errors.phone ? <ErrorMessage className="mt-2">{errors.phone}</ErrorMessage> : null}
                         </Field>
                     </div>
 
                     {/* Row 3: First Name and Last Name */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <Field>
-                            <Label className="text-sm/6 text-gray-900 font-medium">
+                            <Label className="text-sm font-medium text-gray-900 mb-2 block">
                                 First Name <span className="text-gray-400 font-normal">(Optional)</span>
                             </Label>
                             <Input
@@ -343,12 +345,13 @@ const UserModal = ({
                                 value={form.firstName}
                                 onChange={(e) => setForm((f) => ({ ...f, firstName: e.target.value }))}
                                 invalid={Boolean(errors.firstName)}
+                                className="w-full"
                             />
-                            {errors.firstName ? <ErrorMessage>{errors.firstName}</ErrorMessage> : null}
+                            {errors.firstName ? <ErrorMessage className="mt-2">{errors.firstName}</ErrorMessage> : null}
                         </Field>
 
                         <Field>
-                            <Label className="text-sm/6 text-gray-900 font-medium">
+                            <Label className="text-sm font-medium text-gray-900 mb-2 block">
                                 Last Name <span className="text-gray-400 font-normal">(Optional)</span>
                             </Label>
                             <Input
@@ -357,15 +360,16 @@ const UserModal = ({
                                 value={form.lastName}
                                 onChange={(e) => setForm((f) => ({ ...f, lastName: e.target.value }))}
                                 invalid={Boolean(errors.lastName)}
+                                className="w-full"
                             />
-                            {errors.lastName ? <ErrorMessage>{errors.lastName}</ErrorMessage> : null}
+                            {errors.lastName ? <ErrorMessage className="mt-2">{errors.lastName}</ErrorMessage> : null}
                         </Field>
                     </div>
 
                     {/* Row 4: Password and Confirm Password */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <Field>
-                            <Label className="text-sm/6 text-gray-900 font-medium">Password</Label>
+                            <Label className="text-sm font-medium text-gray-900 mb-2 block">Password</Label>
                             <Input
                                 type="password"
                                 placeholder="Enter password (6-50 characters)"
@@ -383,15 +387,16 @@ const UserModal = ({
                                     }
                                 }}
                                 invalid={Boolean(errors.password)}
+                                className="w-full"
                             />
-                            {errors.password ? <ErrorMessage>{errors.password}</ErrorMessage> : null}
-                            <p className="mt-1 text-xs text-gray-500">
+                            {errors.password ? <ErrorMessage className="mt-2">{errors.password}</ErrorMessage> : null}
+                            <p className="mt-2 text-xs text-gray-500">
                                 Password must be between 6 and 50 characters
                             </p>
                         </Field>
 
                         <Field>
-                            <Label className="text-sm/6 text-gray-900 font-medium">Confirm Password</Label>
+                            <Label className="text-sm font-medium text-gray-900 mb-2 block">Confirm Password</Label>
                             <Input
                                 type="password"
                                 placeholder="Confirm password"
@@ -407,8 +412,9 @@ const UserModal = ({
                                     }
                                 }}
                                 invalid={Boolean(errors.confirmPassword)}
+                                className="w-full"
                             />
-                            {errors.confirmPassword ? <ErrorMessage>{errors.confirmPassword}</ErrorMessage> : null}
+                            {errors.confirmPassword ? <ErrorMessage className="mt-2">{errors.confirmPassword}</ErrorMessage> : null}
                         </Field>
                     </div>
 

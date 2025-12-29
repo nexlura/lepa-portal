@@ -5,9 +5,17 @@ import {
     BookOpenIcon,
     UsersIcon,
     ChartBarIcon,
+    BuildingOffice2Icon,
+    ShieldCheckIcon,
 } from '@heroicons/react/24/outline';
 
 interface SystemAdminAnalytics {
+    totalAgencies?: number;
+    totalActiveAgencies?: number;
+    totalSuspendedAgencies?: number;
+    totalInactiveAgencies?: number;
+    totalManagedSchools?: number;
+    totalMinistryOffices?: number;
     totalTenants?: number;
     activeTenants?: number;
     totalSystemUsers?: number;
@@ -28,18 +36,39 @@ const SystemAdminStats = ({ analytics }: SystemAdminStatsProps) => {
 
     const stats = [
         {
+            name: 'Total Agencies',
+            value: formatNumber(analytics.totalAgencies || 0),
+            description: 'Total number of agencies',
+            icon: BuildingOffice2Icon,
+            iconColor: 'text-emerald-400',
+        },
+        {
+            name: 'Active Agencies',
+            value: formatNumber(analytics.totalActiveAgencies || 0),
+            description: 'Agencies currently active',
+            icon: BuildingOffice2Icon,
+            iconColor: 'text-green-400',
+        },
+        {
+            name: 'Managed Schools',
+            value: formatNumber(analytics.totalManagedSchools || 0),
+            description: 'Schools managed by agencies',
+            icon: BuildingOfficeIcon,
+            iconColor: 'text-blue-400',
+        },
+        {
             name: 'Total Tenants',
             value: formatNumber(analytics.totalTenants || 0),
             description: 'Total number of school tenants',
             icon: BuildingOfficeIcon,
-            iconColor: 'text-blue-400',
+            iconColor: 'text-indigo-400',
         },
         {
             name: 'Active Tenants',
             value: formatNumber(analytics.activeTenants || 0),
             description: 'Tenants currently active',
             icon: BuildingOfficeIcon,
-            iconColor: 'text-green-400',
+            iconColor: 'text-cyan-400',
         },
         {
             name: 'System Users',
@@ -53,7 +82,7 @@ const SystemAdminStats = ({ analytics }: SystemAdminStatsProps) => {
             value: formatNumber(analytics.totalStudentsAcrossTenants || 0),
             description: 'Students across all tenants',
             icon: UserGroupIcon,
-            iconColor: 'text-indigo-400',
+            iconColor: 'text-pink-400',
         },
         {
             name: 'Total Teachers',
@@ -74,7 +103,7 @@ const SystemAdminStats = ({ analytics }: SystemAdminStatsProps) => {
             value: formatNumber(analytics.totalSubjectsAcrossTenants || 0),
             description: 'Unique subjects across all tenants',
             icon: ChartBarIcon,
-            iconColor: 'text-pink-400',
+            iconColor: 'text-rose-400',
         },
     ];
 

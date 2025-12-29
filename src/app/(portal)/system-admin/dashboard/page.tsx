@@ -1,46 +1,76 @@
 import SystemAdminStats from '@/components/SystemAdmin/SystemAdminStats';
 import TenantsOverview from '@/components/SystemAdmin/TenantsOverview';
+import TenantDetailsModal from '@/components/SystemAdmin/TenantDetailsModal';
 import { BuildingOfficeIcon, UsersIcon, ShieldCheckIcon, BuildingOffice2Icon } from '@heroicons/react/24/outline';
+import { getModel, isErrorResponse } from '@/lib/connector';
+import DashboardTenantsOverview from '@/components/SystemAdmin/DashboardTenantsOverview';
+
+type BackendAnalyticsData = {
+    total_agencies?: number;
+    total_active_agencies?: number;
+    total_suspended_agencies?: number;
+    total_inactive_agencies?: number;
+    total_managed_schools?: number;
+    total_ministry_offices?: number;
+    total_tenants?: number;
+    active_tenants?: number;
+    system_users?: number;
+    total_students?: number;
+    total_teachers?: number;
+    total_classes?: number;
+    total_subjects?: number;
+    tenant_overview?: Array<{
+        tenant_id: string;
+        school_name: string;
+        student_count: number;
+        teacher_count: number;
+        class_count: number;
+        status: string;
+    }>;
+};
+
+type AnalyticsApiResponse = {
+    success?: boolean;
+    code?: number;
+    data?: BackendAnalyticsData;
+    message?: string;
+};
 
 export default async function SystemAdminDashboard() {
-    // TODO: Replace with API data once endpoint is ready
-    // Dummy data for system admin analytics
-    const analyticsData = {
-        total_tenants: 12,
-        active_tenants: 10,
-        total_system_users: 8,
-        total_students_across_tenants: 3450,
-        total_teachers_across_tenants: 280,
-        total_classes_across_tenants: 195,
-        total_subjects_across_tenants: 45,
-        tenants_with_most_students: [
-            {
-                tenant_id: '1',
-                tenant_name: 'Springfield High School',
-                student_count: 450,
-            },
-            {
-                tenant_id: '2',
-                tenant_name: 'Riverside Academy',
-                student_count: 320,
-            },
-            {
-                tenant_id: '3',
-                tenant_name: 'Central Elementary',
-                student_count: 285,
-            },
-            {
-                tenant_id: '4',
-                tenant_name: 'Westside Middle School',
-                student_count: 240,
-            },
-            {
-                tenant_id: '5',
-                tenant_name: 'North High School',
-                student_count: 215,
-            },
-        ],
+    // Default/fallback data
+    const defaultAnalytics: BackendAnalyticsData = {
+        total_agencies: 0,
+        total_active_agencies: 0,
+        total_suspended_agencies: 0,
+        total_inactive_agencies: 0,
+        total_managed_schools: 0,
+        total_ministry_offices: 0,
+        total_tenants: 0,
+        active_tenants: 0,
+        system_users: 0,
+        total_students: 0,
+        total_teachers: 0,
+        total_classes: 0,
+        total_subjects: 0,
+        tenant_overview: [],
     };
+
+    let analyticsData = defaultAnalytics;
+
+    try {
+        const res = await getModel<AnalyticsApiResponse>('/analytics/system').catch(() => {
+            // Silently handle errors - don't log to avoid console noise
+            return null;
+        });
+
+        if (res && !isErrorResponse(res) && res.data) {
+            analyticsData = res.data;
+        }
+    } catch {
+        // Handle all errors gracefully without throwing
+        // Use default data on error - page will show with default values
+        // Don't log errors to avoid console noise and Next.js fetchData errors
+    }
 
     return (
         <div className="space-y-6">
@@ -55,26 +85,32 @@ export default async function SystemAdminDashboard() {
             {/* Stats */}
             <SystemAdminStats 
                 analytics={{
+                    totalAgencies: analyticsData.total_agencies,
+                    totalActiveAgencies: analyticsData.total_active_agencies,
+                    totalSuspendedAgencies: analyticsData.total_suspended_agencies,
+                    totalInactiveAgencies: analyticsData.total_inactive_agencies,
+                    totalManagedSchools: analyticsData.total_managed_schools,
+                    totalMinistryOffices: analyticsData.total_ministry_offices,
                     totalTenants: analyticsData.total_tenants,
                     activeTenants: analyticsData.active_tenants,
-                    totalSystemUsers: analyticsData.total_system_users,
-                    totalStudentsAcrossTenants: analyticsData.total_students_across_tenants,
-                    totalTeachersAcrossTenants: analyticsData.total_teachers_across_tenants,
-                    totalClassesAcrossTenants: analyticsData.total_classes_across_tenants,
-                    totalSubjectsAcrossTenants: analyticsData.total_subjects_across_tenants,
+                    totalSystemUsers: analyticsData.system_users,
+                    totalStudentsAcrossTenants: analyticsData.total_students,
+                    totalTeachersAcrossTenants: analyticsData.total_teachers,
+                    totalClassesAcrossTenants: analyticsData.total_classes,
+                    totalSubjectsAcrossTenants: analyticsData.total_subjects,
                 }}
             />
 
             {/* Tenants Overview */}
-            <TenantsOverview tenants={analyticsData.tenants_with_most_students?.map(t => ({
-                id: t.tenant_id,
-                name: t.tenant_name,
-                status: 'active' as const,
-                studentCount: t.student_count,
-                teacherCount: Math.floor(t.student_count / 12), // Approximate
-                classCount: Math.floor(t.student_count / 18), // Approximate
-                createdAt: '2024-01-15',
-            }))} />
+            <DashboardTenantsOverview tenants={analyticsData.tenant_overview?.map(t => ({
+                id: t.tenant_id || '',
+                name: t.school_name || '',
+                status: (t.status === 'active' ? 'active' : 'inactive') as 'active' | 'inactive',
+                studentCount: t.student_count || 0,
+                teacherCount: t.teacher_count || 0,
+                classCount: t.class_count || 0,
+                createdAt: new Date().toISOString(),
+            })).filter(t => t.id && t.name) || []} />
 
             {/* Quick Actions */}
             <div className="bg-white shadow rounded-lg p-6">

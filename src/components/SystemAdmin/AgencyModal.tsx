@@ -267,41 +267,43 @@ const AgencyModal = ({
                 }
             </DialogDescription>
             <DialogBody>
-                <div className="mt-4 space-y-4">
+                <div className="mt-4 space-y-6">
                     {/* Row 1: Domain and Name */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <Field>
-                            <Label className="text-sm/6 text-gray-900 font-medium">Domain</Label>
+                            <Label className="text-sm font-medium text-gray-900 mb-2 block break-words">Domain</Label>
                             <Input
                                 type="text"
                                 placeholder="e.g., example.com"
                                 value={form.domain}
                                 onChange={(e) => setForm((f) => ({ ...f, domain: e.target.value }))}
                                 invalid={Boolean(errors.domain)}
+                                className="w-full min-w-0"
                             />
-                            {errors.domain ? <ErrorMessage>{errors.domain}</ErrorMessage> : null}
+                            {errors.domain ? <ErrorMessage className="mt-2">{errors.domain}</ErrorMessage> : null}
                             {isEditMode && (
-                                <p className="mt-1 text-xs text-gray-500">
+                                <p className="mt-2 text-xs text-gray-500">
                                     Leave empty to keep current domain unchanged
                                 </p>
                             )}
                         </Field>
 
                         <Field>
-                            <Label className="text-sm/6 text-gray-900 font-medium">Name</Label>
+                            <Label className="text-sm font-medium text-gray-900 mb-2 block break-words">Name</Label>
                             <Input
                                 type="text"
                                 placeholder="e.g., Ministry of Education"
                                 value={form.name}
                                 onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
                                 invalid={Boolean(errors.name)}
+                                className="w-full min-w-0"
                             />
-                            {errors.name ? <ErrorMessage>{errors.name}</ErrorMessage> : null}
+                            {errors.name ? <ErrorMessage className="mt-2">{errors.name}</ErrorMessage> : null}
                         </Field>
                     </div>
 
                     {/* Row 2: Type and Status */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <Field>
                             <Select
                                 label="Type"

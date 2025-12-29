@@ -15,15 +15,23 @@ interface TenantData {
 
 interface TenantsOverviewProps {
     tenants?: TenantData[];
+    onTenantClick?: (tenantId: string) => void;
 }
 
-const TenantsOverview = ({ tenants = [] }: TenantsOverviewProps) => {
+const TenantsOverview = ({ tenants = [], onTenantClick }: TenantsOverviewProps) => {
     const [displayLimit, setDisplayLimit] = useState(5);
 
     // Use provided tenants or empty array
     const mockTenants: TenantData[] = tenants.length > 0 ? tenants : [];
 
     const displayedTenants = mockTenants.slice(0, displayLimit);
+
+    const handleTenantClick = (e: React.MouseEvent, tenantId: string) => {
+        e.preventDefault();
+        if (onTenantClick) {
+            onTenantClick(tenantId);
+        }
+    };
 
     return (
         <div className="bg-white shadow rounded-lg p-6">
@@ -43,10 +51,10 @@ const TenantsOverview = ({ tenants = [] }: TenantsOverviewProps) => {
             <div className="space-y-3">
                 {displayedTenants.length > 0 ? (
                     displayedTenants.map((tenant) => (
-                        <a
+                        <button
                             key={tenant.id}
-                            href={`/system-admin/tenants/${tenant.id}`}
-                            className="block p-4 border border-gray-200 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-all duration-200 group"
+                            onClick={(e) => handleTenantClick(e, tenant.id)}
+                            className="w-full text-left block p-4 border border-gray-200 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-all duration-200 group cursor-pointer"
                         >
                             <div className="flex items-center space-x-4">
                                 <div className="flex-shrink-0">
@@ -88,7 +96,7 @@ const TenantsOverview = ({ tenants = [] }: TenantsOverviewProps) => {
                                     </div>
                                 </div>
                             </div>
-                        </a>
+                        </button>
                     ))
                 ) : (
                     <div className="text-center py-12 text-gray-500">

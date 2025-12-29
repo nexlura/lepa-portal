@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -52,22 +52,31 @@ const SidebarNavigation: React.FC<{ collapsed?: boolean }> = ({ collapsed }) => 
         const fetchSession = async () => {
             try {
                 const response = await fetch('/api/auth/session');
+                if (!response.ok) {
+                    setIsLoading(false);
+                    return;
+                }
                 const session = await response.json();
                 if (session?.user?.role) {
                     setUserRole(session.user.role);
                 }
             } catch (error) {
-                console.warn('Error fetching session:', error);
+                // Silently handle errors
             } finally {
                 setIsLoading(false);
             }
         };
         fetchSession();
-    }, []);
+    }, []); // Only fetch once on mount
 
-    // Determine which navigation to show
-    const isSystemAdmin = userRole?.toLowerCase().includes('system') || pathname.startsWith('/system-admin');
-    const navigation = isSystemAdmin ? systemAdminNavigation : tenantNavigation;
+    // Determine which navigation to show - memoize to prevent unnecessary re-renders
+    const isSystemAdmin = useMemo(() => {
+        return userRole?.toLowerCase().includes('system') || pathname.startsWith('/system-admin');
+    }, [userRole, pathname]);
+    
+    const navigation = useMemo(() => {
+        return isSystemAdmin ? systemAdminNavigation : tenantNavigation;
+    }, [isSystemAdmin]);
 
     const toggleExpanded = (itemName: string) => {
         setExpandedItems(prev =>
@@ -81,17 +90,22 @@ const SidebarNavigation: React.FC<{ collapsed?: boolean }> = ({ collapsed }) => 
     useEffect(() => {
         if (isLoading) return;
         
-        const activeParents = navigation
+        const currentNavigation = isSystemAdmin ? systemAdminNavigation : tenantNavigation;
+        const activeParents = currentNavigation
             .filter(item =>
                 item.subItems?.some(subItem => pathname.startsWith(subItem.href))
             )
             .map(item => item.name);
 
         setExpandedItems(activeParents);
-    }, [pathname, isLoading, userRole]);
+    }, [pathname, isLoading, isSystemAdmin]);
 
     const isItemActive = (item: NavigationItem) => {
         if (item.href) {
+            // For exact match on dashboard, use === instead of startsWith
+            if (item.href === '/system-admin/dashboard' || item.href === '/dashboard') {
+                return pathname === item.href;
+            }
             return pathname.startsWith(item.href);
         }
         if (item.subItems) {
