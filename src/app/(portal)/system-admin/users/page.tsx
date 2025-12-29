@@ -32,7 +32,7 @@ export type SystemUser = {
     id: string;
     name: string;
     email: string;
-    role: string;
+    userType: string;
     status: 'active' | 'inactive';
     createdAt: string;
 };
@@ -91,10 +91,19 @@ const SystemUsersPage = async ({ searchParams }: PageProps) => {
             ? `${user.first_name} ${user.last_name}`
                     : (user.email || '').split('@')[0] || 'Unknown';
 
-                // Determine role to display: use first role from roles array, or user_type as fallback
-                const displayRole = user.roles && user.roles.length > 0 
-                    ? user.roles[0] 
-                    : (user.user_type === 'system' ? 'System User' : 'Tenant User');
+                // Format user_type for display
+                const formatUserType = (type: string) => {
+                    switch (type) {
+                        case 'system':
+                            return 'System User';
+                        case 'tenant':
+                            return 'Tenant User';
+                        case 'agency':
+                            return 'Agency User';
+                        default:
+                            return type.charAt(0).toUpperCase() + type.slice(1) + ' User';
+                    }
+                };
 
                 // Convert is_active boolean to status string
                 const isActive = user.is_active !== undefined ? user.is_active : true;
@@ -103,7 +112,7 @@ const SystemUsersPage = async ({ searchParams }: PageProps) => {
             id: user.id,
             name: fullName,
                     email: user.email || '',
-                    role: displayRole,
+                    userType: formatUserType(user.user_type || 'system'),
                     status: isActive ? 'active' : 'inactive' as 'active' | 'inactive',
                     createdAt: user.created_at || new Date().toISOString(),
         };

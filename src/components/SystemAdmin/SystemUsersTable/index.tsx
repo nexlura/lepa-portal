@@ -14,20 +14,20 @@ interface SystemUsersTableProps {
 
 const SystemUsersTable = ({ users, totalPages }: SystemUsersTableProps) => {
     const [search, setSearch] = useState('');
-    const [roleFilter, setRoleFilter] = useState<string>('All');
+    const [userTypeFilter, setUserTypeFilter] = useState<string>('All');
     const [statusFilter, setStatusFilter] = useState<string>('All');
 
-    // Get unique roles for filter (filter out undefined/null roles)
-    const roles = Array.from(new Set(users.map(u => u.role).filter((role): role is string => Boolean(role))));
+    // Get unique user types for filter (filter out undefined/null user types)
+    const userTypes = Array.from(new Set(users.map(u => u.userType).filter((userType): userType is string => Boolean(userType))));
 
     // Filter users
     const filteredUsers = users.filter((user) => {
         const matchesSearch = 
             (user.name || '').toLowerCase().includes(search.toLowerCase()) ||
             (user.email || '').toLowerCase().includes(search.toLowerCase());
-        const matchesRole = roleFilter === 'All' || (user.role || '') === roleFilter;
+        const matchesUserType = userTypeFilter === 'All' || (user.userType || '') === userTypeFilter;
         const matchesStatus = statusFilter === 'All' || (user.status || '') === statusFilter.toLowerCase();
-        return matchesSearch && matchesRole && matchesStatus;
+        return matchesSearch && matchesUserType && matchesStatus;
     });
 
     return (
@@ -37,11 +37,11 @@ const SystemUsersTable = ({ users, totalPages }: SystemUsersTableProps) => {
                 <TableControls
                     search={search}
                     setSearch={setSearch}
-                    roleFilter={roleFilter}
-                    setRoleFilter={setRoleFilter}
+                    userTypeFilter={userTypeFilter}
+                    setUserTypeFilter={setUserTypeFilter}
                     statusFilter={statusFilter}
                     setStatusFilter={setStatusFilter}
-                    roles={roles}
+                    userTypes={userTypes}
                     users={users}
                 />
                 <div className="overflow-x-auto">

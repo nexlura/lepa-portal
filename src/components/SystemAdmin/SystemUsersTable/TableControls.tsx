@@ -8,22 +8,22 @@ import { SystemUser } from '@/app/(portal)/system-admin/users/page';
 interface TableControlsProps {
     search: string;
     setSearch: (value: string) => void;
-    roleFilter: string;
-    setRoleFilter: (value: string) => void;
+    userTypeFilter: string;
+    setUserTypeFilter: (value: string) => void;
     statusFilter: string;
     setStatusFilter: (value: string) => void;
-    roles: string[];
+    userTypes: string[];
     users: SystemUser[];
 }
 
 const TableControls = ({ 
     search, 
     setSearch, 
-    roleFilter, 
-    setRoleFilter,
+    userTypeFilter, 
+    setUserTypeFilter,
     statusFilter,
     setStatusFilter,
-    roles,
+    userTypes,
     users
 }: TableControlsProps) => {
     // Calculate counts for each status
@@ -31,24 +31,20 @@ const TableControls = ({
     const activeCount = users.filter(u => u.status === 'active').length;
     const inactiveCount = users.filter(u => u.status === 'inactive').length;
 
-    // Calculate counts for each role
-    const allRoleCount = users.length;
-    const roleCounts = roles.reduce((acc, role) => {
-        acc[role] = users.filter(u => u.role === role).length;
+    // Calculate counts for each user type
+    const allUserTypeCount = users.length;
+    const userTypeCounts = userTypes.reduce((acc, userType) => {
+        acc[userType] = users.filter(u => u.userType === userType).length;
         return acc;
     }, {} as Record<string, number>);
 
-    // Get role icons
-    const getRoleIcon = (role: string) => {
-        if (!role) return null;
-        const roleLower = role.toLowerCase();
-        if (roleLower.includes('system') && roleLower.includes('administrator')) return ShieldCheckIcon;
-        if (roleLower.includes('tenant') && roleLower.includes('administrator')) return BuildingOfficeIcon;
-        if (roleLower.includes('support')) return UserGroupIcon;
-        if (roleLower.includes('government') || roleLower.includes('monitor') || roleLower.includes('auditor')) {
-            return AcademicCapIcon;
-        }
-        if (roleLower === 'tenant user') return UserGroupIcon;
+    // Get user type icons
+    const getUserTypeIcon = (userType: string) => {
+        if (!userType) return null;
+        const userTypeLower = userType.toLowerCase();
+        if (userTypeLower.includes('system')) return ShieldCheckIcon;
+        if (userTypeLower.includes('tenant')) return BuildingOfficeIcon;
+        if (userTypeLower.includes('agency')) return UserGroupIcon;
         return null;
     };
 
@@ -139,47 +135,47 @@ const TableControls = ({
                 </div>
             </Field>
 
-            {/* Role Filter - Modern Button Group */}
+            {/* User Type Filter - Modern Button Group */}
             <Field>
-                <Label>Filter by Role</Label>
+                <Label>Filter by User Type</Label>
                 <div className="flex flex-wrap gap-2 mt-3">
                     <button
                         type="button"
-                        onClick={() => setRoleFilter('All')}
+                        onClick={() => setUserTypeFilter('All')}
                         className={`
                             inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg
                             transition-all duration-200
                             ${
-                                roleFilter === 'All'
+                                userTypeFilter === 'All'
                                     ? 'bg-primary-100 text-primary-800 border-2 border-primary-300 shadow-sm'
                                     : 'bg-white text-gray-700 border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                             }
                         `}
                     >
-                        <span>All Roles</span>
+                        <span>All User Types</span>
                         <span
                             className={`
                                 ml-1 px-2 py-0.5 text-xs font-semibold rounded-full
                                 ${
-                                    roleFilter === 'All'
+                                    userTypeFilter === 'All'
                                         ? 'bg-primary-200 text-primary-900'
                                         : 'bg-gray-100 text-gray-600'
                                 }
                             `}
                         >
-                            {allRoleCount}
+                            {allUserTypeCount}
                         </span>
                     </button>
-                    {roles.map((role) => {
-                        const Icon = getRoleIcon(role);
-                        const isActive = roleFilter === role;
-                        const count = roleCounts[role] || 0;
+                    {userTypes.map((userType) => {
+                        const Icon = getUserTypeIcon(userType);
+                        const isActive = userTypeFilter === userType;
+                        const count = userTypeCounts[userType] || 0;
                         
                         return (
                             <button
-                                key={role}
+                                key={userType}
                                 type="button"
-                                onClick={() => setRoleFilter(role)}
+                                onClick={() => setUserTypeFilter(userType)}
                                 className={`
                                     inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg
                                     transition-all duration-200
@@ -197,7 +193,7 @@ const TableControls = ({
                                         }`}
                                     />
                                 )}
-                                <span className="max-w-[150px] truncate" title={role}>{role}</span>
+                                <span className="max-w-[150px] truncate" title={userType}>{userType}</span>
                                 <span
                                     className={`
                                         ml-1 px-2 py-0.5 text-xs font-semibold rounded-full

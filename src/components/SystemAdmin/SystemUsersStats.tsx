@@ -4,7 +4,6 @@ import {
     XCircleIcon,
     ShieldCheckIcon,
     UserGroupIcon,
-    AcademicCapIcon,
     BuildingOfficeIcon,
 } from '@heroicons/react/24/outline';
 import { SystemUser } from '@/app/(portal)/system-admin/users/page';
@@ -23,21 +22,15 @@ const SystemUsersStats = ({ users }: SystemUsersStatsProps) => {
     const activeUsers = users.filter(u => u.status === 'active').length;
     const inactiveUsers = users.filter(u => u.status === 'inactive').length;
     
-    // Count by role
-    const systemAdmins = users.filter(u => 
-        u.role.toLowerCase().includes('system') && u.role.toLowerCase().includes('administrator')
-    ).length;
-    const systemSupport = users.filter(u => u.role.toLowerCase().includes('system support')).length;
-    const governmentUsers = users.filter(u => 
-        u.role.toLowerCase().includes('government') || 
-        u.role.toLowerCase().includes('monitor') ||
-        u.role.toLowerCase().includes('auditor')
-    ).length;
-    const tenantAdmins = users.filter(u => 
-        u.role.toLowerCase().includes('tenant') && u.role.toLowerCase().includes('administrator')
+    // Count by user type
+    const systemUsers = users.filter(u => 
+        u.userType.toLowerCase().includes('system')
     ).length;
     const tenantUsers = users.filter(u => 
-        u.role.toLowerCase() === 'tenant user'
+        u.userType.toLowerCase().includes('tenant')
+    ).length;
+    const agencyUsers = users.filter(u => 
+        u.userType.toLowerCase().includes('agency')
     ).length;
 
     const stats = [
@@ -63,39 +56,25 @@ const SystemUsersStats = ({ users }: SystemUsersStatsProps) => {
             iconColor: 'text-gray-400',
         },
         {
-            name: 'System Administrators',
-            value: formatNumber(systemAdmins),
-            description: 'Users with admin privileges',
+            name: 'System Users',
+            value: formatNumber(systemUsers),
+            description: 'System-level users',
             icon: ShieldCheckIcon,
             iconColor: 'text-purple-400',
         },
         {
-            name: 'System Support',
-            value: formatNumber(systemSupport),
-            description: 'Support staff users',
-            icon: UserGroupIcon,
-            iconColor: 'text-orange-400',
-        },
-        {
-            name: 'Government Users',
-            value: formatNumber(governmentUsers),
-            description: 'Government officials and monitors',
-            icon: AcademicCapIcon,
-            iconColor: 'text-indigo-400',
-        },
-        {
-            name: 'Tenant Administrators',
-            value: formatNumber(tenantAdmins),
-            description: 'School administrators',
+            name: 'Tenant Users',
+            value: formatNumber(tenantUsers),
+            description: 'Tenant-level users',
             icon: BuildingOfficeIcon,
             iconColor: 'text-teal-400',
         },
         {
-            name: 'Tenant Users',
-            value: formatNumber(tenantUsers),
-            description: 'School-level users',
+            name: 'Agency Users',
+            value: formatNumber(agencyUsers),
+            description: 'Agency-level users',
             icon: UserGroupIcon,
-            iconColor: 'text-pink-400',
+            iconColor: 'text-orange-400',
         },
     ];
 

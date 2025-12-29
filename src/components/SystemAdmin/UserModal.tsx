@@ -13,7 +13,7 @@ import { FeedbackContext } from '@/context/feedback';
 import { postModel, getModel, isErrorResponse } from '@/lib/connector';
 
 export type UserFormData = {
-    userType: 'agency' | 'system' | 'tenant' | 'support';
+    userType: 'agency' | 'system' | 'tenant';
     tenantId: string;
     agencyId: string;
     phone: string;
@@ -234,9 +234,9 @@ const UserModal = ({
 
     // Check if form is valid for submission
     const isFormValid = () => {
+        // Email is optional, so don't require it
         const baseValid = form.phone.trim() !== '' &&
             form.password.trim() !== '' &&
-            form.email.trim() !== '' &&
             confirmPassword.trim() !== '' &&
             form.password === confirmPassword;
         
@@ -254,11 +254,9 @@ const UserModal = ({
     const validate = () => {
         const next: Partial<Record<keyof UserFormData | 'confirmPassword', string>> = {};
         
-        // Email validation
+        // Email validation (optional but must be valid if provided)
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!form.email.trim()) {
-            next.email = 'Email is required';
-        } else if (!emailRegex.test(form.email.trim())) {
+        if (form.email.trim() && !emailRegex.test(form.email.trim())) {
             next.email = 'Enter a valid email address';
         }
         
@@ -313,34 +311,48 @@ const UserModal = ({
         setIsLoading(true);
 
         try {
-            // Prepare request data
+            // Prepare request data matching backend structure
             const requestData: {
                 user_type: string;
-                tenant_id?: string;
-                agency_id?: string;
+                tenant_id?: string | null;
+                agency_id?: string | null;
                 phone: string;
                 password: string;
-                email: string;
+                email?: string;
                 first_name?: string;
                 last_name?: string;
             } = {
                 user_type: form.userType,
                 phone: form.phone.trim(),
                 password: form.password,
-                email: form.email.trim(),
             };
 
-            // Include tenant_id if user type is 'tenant'
-            if (form.userType === 'tenant' && form.tenantId) {
-                requestData.tenant_id = form.tenantId;
+            // Include email only if provided
+            if (form.email.trim()) {
+                requestData.email = form.email.trim();
             }
 
-            // Include agency_id if user type is 'agency'
-            if (form.userType === 'agency' && form.agencyId) {
-                requestData.agency_id = form.agencyId;
+            // Include tenant_id if user type is 'tenant' (required for tenant users)
+            if (form.userType === 'tenant') {
+                if (form.tenantId) {
+                    requestData.tenant_id = form.tenantId;
+                } else {
+                    // This should be caught by validation, but set to null if somehow missing
+                    requestData.tenant_id = null;
+                }
             }
 
-            // Only include first_name and last_name if provided
+            // Include agency_id if user type is 'agency' (required for agency users)
+            if (form.userType === 'agency') {
+                if (form.agencyId) {
+                    requestData.agency_id = form.agencyId;
+                } else {
+                    // This should be caught by validation, but set to null if somehow missing
+                    requestData.agency_id = null;
+                }
+            }
+
+            // Include first_name and last_name only if provided
             if (form.firstName.trim()) {
                 requestData.first_name = form.firstName.trim();
             }
@@ -432,7 +444,7 @@ const UserModal = ({
                             label="User Type"
                             value={form.userType}
                             onChange={(value) => {
-                                const newUserType = value as 'agency' | 'system' | 'tenant' | 'support';
+                                const newUserType = value as 'agency' | 'system' | 'tenant';
                                 setForm((f) => ({ 
                                     ...f, 
                                     userType: newUserType,
@@ -443,7 +455,6 @@ const UserModal = ({
                             }}
                             options={[
                                 { id: 'system', name: 'System User' },
-                                { id: 'support', name: 'Support User' },
                                 { id: 'agency', name: 'Agency User' },
                                 { id: 'tenant', name: 'Tenant User' },
                             ]}
@@ -456,7 +467,9 @@ const UserModal = ({
                     {/* Row 2: Email and Phone */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <Field>
-                            <Label className="text-sm font-medium text-gray-900 mb-2 block break-words">Email</Label>
+                            <Label className="text-sm font-medium text-gray-900 mb-2 block break-words">
+                                Email <span className="text-gray-400 font-normal">(Optional)</span>
+                            </Label>
                             <Input
                                 type="email"
                                 placeholder="e.g., user@example.com"
