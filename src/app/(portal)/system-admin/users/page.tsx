@@ -83,7 +83,7 @@ const SystemUsersPage = async ({ searchParams }: PageProps) => {
         // Check if response has data
         if (res.data && res.data.users && Array.isArray(res.data.users)) {
             const backendUsers = res.data.users;
-            totalPages = typeof res.data.total_pages === 'number' ? res.data.total_pages : 1;
+            totalPages = typeof res.data.total_pages === 'number' && res.data.total_pages > 0 ? res.data.total_pages : 1;
             
             // Transform backend data to frontend format
             users = backendUsers.map((user: BackendSystemUserData) => {

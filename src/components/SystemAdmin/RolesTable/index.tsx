@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Role } from '@/app/(portal)/system-admin/roles/page';
+import type { Role } from '@/types/role';
 import RolesTableHead from './TableHead';
 import RolesTableBody from './TableBody';
 import TableFoot from '@/components/TableFoot';
@@ -10,9 +10,10 @@ import TableControls from './TableControls';
 interface RolesTableProps {
     roles: Role[];
     totalPages: number;
+    onEdit?: (role: Role) => void;
 }
 
-const RolesTable = ({ roles, totalPages }: RolesTableProps) => {
+const RolesTable = ({ roles, totalPages, onEdit }: RolesTableProps) => {
     const [search, setSearch] = useState('');
 
     // Filter roles based on search
@@ -32,7 +33,7 @@ const RolesTable = ({ roles, totalPages }: RolesTableProps) => {
                 <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
                         <RolesTableHead />
-                        <RolesTableBody roles={filteredRoles} />
+                        <RolesTableBody roles={filteredRoles} onEdit={onEdit} />
                         {totalPages > 1 && (
                             <TableFoot totalPages={totalPages} />
                         )}

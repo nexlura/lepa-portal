@@ -21,6 +21,7 @@ export type UserFormData = {
     email: string;
     firstName: string;
     lastName: string;
+    roleIds: string[];
 }
 
 type BackendTenantData = {
@@ -84,15 +85,18 @@ const UserModal = ({
         email: '',
         firstName: '',
         lastName: '',
+        roleIds: [],
     });
 
     const [tenants, setTenants] = useState<SearchableSelectOption[]>([]);
     const [agencies, setAgencies] = useState<SearchableSelectOption[]>([]);
+    const [roles, setRoles] = useState<SearchableSelectOption[]>([]);
     const [confirmPassword, setConfirmPassword] = useState('');
     const [errors, setErrors] = useState<Partial<Record<keyof UserFormData | 'confirmPassword', string>>>({});
     const [isLoading, setIsLoading] = useState(false);
     const [isLoadingTenants, setIsLoadingTenants] = useState(false);
     const [isLoadingAgencies, setIsLoadingAgencies] = useState(false);
+    const [isLoadingRoles, setIsLoadingRoles] = useState(false);
 
     // Fetch tenants for dropdown when user type is 'tenant'
     useEffect(() => {
@@ -100,7 +104,7 @@ const UserModal = ({
             setIsLoadingTenants(true);
             getModel<TenantsApiResponse>('/tenants?limit=100')
                 .then((res) => {
-                    console.log('Tenants API response:', res);
+                    // Removed console.log to prevent fetchData errors
                     if (res && !isErrorResponse(res)) {
                         // Handle different response structures
                         let tenantsData: BackendTenantData[] = [];
@@ -121,19 +125,19 @@ const UserModal = ({
                                 id: tenant.id,
                                 name: tenant.school_name || 'Unnamed Tenant',
                             }));
-                            console.log('Transformed tenants:', transformedTenants);
+                            // Removed console.log to prevent fetchData errors
                             setTenants(transformedTenants);
                         } else {
-                            console.warn('No tenants found in response');
+                            // Removed console.warn to prevent fetchData errors
                             setTenants([]);
                         }
                     } else if (isErrorResponse(res)) {
-                        console.error('Error fetching tenants:', res);
+                        // Removed console.error to prevent fetchData errors
                         setTenants([]);
                     }
                 })
                 .catch((error) => {
-                    console.error('Exception fetching tenants:', error);
+                    // Removed console.error to prevent fetchData errors
                     setTenants([]);
                 })
                 .finally(() => {
@@ -150,7 +154,7 @@ const UserModal = ({
             setIsLoadingAgencies(true);
             getModel<AgenciesApiResponse>('/agencies?limit=100')
                 .then((res) => {
-                    console.log('Agencies API response:', res);
+                    // Removed console.log to prevent fetchData errors
                     if (res && !isErrorResponse(res)) {
                         // Handle different response structures
                         let agenciesData: BackendAgencyData[] = [];
@@ -176,19 +180,19 @@ const UserModal = ({
                                 id: agency.id,
                                 name: agency.name || 'Unnamed Agency',
                             }));
-                            console.log('Transformed agencies:', transformedAgencies);
+                            // Removed console.log to prevent fetchData errors
                             setAgencies(transformedAgencies);
                         } else {
-                            console.warn('No agencies found in response');
+                            // Removed console.warn to prevent fetchData errors
                             setAgencies([]);
                         }
                     } else if (isErrorResponse(res)) {
-                        console.error('Error fetching agencies:', res);
+                        // Removed console.error to prevent fetchData errors
                         setAgencies([]);
                     }
                 })
                 .catch((error) => {
-                    console.error('Exception fetching agencies:', error);
+                    // Removed console.error to prevent fetchData errors
                     setAgencies([]);
                 })
                 .finally(() => {
@@ -198,6 +202,51 @@ const UserModal = ({
             setAgencies([]);
         }
     }, [open, form.userType]);
+
+    // Fetch roles when modal opens
+    useEffect(() => {
+        if (open) {
+            fetchRoles();
+        }
+    }, [open]);
+
+    const fetchRoles = async () => {
+        setIsLoadingRoles(true);
+        try {
+            const response = await getModel<{
+                success?: boolean;
+                data?: {
+                    roles?: Array<{ id: string; title?: string; name?: string }>;
+                } | Array<{ id: string; title?: string; name?: string }>;
+                roles?: Array<{ id: string; title?: string; name?: string }>;
+            }>('/rbac/roles?limit=100').catch(() => null);
+
+            if (response && !isErrorResponse(response)) {
+                let rolesList: Array<{ id: string; title?: string; name?: string }> = [];
+                
+                if (response.data) {
+                    if (Array.isArray(response.data)) {
+                        rolesList = response.data;
+                    } else if (response.data.roles && Array.isArray(response.data.roles)) {
+                        rolesList = response.data.roles;
+                    }
+                } else if (response.roles && Array.isArray(response.roles)) {
+                    rolesList = response.roles;
+                }
+
+                setRoles(
+                    rolesList.map(role => ({
+                        id: role.id,
+                        name: role.title || role.name || 'Unnamed Role',
+                    }))
+                );
+            }
+        } catch (error: any) {
+            // Removed console.error to prevent fetchData errors
+        } finally {
+            setIsLoadingRoles(false);
+        }
+    };
 
     // Reset form when modal opens or closes
     useEffect(() => {
@@ -212,6 +261,7 @@ const UserModal = ({
                 email: '',
                 firstName: '',
                 lastName: '',
+                roleIds: [],
             });
             setConfirmPassword('');
             setErrors({});
@@ -226,6 +276,7 @@ const UserModal = ({
                 email: '',
                 firstName: '',
                 lastName: '',
+                roleIds: [],
             });
             setConfirmPassword('');
             setErrors({});
@@ -321,6 +372,7 @@ const UserModal = ({
                 email?: string;
                 first_name?: string;
                 last_name?: string;
+                role_ids?: string[];
             } = {
                 user_type: form.userType,
                 phone: form.phone.trim(),
@@ -360,9 +412,13 @@ const UserModal = ({
                 requestData.last_name = form.lastName.trim();
             }
 
-            console.log('Creating user with data:', JSON.stringify(requestData, null, 2));
+            // Include role_ids if any roles are selected
+            if (form.roleIds && form.roleIds.length > 0) {
+                requestData.role_ids = form.roleIds;
+            }
+
+            // Removed console.log to prevent fetchData errors
             const response = await postModel('/users', requestData);
-            console.log('User creation response:', JSON.stringify(response, null, 2));
 
             if (!response) {
                 setFeedback({ 
@@ -376,11 +432,7 @@ const UserModal = ({
                 // TypeScript now knows response has error: true, status: number, message: string
                 const errorMessage = response.message || 'Failed to create user';
                 const statusCode = response.status;
-                console.error('User creation error:', {
-                    status: statusCode,
-                    message: errorMessage,
-                    fullResponse: response
-                });
+                // Removed console.error to prevent fetchData errors
                 setFeedback({ 
                     status: 'error', 
                     text: statusCode ? `Error ${statusCode}: ${errorMessage}` : errorMessage
@@ -404,7 +456,7 @@ const UserModal = ({
                 }
             }
         } catch (error: any) {
-            console.error('User creation exception:', error);
+            // Removed console.error to prevent fetchData errors
             setFeedback({ 
                 status: 'error', 
                 text: error?.message || 'An unexpected error occurred. Please check the console for details.' 
@@ -425,9 +477,26 @@ const UserModal = ({
             email: '',
             firstName: '',
             lastName: '',
+            roleIds: [],
         });
         setConfirmPassword('');
         setErrors({});
+    };
+
+    const handleAddRole = (roleId: string | null) => {
+        if (roleId && !form.roleIds.includes(roleId)) {
+            setForm((f) => ({
+                ...f,
+                roleIds: [...f.roleIds, roleId],
+            }));
+        }
+    };
+
+    const handleRemoveRole = (roleId: string) => {
+        setForm((f) => ({
+            ...f,
+            roleIds: f.roleIds.filter(id => id !== roleId),
+        }));
     };
 
     return (
@@ -644,6 +713,53 @@ const UserModal = ({
                             )}
                         </Field>
                     )}
+
+                    {/* Row 7: Roles (Optional) */}
+                    <Field>
+                        <Label className="text-sm font-medium text-gray-900 mb-2 block break-words">
+                            Assign Roles <span className="text-gray-400 font-normal">(Optional)</span>
+                        </Label>
+                        <SearchableSelect
+                            value={null}
+                            onChange={handleAddRole}
+                            options={roles.filter(role => !form.roleIds.includes(role.id))}
+                            placeholder={isLoadingRoles ? "Loading roles..." : "Search and select roles to assign..."}
+                            emptyLabel="No roles available"
+                            loading={isLoadingRoles}
+                            disabled={isLoadingRoles}
+                        />
+                        {form.roleIds.length > 0 && (
+                            <div className="mt-3 space-y-2">
+                                <Label className="text-xs font-medium text-gray-700 block">
+                                    Selected Roles ({form.roleIds.length})
+                                </Label>
+                                <div className="flex flex-wrap gap-2">
+                                    {form.roleIds.map((roleId) => {
+                                        const role = roles.find(r => r.id === roleId);
+                                        if (!role) return null;
+                                        return (
+                                            <span
+                                                key={roleId}
+                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-purple-100 text-purple-800 rounded-lg"
+                                            >
+                                                {role.name}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleRemoveRole(roleId)}
+                                                    className="text-purple-600 hover:text-purple-800 focus:outline-none"
+                                                    aria-label={`Remove ${role.name}`}
+                                                >
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                    </svg>
+                                                </button>
+                                            </span>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
+                    </Field>
                 </div>
             </DialogBody>
             <DialogActions>

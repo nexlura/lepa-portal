@@ -1,129 +1,188 @@
 import RolesView from '@/components/SystemAdmin/RolesView';
+import { getModel, isErrorResponse } from '@/lib/connector';
+import type { Permission } from '@/lib/rbac';
+
+type BackendPermission = string | {
+    id?: string;
+    name?: string;
+    code?: string;
+    title?: string;
+    [key: string]: any;
+};
 
 type BackendRoleData = {
     id: string;
-    name: string;
+    title?: string;
+    name?: string;
     description?: string;
-    permissions: string[];
+    scope?: string;
+    permissions?: BackendPermission[];
     user_count?: number;
     created_at: string;
 };
 
-export type Role = {
-    id: string;
-    name: string;
-    description: string;
-    permissions: string[];
-    userCount: number;
-    createdAt: string;
+type RolesApiResponse = {
+    success?: boolean;
+    code?: number;
+    data?: {
+        limit?: number;
+        page?: number;
+        total_items?: number;
+        total_pages?: number;
+        roles?: BackendRoleData[];
+    } | BackendRoleData[];
+    message?: string;
 };
+
+import type { Role } from '@/types/role';
+
+// Re-export for backward compatibility
+export type { Role };
 
 export type PageProps = {
     params: Promise<{ pageNumber?: string }>;
     searchParams: Promise<{ page?: string }>;
 };
 
-const RolesPage = async ({ searchParams }: PageProps) => {
-    // TODO: Replace with API data once endpoint is ready
-    // Dummy data for roles
-    const dummyRoles: BackendRoleData[] = [
-        {
-            id: '1',
-            name: 'System Administrator',
-            description: 'Full system access with all permissions',
-            permissions: [
-                'manage_tenants',
-                'manage_system_users',
-                'manage_roles',
-                'view_all_analytics',
-                'manage_permissions',
-                'system_configuration',
-            ],
-            user_count: 2,
-            created_at: '2024-01-01T10:00:00Z',
-        },
-        {
-            id: '2',
-            name: 'System Support',
-            description: 'Support staff with limited administrative access',
-            permissions: [
-                'view_tenants',
-                'view_system_users',
-                'view_analytics',
-                'manage_support_tickets',
-            ],
-            user_count: 3,
-            created_at: '2024-01-05T14:30:00Z',
-        },
-        {
-            id: '3',
-            name: 'Government Monitor',
-            description: 'Government officials with read-only access to all data',
-            permissions: [
-                'view_tenants',
-                'view_analytics',
-                'view_reports',
-                'export_data',
-            ],
-            user_count: 2,
-            created_at: '2024-01-10T09:15:00Z',
-        },
-        {
-            id: '4',
-            name: 'Government Auditor',
-            description: 'Auditors with access to financial and compliance data',
-            permissions: [
-                'view_tenants',
-                'view_analytics',
-                'view_financial_data',
-                'view_compliance_reports',
-                'export_data',
-            ],
-            user_count: 1,
-            created_at: '2024-01-15T11:45:00Z',
-        },
-        {
-            id: '5',
-            name: 'Tenant Administrator',
-            description: 'School administrators managing their own tenant',
-            permissions: [
-                'manage_own_tenant',
-                'manage_students',
-                'manage_teachers',
-                'manage_classes',
-                'view_tenant_analytics',
-            ],
-            user_count: 12,
-            created_at: '2024-01-20T08:30:00Z',
-        },
-        {
-            id: '6',
-            name: 'Teacher',
-            description: 'Teachers with access to their assigned classes and students',
-            permissions: [
-                'view_assigned_classes',
-                'view_assigned_students',
-                'manage_grades',
-                'view_class_analytics',
-            ],
-            user_count: 280,
-            created_at: '2024-02-01T10:00:00Z',
-        },
-    ];
+type BackendPermissionData = {
+    id: string;
+    name?: string;
+    code?: string;
+    description?: string;
+    resource?: string;
+    action?: string;
+};
 
-    const transformedData: Role[] = dummyRoles.map((role: BackendRoleData) => {
-        return {
-            id: role.id,
-            name: role.name,
-            description: role.description || 'No description',
-            permissions: role.permissions || [],
-            userCount: role.user_count || 0,
-            createdAt: role.created_at,
-        };
-    });
+type PermissionsApiResponse = {
+    success?: boolean;
+    code?: number;
+    data?: {
+        limit?: number;
+        page?: number;
+        total_items?: number;
+        total_pages?: number;
+        permissions?: BackendPermissionData[];
+    } | BackendPermissionData[];
+    message?: string;
+};
+
+const RolesPage = async ({ searchParams }: PageProps) => {
+    let roles: Role[] = [];
+    let rolesTotalPages = 1;
+    let permissions: Permission[] = [];
+    let permissionsTotalPages = 1;
+    
+    try {
+        // Get page from searchParams
+        const resolvedSearchParams = await searchParams;
+        const currentPage = resolvedSearchParams?.page ? parseInt(resolvedSearchParams.page, 10) : 1;
+        const pageParam = currentPage > 1 ? `&page=${currentPage}` : '';
+        
+        const res = await getModel<RolesApiResponse>(`/rbac/roles?limit=10${pageParam}`).catch((error: any) => {
+            // Catch any errors from getModel, including auth/session errors
+            // Suppress JSON parse errors and ClientFetchErrors as they're handled gracefully
+            const errorMessage = error?.message || String(error || '');
+            if (errorMessage.includes('JSON.parse') || 
+                errorMessage.includes('unexpected end of data') || 
+                errorMessage.includes('ClientFetchError')) {
+                // Silently handle auth/session errors - they're expected in some contexts
+                return null;
+            }
+            // Don't log errors to avoid console noise
+            return null;
+        });
+        
+        // Check if response is null or undefined
+        if (!res) {
+            // Continue to fetch permissions even if roles fail
+        } else if (!isErrorResponse(res)) {
+            // Handle different response structures
+            let backendRoles: BackendRoleData[] = [];
+            
+            if (res.data) {
+                // Check if data is nested with roles array
+                if (Array.isArray(res.data)) {
+                    // Direct array response
+                    backendRoles = res.data;
+                } else if (res.data.roles && Array.isArray(res.data.roles)) {
+                    // Nested structure with roles array
+                    backendRoles = res.data.roles;
+                    rolesTotalPages = typeof res.data.total_pages === 'number' ? res.data.total_pages : 1;
+                }
+            }
+            
+            // Transform backend data to frontend format
+            if (backendRoles.length > 0) {
+                roles = backendRoles.map((role: BackendRoleData) => {
+                    // Handle both 'title' and 'name' fields (backend might use 'title' from creation)
+                    const roleName = role.title || role.name || 'Unnamed Role';
+                    
+                    // Transform permissions: handle both string arrays and object arrays
+                    const transformPermissions = (perms: BackendPermission[] | undefined): string[] => {
+                        if (!perms || !Array.isArray(perms)) {
+                            return [];
+                        }
+                        return perms.map((perm) => {
+                            if (typeof perm === 'string') {
+                                return perm;
+                            }
+                            // If it's an object, try to extract a string value
+                            if (typeof perm === 'object' && perm !== null) {
+                                return perm.name || perm.code || perm.title || perm.id || String(perm);
+                            }
+                            return String(perm);
+                        }).filter((p): p is string => typeof p === 'string' && p.length > 0);
+                    };
+                    
+            return {
+                id: role.id,
+                        name: roleName,
+                description: role.description || 'No description',
+                permissions: transformPermissions(role.permissions),
+                userCount: role.user_count || 0,
+                        createdAt: role.created_at || new Date().toISOString(),
+            };
+        });
+            }
+        }
+
+        // Fetch permissions
+        const permissionsRes = await getModel<PermissionsApiResponse>(`/rbac/permissions?limit=10${pageParam}`).catch(() => null);
+        
+        if (permissionsRes && !isErrorResponse(permissionsRes)) {
+            let backendPermissions: BackendPermissionData[] = [];
+            
+            if (permissionsRes.data) {
+                if (Array.isArray(permissionsRes.data)) {
+                    backendPermissions = permissionsRes.data;
+                } else if (permissionsRes.data.permissions && Array.isArray(permissionsRes.data.permissions)) {
+                    backendPermissions = permissionsRes.data.permissions;
+                    permissionsTotalPages = typeof permissionsRes.data.total_pages === 'number' ? permissionsRes.data.total_pages : 1;
+                }
+            }
+            
+            permissions = backendPermissions.map((perm: BackendPermissionData): Permission => ({
+                id: perm.id,
+                name: perm.name || perm.code || 'Unnamed Permission',
+                code: perm.code,
+                description: perm.description,
+                resource: perm.resource,
+                action: perm.action,
+            }));
+        }
+    } catch (error: any) {
+        // Handle all errors gracefully without throwing
+        // Use empty array as fallback - page will show empty state
+        // Don't log errors to avoid console noise and Next.js fetchData errors
+    }
 
     return (
-        <RolesView roles={transformedData} totalPages={1} />
+        <RolesView 
+            roles={roles || []} 
+            rolesTotalPages={rolesTotalPages || 1}
+            permissions={permissions || []}
+            permissionsTotalPages={permissionsTotalPages || 1}
+        />
     );
 };
 
