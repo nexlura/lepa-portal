@@ -37,9 +37,12 @@ export async function middleware(req: NextRequest) {
       // Redirect based on user role
       const userRole = session.user.role?.toLowerCase() || '';
       const isSystemAdmin = userRole === 'system_admin' || userRole === 'system admin' || userRole.includes('system');
+      const isAgency = userRole === 'agency' || userRole.includes('agency');
       
       if (isSystemAdmin) {
         return NextResponse.redirect(new URL('/system-admin/dashboard', req.url));
+      } else if (isAgency) {
+        return NextResponse.redirect(new URL('/agency/dashboard', req.url));
       } else {
         return NextResponse.redirect(new URL('/dashboard', req.url));
       }
@@ -60,18 +63,38 @@ export async function middleware(req: NextRequest) {
   // Role-based route protection
   const userRole = session.user.role?.toLowerCase() || '';
   const isSystemAdmin = userRole === 'system_admin' || userRole === 'system admin' || userRole.includes('system');
+  const isAgency = userRole === 'agency' || userRole.includes('agency');
   
   // Protect system-admin routes - only system admins can access
   if (pathname.startsWith('/system-admin')) {
     if (!isSystemAdmin) {
-      // Redirect non-system admins to their dashboard
+      // Redirect non-system admins to their appropriate dashboard
+      if (isAgency) {
+        return NextResponse.redirect(new URL('/agency/dashboard', req.url));
+      }
       return NextResponse.redirect(new URL('/dashboard', req.url));
     }
   }
   
-  // Redirect system admins away from tenant admin dashboard to their dashboard
-  if (isSystemAdmin && pathname === '/dashboard') {
+  // Protect agency routes - only agency users can access
+  if (pathname.startsWith('/agency')) {
+    if (!isAgency) {
+      // Redirect non-agency users to their appropriate dashboard
+      if (isSystemAdmin) {
+        return NextResponse.redirect(new URL('/system-admin/dashboard', req.url));
+      }
+      return NextResponse.redirect(new URL('/dashboard', req.url));
+    }
+  }
+  
+  // Redirect system admins away from tenant/agency dashboards to their dashboard
+  if (isSystemAdmin && (pathname === '/dashboard' || pathname.startsWith('/agency'))) {
     return NextResponse.redirect(new URL('/system-admin/dashboard', req.url));
+  }
+  
+  // Redirect agency users away from tenant/system-admin dashboards to their dashboard
+  if (isAgency && (pathname === '/dashboard' || pathname.startsWith('/system-admin'))) {
+    return NextResponse.redirect(new URL('/agency/dashboard', req.url));
   }
 
   // Call your redirect helper *inside* middleware

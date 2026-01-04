@@ -65,21 +65,27 @@ type AgenciesApiResponse = {
     };
 };
 
+interface UserModalProps {
+    open: boolean;
+    onClose: (open: boolean) => void;
+    agencyId?: string;
+    restrictToTenantUsers?: boolean; // When true, only allows creating tenant admin users
+}
+
 const UserModal = ({
     open,
     onClose,
-}: {
-    open: boolean;
-    onClose: (open: boolean) => void;
-}) => {
+    agencyId,
+    restrictToTenantUsers = false,
+}: UserModalProps) => {
     const router = useRouter();
     const { data: session } = useSession();
     const { setFeedback } = useContext(FeedbackContext);
 
     const [form, setForm] = useState<UserFormData>({
-        userType: 'system',
+        userType: restrictToTenantUsers ? 'tenant' : 'system',
         tenantId: '',
-        agencyId: '',
+        agencyId: agencyId || '',
         phone: '',
         password: '',
         email: '',
@@ -102,7 +108,9 @@ const UserModal = ({
     useEffect(() => {
         if (open && form.userType === 'tenant') {
             setIsLoadingTenants(true);
-            getModel<TenantsApiResponse>('/tenants?limit=100')
+            // Filter by agency_id if provided
+            const agencyFilter = agencyId ? `&agency_id=${agencyId}` : '';
+            getModel<TenantsApiResponse>(`/tenants?limit=100${agencyFilter}`)
                 .then((res) => {
                     // Removed console.log to prevent fetchData errors
                     if (res && !isErrorResponse(res)) {
@@ -146,7 +154,7 @@ const UserModal = ({
         } else {
             setTenants([]);
         }
-    }, [open, form.userType]);
+    }, [open, form.userType, agencyId]);
 
     // Fetch agencies for dropdown when user type is 'agency'
     useEffect(() => {
@@ -253,9 +261,9 @@ const UserModal = ({
         if (open) {
             // Reset form when modal opens to ensure clean state
             setForm({
-                userType: 'system',
+                userType: restrictToTenantUsers ? 'tenant' : 'system',
                 tenantId: '',
-                agencyId: '',
+                agencyId: agencyId || '',
                 phone: '',
                 password: '',
                 email: '',
@@ -268,9 +276,9 @@ const UserModal = ({
         } else {
             // Also reset when modal closes
             setForm({
-                userType: 'system',
+                userType: restrictToTenantUsers ? 'tenant' : 'system',
                 tenantId: '',
-                agencyId: '',
+                agencyId: agencyId || '',
                 phone: '',
                 password: '',
                 email: '',
@@ -281,7 +289,7 @@ const UserModal = ({
             setConfirmPassword('');
             setErrors({});
         }
-    }, [open]);
+    }, [open, restrictToTenantUsers, agencyId]);
 
     // Check if form is valid for submission
     const isFormValid = () => {
@@ -342,9 +350,11 @@ const UserModal = ({
             next.lastName = 'Last name must be between 2 and 50 characters if provided';
         }
         
-        // Tenant ID validation (required if user type is 'tenant')
+        // Tenant ID validation (required if user type is 'tenant' - for tenant admin users)
         if (form.userType === 'tenant' && !form.tenantId) {
-            next.tenantId = 'Tenant is required for tenant users';
+            next.tenantId = restrictToTenantUsers 
+                ? 'Please select a tenant for this tenant admin user'
+                : 'Tenant is required for tenant users';
         }
         
         // Agency ID validation (required if user type is 'agency')
@@ -503,35 +513,40 @@ const UserModal = ({
         <Dialog size="xl" open={open} onClose={handleClose} className="relative z-20">
             <DialogTitle>Create New User</DialogTitle>
             <DialogDescription>
-                Add a new user to the platform. Select the user type to determine their access level.
+                {restrictToTenantUsers 
+                    ? 'Create a tenant admin user for a tenant that belongs to your agency. Tenant admins can manage their school\'s operations.'
+                    : 'Add a new user to the platform. Select the user type to determine their access level.'
+                }
             </DialogDescription>
             <DialogBody>
                 <div className="mt-4 space-y-6">
-                    {/* Row 1: User Type */}
-                    <Field>
-                        <SearchableSelect
-                            label="User Type"
-                            value={form.userType}
-                            onChange={(value) => {
-                                const newUserType = value as 'agency' | 'system' | 'tenant';
-                                setForm((f) => ({ 
-                                    ...f, 
-                                    userType: newUserType,
-                                    tenantId: '', // Reset tenant when type changes
-                                    agencyId: '' // Reset agency when type changes
-                                }));
-                                setErrors((e) => ({ ...e, tenantId: undefined, agencyId: undefined })); // Clear tenant/agency errors
-                            }}
-                            options={[
-                                { id: 'system', name: 'System User' },
-                                { id: 'agency', name: 'Agency User' },
-                                { id: 'tenant', name: 'Tenant User' },
-                            ]}
-                            placeholder="Search user type..."
-                            emptyLabel="No user types found"
-                            error={errors.userType}
-                        />
-                    </Field>
+                    {/* Row 1: User Type - Hidden if restricted to tenant users */}
+                    {!restrictToTenantUsers && (
+                        <Field>
+                            <SearchableSelect
+                                label="User Type"
+                                value={form.userType}
+                                onChange={(value) => {
+                                    const newUserType = value as 'agency' | 'system' | 'tenant';
+                                    setForm((f) => ({ 
+                                        ...f, 
+                                        userType: newUserType,
+                                        tenantId: '', // Reset tenant when type changes
+                                        agencyId: '' // Reset agency when type changes
+                                    }));
+                                    setErrors((e) => ({ ...e, tenantId: undefined, agencyId: undefined })); // Clear tenant/agency errors
+                                }}
+                                options={[
+                                    { id: 'system', name: 'System User' },
+                                    { id: 'agency', name: 'Agency User' },
+                                    { id: 'tenant', name: 'Tenant User' },
+                                ]}
+                                placeholder="Search user type..."
+                                emptyLabel="No user types found"
+                                error={errors.userType}
+                            />
+                        </Field>
+                    )}
 
                     {/* Row 2: Email and Phone */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -652,7 +667,7 @@ const UserModal = ({
                         </Field>
                     </div>
 
-                    {/* Row 5: Tenant (only show if user type is 'tenant') */}
+                    {/* Row 5: Tenant (only show if user type is 'tenant') - Required for tenant admin users */}
                     {form.userType === 'tenant' && (
                         <Field>
                             <SearchableSelect
@@ -677,7 +692,15 @@ const UserModal = ({
                             />
                             {!isLoadingTenants && tenants.length === 0 && (
                                 <p className="mt-2 text-xs text-gray-500">
-                                    No tenants found. Please ensure tenants exist in the system.
+                                    {restrictToTenantUsers 
+                                        ? 'No tenants found for your agency. Please ensure tenants are assigned to your agency.'
+                                        : 'No tenants found. Please ensure tenants exist in the system.'
+                                    }
+                                </p>
+                            )}
+                            {restrictToTenantUsers && tenants.length > 0 && (
+                                <p className="mt-2 text-xs text-gray-500">
+                                    Select a tenant that belongs to your agency. This user will be created as a tenant admin.
                                 </p>
                             )}
                         </Field>

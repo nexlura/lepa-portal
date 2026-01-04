@@ -41,13 +41,20 @@ const systemAdminNavigation: NavigationItem[] = [
     { name: 'Roles & Permissions', href: '/system-admin/roles', icon: ShieldCheckIcon },
 ];
 
+// Agency navigation
+const agencyNavigation: NavigationItem[] = [
+    { name: 'Dashboard', href: '/agency/dashboard', icon: HomeIcon },
+    { name: 'Tenants', href: '/agency/tenants', icon: BuildingOfficeIcon },
+    { name: 'Users', href: '/agency/users', icon: UsersIcon },
+];
+
 const SidebarNavigation: React.FC<{ collapsed?: boolean }> = ({ collapsed }) => {
     const pathname = usePathname();
     const [expandedItems, setExpandedItems] = useState<string[]>([]);
     const [userRole, setUserRole] = useState<string>('');
     const [isLoading, setIsLoading] = useState(true);
 
-    // Check if user is system admin
+    // Check if user is system admin or agency
     useEffect(() => {
         const fetchSession = async () => {
             try {
@@ -74,9 +81,15 @@ const SidebarNavigation: React.FC<{ collapsed?: boolean }> = ({ collapsed }) => 
         return userRole?.toLowerCase().includes('system') || pathname.startsWith('/system-admin');
     }, [userRole, pathname]);
     
+    const isAgency = useMemo(() => {
+        return userRole?.toLowerCase().includes('agency') || pathname.startsWith('/agency');
+    }, [userRole, pathname]);
+    
     const navigation = useMemo(() => {
-        return isSystemAdmin ? systemAdminNavigation : tenantNavigation;
-    }, [isSystemAdmin]);
+        if (isSystemAdmin) return systemAdminNavigation;
+        if (isAgency) return agencyNavigation;
+        return tenantNavigation;
+    }, [isSystemAdmin, isAgency]);
 
     const toggleExpanded = (itemName: string) => {
         setExpandedItems(prev =>
@@ -90,7 +103,11 @@ const SidebarNavigation: React.FC<{ collapsed?: boolean }> = ({ collapsed }) => 
     useEffect(() => {
         if (isLoading) return;
         
-        const currentNavigation = isSystemAdmin ? systemAdminNavigation : tenantNavigation;
+        const currentNavigation = isSystemAdmin 
+            ? systemAdminNavigation 
+            : isAgency 
+            ? agencyNavigation 
+            : tenantNavigation;
         const activeParents = currentNavigation
             .filter(item =>
                 item.subItems?.some(subItem => pathname.startsWith(subItem.href))
@@ -98,14 +115,24 @@ const SidebarNavigation: React.FC<{ collapsed?: boolean }> = ({ collapsed }) => 
             .map(item => item.name);
 
         setExpandedItems(activeParents);
-    }, [pathname, isLoading, isSystemAdmin]);
+    }, [pathname, isLoading, isSystemAdmin, isAgency]);
 
     const isItemActive = (item: NavigationItem) => {
         if (item.href) {
-            // For exact match on dashboard, use === instead of startsWith
-            if (item.href === '/system-admin/dashboard' || item.href === '/dashboard') {
-                return pathname === item.href;
+            // For dashboard routes, check exact match or if pathname starts with dashboard path but doesn't go deeper
+            if (item.href === '/system-admin/dashboard') {
+                return pathname === '/system-admin/dashboard' || 
+                       (pathname.startsWith('/system-admin/dashboard') && pathname.split('/').length === 3);
             }
+            if (item.href === '/agency/dashboard') {
+                return pathname === '/agency/dashboard' || 
+                       (pathname.startsWith('/agency/dashboard') && pathname.split('/').length === 3);
+            }
+            if (item.href === '/dashboard') {
+                return pathname === '/dashboard' || 
+                       (pathname.startsWith('/dashboard') && pathname.split('/').length === 2);
+            }
+            // For other routes, use startsWith
             return pathname.startsWith(item.href);
         }
         if (item.subItems) {

@@ -15,7 +15,7 @@ import type { Role } from '@/types/role';
 export type RoleFormData = {
     title: string;
     description: string;
-    scope: 'system' | 'agency' | 'tenant';
+    scope: 'system' | 'tenant';
 };
 
 interface RoleModalProps {
@@ -71,7 +71,7 @@ const RoleModal = ({ open, onClose, role }: RoleModalProps) => {
     const isFormValid = () => {
         return form.title.trim() !== '' &&
             form.description.trim() !== '' &&
-            (form.scope === 'system' || form.scope === 'tenant' || form.scope === 'agency');
+            (form.scope === 'system' || form.scope === 'tenant');
     };
 
     const validate = () => {
@@ -219,14 +219,13 @@ const RoleModal = ({ open, onClose, role }: RoleModalProps) => {
                             label="Scope"
                             value={form.scope}
                             onChange={(value) => {
-                                const newScope = value as 'system' | 'tenant' | 'agency';
+                                const newScope = value as 'system' | 'tenant';
                                 setForm((f) => ({ ...f, scope: newScope }));
                                 setErrors((e) => ({ ...e, scope: undefined }));
                             }}
                             options={[
                                 { id: 'system', name: 'System' },
                                 { id: 'tenant', name: 'Tenant' },
-                                { id: 'agency', name: 'Agency' },
                             ]}
                             placeholder="Search scope..."
                             emptyLabel="No scope found"
