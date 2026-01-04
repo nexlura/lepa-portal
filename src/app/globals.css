@@ -104,5 +104,5 @@
   --color-accent-950: var(--accent-950);
   
   --font-sans: var(--font-inter);
-  --font-serif: var(--font-merriweather);
+  --font-serif: serif; /* Merriweather temporarily disabled due to Turbopack issue */
 }

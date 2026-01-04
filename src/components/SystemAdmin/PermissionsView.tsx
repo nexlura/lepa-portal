@@ -38,7 +38,7 @@ const PermissionsView = ({ permissions, totalPages, onCreatePermission }: Permis
         }
     };
 
-    if (permissions?.length < 1) {
+    if (!permissions || permissions.length < 1) {
         return (
             <>
                 <EmptyState
@@ -56,6 +56,12 @@ const PermissionsView = ({ permissions, totalPages, onCreatePermission }: Permis
                     }
                     icon={<KeyIcon className="size-12 text-gray-500" />}
                 />
+                {/* Edit modal - always render to avoid hydration issues */}
+                <PermissionModal 
+                    open={isEditModalOpen} 
+                    onClose={handleCloseEditModal}
+                    permission={editingPermission}
+                />
             </>
         );
     }
@@ -64,7 +70,7 @@ const PermissionsView = ({ permissions, totalPages, onCreatePermission }: Permis
         <>
             {/* Permissions table */}
             <PermissionsTable 
-                permissions={permissions || []} 
+                permissions={permissions} 
                 totalPages={totalPages || 1}
                 onEdit={handleEditPermission}
             />
