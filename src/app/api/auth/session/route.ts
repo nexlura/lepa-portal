@@ -2,18 +2,26 @@ import { auth } from '@/auth';
 import { NextResponse } from 'next/server';
 
 export async function GET() {
-  const session = await auth();
-
-  if (session?.user) {
-    // ✅ Authenticated → redirect to dashboard
-    return NextResponse.json(
-      { message: 'request successfull' },
-      { status: 200 }
-    );
-  } else {
-    return NextResponse.json(
-      { message: 'user is unauthenticated' },
-      { status: 401 }
-    );
+  try {
+    const session = await auth();
+    
+    // Return session in the format NextAuth expects
+    // If no session, return null (NextAuth handles this)
+    return NextResponse.json(session || null, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    // Handle errors gracefully - return null session instead of error
+    // This prevents JSON parse errors on the client
+    console.warn('Error fetching session:', error?.message || error);
+    return NextResponse.json(null, { 
+      status: 200, // Return 200 with null to prevent client errors
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
   }
 }

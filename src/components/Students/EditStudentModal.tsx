@@ -41,6 +41,14 @@ const EditStudentModal = ({ open, onClose, initialData, onSubmit }: {
     const validate = () => {
         const next: Partial<Record<keyof EditStudentFormData, string>> = {}
         if (!form.fullName?.trim()) next.fullName = 'Full name is required'
+
+        if (form.dateOfBirth) {
+            const today = new Date().toISOString().split('T')[0]
+            if (form.dateOfBirth >= today) {
+                next.dateOfBirth = 'Date of birth cannot be current or future date'
+            }
+        }
+
         setErrors(next)
         return Object.keys(next).length === 0
     }
@@ -73,7 +81,13 @@ const EditStudentModal = ({ open, onClose, initialData, onSubmit }: {
                     </Field>
                     <Field>
                         <Label className="text-sm/6 text-gray-900 font-medium">Date of Birth</Label>
-                        <Input type="date" value={form.dateOfBirth || ''} onChange={(e) => setForm((f) => ({ ...f, dateOfBirth: e.target.value }))} />
+                        <Input
+                            type="date"
+                            value={form.dateOfBirth || ''}
+                            onChange={(e) => setForm((f) => ({ ...f, dateOfBirth: e.target.value }))}
+                            invalid={Boolean(errors.dateOfBirth)}
+                        />
+                        {errors.dateOfBirth ? <ErrorMessage>{errors.dateOfBirth}</ErrorMessage> : null}
                     </Field>
 
                     <Field>

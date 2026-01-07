@@ -1,55 +1,57 @@
 import { 
-    AcademicCapIcon, 
-    CheckCircleIcon,
-    ChartBarIcon,
+    UserGroupIcon, 
+    AcademicCapIcon,
+    BookOpenIcon,
 } from "@heroicons/react/24/outline"
 
-interface TeachersAnalytics {
-    totalTeachers: number;
-    activeTeachers: number;
-    averageStudentsPerTeacher: number;
+interface StudentsAnalytics {
+    totalStudents: number;
+    enrolledStudents: number;
+    studentsByGender: {
+        male: number;
+        female: number;
+        other: number;
+    };
 }
 
-interface TeachersStatsProps {
-    analytics: TeachersAnalytics;
+interface StudentsStatsProps {
+    analytics: StudentsAnalytics;
 }
 
-const TeachersStats = ({ analytics }: TeachersStatsProps) => {
+const StudentsStats = ({ analytics }: StudentsStatsProps) => {
     const stats = {
-        totalTeachers: analytics.totalTeachers,
-        activeTeachers: analytics.activeTeachers,
-        averageStudentsPerTeacher: analytics.averageStudentsPerTeacher,
+        totalStudents: analytics.totalStudents,
+        enrolledStudents: analytics.enrolledStudents,
+        maleStudents: analytics.studentsByGender.male,
+        femaleStudents: analytics.studentsByGender.female,
     }
 
     const formatNumber = (num: number) => {
         return new Intl.NumberFormat('en-US').format(num);
     };
 
-    const formatDecimal = (num: number) => {
-        return num.toFixed(1);
-    };
-
     const statCards = [
         {
-            name: 'Total Teachers',
-            value: formatNumber(stats.totalTeachers),
-            description: 'Total number of teachers in the school',
-            icon: AcademicCapIcon,
+            name: 'Total Students',
+            value: formatNumber(stats.totalStudents),
+            description: 'Total number of students in the school',
+            icon: UserGroupIcon,
             iconColor: 'text-gray-400',
         },
+      
         {
-            name: 'Active Teachers',
-            value: formatNumber(stats.activeTeachers),
-            description: 'Teachers currently active and teaching',
-            icon: CheckCircleIcon,
-            iconColor: 'text-green-400',
+            name: 'Enrolled Students',
+            value: formatNumber(stats.enrolledStudents),
+            description: 'Students currently enrolled in classes',
+            icon: AcademicCapIcon,
+            iconColor: 'text-blue-400',
         },
         {
-            name: 'Average Students per Teacher',
-            value: formatDecimal(stats.averageStudentsPerTeacher),
-            description: 'Average number of students assigned per teacher',
-            icon: ChartBarIcon,
-            iconColor: 'text-purple-400',
+            name: 'Gender Distribution',
+            value: `${formatNumber(stats.maleStudents)}M / ${formatNumber(stats.femaleStudents)}F`,
+            description: 'Male and female student counts',
+            icon: BookOpenIcon,
+            iconColor: 'text-indigo-400',
         },
     ];
 
@@ -83,4 +85,5 @@ const TeachersStats = ({ analytics }: TeachersStatsProps) => {
     )
 }
 
-export default TeachersStats
+export default StudentsStats
+

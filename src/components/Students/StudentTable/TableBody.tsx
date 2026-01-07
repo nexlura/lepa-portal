@@ -36,7 +36,7 @@ const StudentsTableBody = ({ students }: StudentsTableBodyProps) => {
                         <div className="text-sm text-gray-500">{s.sex}</div>
                     </td>
                     <td className="px-6 py-3 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{s.currentClassName}</div>
+                        <div className="capitalize text-sm text-gray-900">{s.currentClassName}</div>
                     </td>
                     <td className="px-6 py-3 whitespace-nowrap">
                         <StatusPill status={s.status} label='enrolled' />

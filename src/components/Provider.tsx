@@ -21,7 +21,9 @@ const TokenRefresher = () => {
 
             try {
                 const check = await fetch("/api/auth/session");
-                if (check.status === 401) {
+                const sessionData = await check.json();
+                // Check if session is null or invalid (no user)
+                if (!sessionData || !sessionData.user || check.status === 401) {
                     if (!window.location.pathname.startsWith("/auth")) {
                         await signOut({ callbackUrl: "/" });
                     }

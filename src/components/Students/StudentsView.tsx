@@ -6,14 +6,26 @@ import { Button } from '@/components/UIKit/Button';
 import EmptyState from '@/components/EmptyState';
 import { Student } from '@/app/(portal)/students/[pid]/page';
 import StudentsTable from '@/components/Students/StudentTable';
+import StudentsStats from './StudentsStats';
+
+interface StudentsAnalytics {
+    totalStudents: number;
+    enrolledStudents: number;
+    studentsByGender: {
+        male: number;
+        female: number;
+        other: number;
+    };
+}
 
 export interface StudentsViewProps {
     students: Student[]
     totalPages: number
+    analytics: StudentsAnalytics
 }
 
 
-const StudentsView = ({ students, totalPages }: StudentsViewProps) => {
+const StudentsView = ({ students, totalPages, analytics }: StudentsViewProps) => {
 
     if (students.length < 1) {
         return (
@@ -23,7 +35,7 @@ const StudentsView = ({ students, totalPages }: StudentsViewProps) => {
                     subHeading='Get started by importing admissions data'
                     button={
                         <Button
-                            href="/admissions/new"
+                            href="/students/new"
                             color='primary'
                         >
                             <PlusIcon className="h-4 w-4 mr-2 text-white" color='white' />
@@ -56,6 +68,9 @@ const StudentsView = ({ students, totalPages }: StudentsViewProps) => {
                     </Button>
                 </div>
             </div>
+
+            {/* Stats */}
+            <StudentsStats analytics={analytics} />
 
             <StudentsTable totalPages={totalPages} students={students} />
         </div>

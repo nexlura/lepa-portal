@@ -3,6 +3,7 @@ import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 
 export interface PaginationProps {
     totalPages: number;
+    currentPage: number;
     onPageChange?: (page: number) => void;
 }
 
@@ -56,19 +57,17 @@ const generatePagesCounter = (totalPages: number, currentPage: number = 1) => {
     return pages;
 }
 
-const TablePagination = ({ totalPages, onPageChange }: PaginationProps) => {
+const TablePagination = ({ totalPages, currentPage, onPageChange }: PaginationProps) => {
     const router = useRouter();
     const pathname = usePathname();
-
-    // Split the path into parts and remove the last segment if it's a param
-    const parts = pathname.split("/").filter(Boolean);
-    const basePath = parts.length > 2 ? `/${parts.slice(0, -1).join("/")}` : pathname;
-    const currentPage = Number(parts[parts.length - 1]) || 1;
 
     const handlePageChange = (page: number) => {
         if (onPageChange) {
             onPageChange(page);
         } else {
+            // Fallback: if no onPageChange provided, use URL-based routing
+            const parts = pathname.split("/").filter(Boolean);
+            const basePath = parts.length > 2 ? `/${parts.slice(0, -1).join("/")}` : pathname;
             router.push(`${basePath}/${page}`);
         }
     };
