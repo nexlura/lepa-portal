@@ -25,8 +25,8 @@ interface ClassOverviewProps {
     classesWithoutTeacherCount?: number;
     classesWithoutTeachers?: ClassData[];
 }
-
 // Custom tooltip component
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
         return (
@@ -73,8 +73,12 @@ const ClassOverview = ({
                         data={chartData} 
                         margin={{ top: 5, right: 30, left: 20, bottom: 60 }}
                         onMouseMove={(state) => {
-                            if (state?.activePayload?.[0]?.payload?.name) {
-                                setHoveredBar(state.activePayload[0].payload.name);
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                            const name = (state as any)?.activePayload?.['0']?.name as string;
+                            if (name) {
+                                setHoveredBar(name);
+                            } else {
+                                setHoveredBar(null);
                             }
                         }}
                         onMouseLeave={() => setHoveredBar(null)}
@@ -91,7 +95,7 @@ const ClassOverview = ({
                             tick={{ fontSize: 12, fill: '#6b7280' }}
                             label={{ value: 'Number of Students', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fill: '#6b7280' } }}
                         />
-                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(105, 199, 215, 0.1)' }} />
+                        <Tooltip content={<CustomTooltip active={true} payload={[]} />} cursor={{ fill: 'rgba(105, 199, 215, 0.1)' }} />
                         <Bar 
                             dataKey="students" 
                             radius={[8, 8, 0, 0]}

@@ -17,10 +17,10 @@ interface StudentInsightsProps {
 }
 
 const RADIAN = Math.PI / 180;
-const COLORS = ['#67cbdf', '#317787', '#1a3d44'];
 const GENDER_COLORS = ['#69C7D7', '#839CD2', '#ACF8A6'];
 
 // Custom tooltip for pie chart
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const PieTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
         return (
@@ -39,6 +39,7 @@ const PieTooltip = ({ active, payload }: any) => {
 };
 
 // Custom tooltip for bar chart
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const BarTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
         return (
@@ -87,6 +88,7 @@ const StudentInsights = ({ genderDistribution, ageRanges }: StudentInsightsProps
             : []),
     ].filter(item => item.value > 0);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const onPieEnter = (_: any, index: number) => {
         setActiveIndex(index);
     };
@@ -178,7 +180,9 @@ const StudentInsights = ({ genderDistribution, ageRanges }: StudentInsightsProps
                                 <BarChart 
                                     data={ageRanges} 
                                     margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                                    onMouseMove={(state) => {
+                                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                    onMouseMove={(state: any) => {
+                                        // Fix: Accept 'state' as 'any' to prevent type error for 'activePayload'
                                         if (state?.activePayload?.[0]?.payload?.range) {
                                             setHoveredBar(state.activePayload[0].payload.range);
                                         }

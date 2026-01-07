@@ -12,6 +12,7 @@ export async function GET() {
         'Content-Type': 'application/json',
       },
     });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     // Handle errors gracefully - return null session instead of error
     // This prevents JSON parse errors on the client
