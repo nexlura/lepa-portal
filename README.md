@@ -2,6 +2,8 @@
 
 A comprehensive multi-tenant school management system built with Next.js 15, React 19, and NextAuth. Lepa Portal provides a scalable platform for managing schools, students, teachers, classes, admissions, and administrative operations across multiple agencies and tenants.
 
+**Author**: Nexlura LLC
+
 ## Table of Contents
 
 - [Overview](#overview)
@@ -18,6 +20,7 @@ A comprehensive multi-tenant school management system built with Next.js 15, Rea
 - [API Integration](#api-integration)
 - [Deployment](#deployment)
 - [Contributing](#contributing)
+- [License](#license)
 
 ## Overview
 
@@ -417,7 +420,7 @@ The application includes measures to prevent browser autofill on sensitive forms
 
 ## License
 
-[Add your license information here]
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Support
 
@@ -425,4 +428,8 @@ For issues, questions, or contributions, please open an issue on the GitHub repo
 
 ---
 
+**LEPA Frontend** - Empowering education through technology 🎓
+
 **Built with ❤️ by the Nexlura team**
+
+*© 2026 Nexlura LLC. All rights reserved.*
