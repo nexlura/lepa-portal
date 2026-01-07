@@ -113,7 +113,7 @@ const AgencyTenantsPage = async ({ searchParams }: PageProps) => {
     }
 
     return (
-        <AgencyTenantsView tenants={tenants} totalPages={totalPages} />
+        <AgencyTenantsView tenants={tenants} totalPages={totalPages} agencyId={agencyId} />
     );
 };
 

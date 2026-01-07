@@ -10,9 +10,10 @@ import type { Tenant } from '@/app/(portal)/agency/tenants/page';
 interface AgencyTenantsViewProps {
     tenants: Tenant[];
     totalPages: number;
+    agencyId?: string | null;
 }
 
-const AgencyTenantsView = ({ tenants, totalPages }: AgencyTenantsViewProps) => {
+const AgencyTenantsView = ({ tenants, totalPages, agencyId }: AgencyTenantsViewProps) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingTenant, setEditingTenant] = useState<Tenant | null>(null);
 
@@ -68,6 +69,7 @@ const AgencyTenantsView = ({ tenants, totalPages }: AgencyTenantsViewProps) => {
                 open={isModalOpen}
                 onClose={handleCloseModal}
                 tenant={editingTenant}
+                agencyId={agencyId}
             />
         </div>
     );

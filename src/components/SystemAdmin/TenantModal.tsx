@@ -73,16 +73,22 @@ const TenantModal = ({
     open,
     onClose,
     tenant,
+    agencyId,
 }: {
     open: boolean;
     onClose: (open: boolean) => void;
     tenant?: Tenant | null;
+    agencyId?: string | null;
 }) => {
     const router = useRouter();
     const { data: session } = useSession();
     const { setFeedback } = useContext(FeedbackContext);
 
     const isEditMode = !!tenant;
+
+    // Determine if agency field should be disabled (when agencyId is provided)
+    const hasValidAgencyId = agencyId && typeof agencyId === 'string' && agencyId.trim().length > 0;
+    const isAgencyFieldDisabled = hasValidAgencyId;
 
     const [form, setForm] = useState<TenantFormData>({
         domain: '',
@@ -91,7 +97,7 @@ const TenantModal = ({
         phone: '',
         level: 'primary',
         code: '',
-        agencyId: '',
+        agencyId: hasValidAgencyId ? agencyId : '',
         status: 'active',
     });
 
@@ -101,7 +107,25 @@ const TenantModal = ({
     const [isLoadingAgencies, setIsLoadingAgencies] = useState(false);
     const [isLoadingTenant, setIsLoadingTenant] = useState(false);
 
-    // Fetch agencies for dropdown
+    // Sync agencyId to form when provided and modal opens (create mode only)
+    // This ensures the agencyId is set even if the form was reset
+    useEffect(() => {
+        if (open && hasValidAgencyId && !tenant) {
+            // Use a small timeout to ensure this runs after any form reset
+            const timeoutId = setTimeout(() => {
+                setForm((f) => {
+                    // Only update if the agencyId in form doesn't match the prop
+                    if (f.agencyId !== agencyId) {
+                        return { ...f, agencyId: agencyId! };
+                    }
+                    return f;
+                });
+            }, 0);
+            return () => clearTimeout(timeoutId);
+        }
+    }, [open, agencyId, tenant, hasValidAgencyId]);
+
+    // Fetch agencies for dropdown (always fetch so we can display the agency name even when disabled)
     useEffect(() => {
         if (open) {
             setIsLoadingAgencies(true);
@@ -113,6 +137,16 @@ const TenantModal = ({
                             name: agency.name,
                         }));
                         setAgencies(transformedAgencies);
+                        
+                        // After agencies are loaded, ensure agencyId is set in form if provided
+                        if (hasValidAgencyId && !tenant) {
+                            setForm((f) => {
+                                if (f.agencyId !== agencyId) {
+                                    return { ...f, agencyId: agencyId! };
+                                }
+                                return f;
+                            });
+                        }
                     }
                 })
                 .catch((error) => {
@@ -122,7 +156,7 @@ const TenantModal = ({
                     setIsLoadingAgencies(false);
                 });
         }
-    }, [open]);
+    }, [open, agencyId, tenant, hasValidAgencyId]);
 
     // Fetch full tenant details when editing
     useEffect(() => {
@@ -166,8 +200,9 @@ const TenantModal = ({
                 .finally(() => {
                     setIsLoadingTenant(false);
                 });
-        } else if (!tenant) {
-            // Reset form for create mode
+        } else if (!tenant && open) {
+            // Reset form for create mode, but preserve agencyId if provided via prop
+            const initialAgencyId = (agencyId && typeof agencyId === 'string' && agencyId.trim().length > 0) ? agencyId : '';
             setForm({
                 domain: '',
                 schoolName: '',
@@ -175,12 +210,12 @@ const TenantModal = ({
                 phone: '',
                 level: 'primary',
                 code: '',
-                agencyId: '',
+                agencyId: initialAgencyId,
                 status: 'active',
             });
             setErrors({});
         }
-    }, [tenant?.id, open, isEditMode]);
+    }, [tenant?.id, open, isEditMode, agencyId]);
 
     // Check if form is valid for submission
     const isFormValid = () => {
@@ -190,7 +225,7 @@ const TenantModal = ({
             form.address.trim() !== '' &&
             form.phone.trim() !== '' &&
             form.level !== '' &&
-            form.agencyId !== ''
+            (hasValidAgencyId || form.agencyId !== '')
         );
     };
 
@@ -239,8 +274,8 @@ const TenantModal = ({
             next.code = 'Code must be between 2 and 50 characters if provided';
         }
         
-        // Agency validation
-        if (!form.agencyId) {
+        // Agency validation (only if agencyId prop is not provided)
+        if (!agencyId && !form.agencyId) {
             next.agencyId = 'Agency is required';
         }
 
@@ -334,7 +369,7 @@ const TenantModal = ({
                     phone: form.phone.trim(),
                     level: form.level,
                     code: form.code.trim() || undefined,
-                    agency_id: form.agencyId,
+                    agency_id: agencyId || form.agencyId,
                     is_active: form.status === 'active',
                 });
 
@@ -383,7 +418,7 @@ const TenantModal = ({
                 phone: '',
                 level: 'primary',
                 code: '',
-                agencyId: '',
+                agencyId: hasValidAgencyId ? agencyId! : '',
                 status: 'active',
             });
         }
@@ -396,7 +431,9 @@ const TenantModal = ({
             <DialogDescription>
                 {isEditMode 
                     ? 'Update tenant information. Only changed fields will be updated.'
-                    : 'Add a new school tenant to the system.'
+                    : agencyId 
+                        ? 'Add a new school tenant to your agency.'
+                        : 'Add a new school tenant to the system.'
                 }
             </DialogDescription>
             <DialogBody>
@@ -470,7 +507,7 @@ const TenantModal = ({
                         </Field>
                     </div>
 
-                    {/* Row 3: Agency */}
+                    {/* Row 3: Agency (always show, but disabled when agencyId prop is provided) */}
                     <Field>
                         <SearchableSelect
                             label="Agency"
@@ -481,7 +518,7 @@ const TenantModal = ({
                             emptyLabel="No agencies found"
                             loading={isLoadingAgencies}
                             error={errors.agencyId}
-                            disabled={isLoadingAgencies}
+                            disabled={isLoadingAgencies || isAgencyFieldDisabled}
                         />
                     </Field>
 
