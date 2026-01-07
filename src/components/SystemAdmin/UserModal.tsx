@@ -211,12 +211,13 @@ const UserModal = ({
         }
     }, [open, form.userType]);
 
-    // Fetch roles when modal opens
+    // Fetch roles when modal opens or session changes
     useEffect(() => {
         if (open) {
             fetchRoles();
         }
-    }, [open]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [open, session?.user?.role]);
 
     const fetchRoles = async () => {
         setIsLoadingRoles(true);
@@ -224,13 +225,13 @@ const UserModal = ({
             const response = await getModel<{
                 success?: boolean;
                 data?: {
-                    roles?: Array<{ id: string; title?: string; name?: string }>;
-                } | Array<{ id: string; title?: string; name?: string }>;
-                roles?: Array<{ id: string; title?: string; name?: string }>;
+                    roles?: Array<{ id: string; title?: string; name?: string; code?: string }>;
+                } | Array<{ id: string; title?: string; name?: string; code?: string }>;
+                roles?: Array<{ id: string; title?: string; name?: string; code?: string }>;
             }>('/rbac/roles?limit=100').catch(() => null);
 
             if (response && !isErrorResponse(response)) {
-                let rolesList: Array<{ id: string; title?: string; name?: string }> = [];
+                let rolesList: Array<{ id: string; title?: string; name?: string; code?: string }> = [];
                 
                 if (response.data) {
                     if (Array.isArray(response.data)) {
@@ -242,8 +243,50 @@ const UserModal = ({
                     rolesList = response.roles;
                 }
 
+                // Get current user's role from session
+                const currentUserRole = session?.user?.role?.toLowerCase() || '';
+                const isAgencyAdmin = currentUserRole.includes('agency');
+                const isTenantAdmin = currentUserRole.includes('tenant') && !isAgencyAdmin;
+
+                // Helper function to check if role matches allowed roles
+                const matchesRole = (roleName: string, roleCode: string, allowedRoles: string[]): boolean => {
+                    const lowerName = roleName.toLowerCase();
+                    const lowerCode = roleCode.toLowerCase();
+                    return allowedRoles.some(allowed => {
+                        const lowerAllowed = allowed.toLowerCase();
+                        // Check for exact match or word boundary match
+                        return lowerName === lowerAllowed || 
+                               lowerCode === lowerAllowed ||
+                               lowerName.includes(` ${lowerAllowed} `) ||
+                               lowerName.startsWith(`${lowerAllowed} `) ||
+                               lowerName.endsWith(` ${lowerAllowed}`) ||
+                               lowerCode.includes(` ${lowerAllowed} `) ||
+                               lowerCode.startsWith(`${lowerAllowed} `) ||
+                               lowerCode.endsWith(` ${lowerAllowed}`);
+                    });
+                };
+
+                // Filter roles based on current user's role
+                let allowedRoles = rolesList;
+                if (isAgencyAdmin) {
+                    // Agency admins can only assign "admin" and "teacher" roles
+                    allowedRoles = rolesList.filter(role => {
+                        const roleName = role.title || role.name || '';
+                        const roleCode = role.code || '';
+                        return matchesRole(roleName, roleCode, ['admin', 'teacher']);
+                    });
+                } else if (isTenantAdmin) {
+                    // Tenant admins can only assign "admin", "teacher", "student", and "parent" roles
+                    allowedRoles = rolesList.filter(role => {
+                        const roleName = role.title || role.name || '';
+                        const roleCode = role.code || '';
+                        return matchesRole(roleName, roleCode, ['admin', 'teacher', 'student', 'parent']);
+                    });
+                }
+                // System admins can assign all roles (no filtering)
+
                 setRoles(
-                    rolesList.map(role => ({
+                    allowedRoles.map(role => ({
                         id: role.id,
                         name: role.title || role.name || 'Unnamed Role',
                     }))
@@ -560,9 +603,9 @@ const UserModal = ({
                                 value={form.email}
                                 onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
                                 invalid={Boolean(errors.email)}
-                                autoComplete="new-password"
-                                name="new-user-email"
-                                id="new-user-email"
+                                autoComplete="off"
+                                name="create-user-email"
+                                id="create-user-email"
                                 className="w-full min-w-0"
                             />
                             {errors.email ? <ErrorMessage className="mt-2">{errors.email}</ErrorMessage> : null}
@@ -636,6 +679,9 @@ const UserModal = ({
                                     }
                                 }}
                                 invalid={Boolean(errors.password)}
+                                autoComplete="new-password"
+                                name="create-user-password"
+                                id="create-user-password"
                                 className="w-full"
                             />
                             {errors.password ? <ErrorMessage className="mt-2">{errors.password}</ErrorMessage> : null}
@@ -661,6 +707,9 @@ const UserModal = ({
                                     }
                                 }}
                                 invalid={Boolean(errors.confirmPassword)}
+                                autoComplete="new-password"
+                                name="create-user-confirm-password"
+                                id="create-user-confirm-password"
                                 className="w-full"
                             />
                             {errors.confirmPassword ? <ErrorMessage className="mt-2">{errors.confirmPassword}</ErrorMessage> : null}
