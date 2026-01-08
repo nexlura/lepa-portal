@@ -1,17 +1,56 @@
-import { SetStateAction, Dispatch } from "react"
+import { SetStateAction, Dispatch, useEffect, useState, useCallback, useRef } from "react"
 
 import { MultiSelectOption } from "../../UIKit/MultiSelect"
-import { AddStudentForm } from "@/app/(portal)/students/new/page"
+import type { AddStudentForm } from "@/components/Students/AddStudent/types"
 import SearchableAssignSelect from "./SearchableAssignSelect"
+import { getModel } from "@/lib/connector"
+import { BackendClassData } from "@/app/(portal)/classes/[pageNumber]/page"
 
 interface AssignedClassTabsProps {
     form: AddStudentForm
     setForm: Dispatch<SetStateAction<AddStudentForm>>
-    classes: MultiSelectOption[]
-    loadingClasses: boolean
 }
 
-const AssignedClassTabs = ({ form, setForm, classes, loadingClasses }: AssignedClassTabsProps) => {
+
+const AssignedClassTabs = ({ form, setForm }: AssignedClassTabsProps) => {
+    const fetchedRef = useRef(false)
+
+
+    const [classes, setClasses] = useState<MultiSelectOption[]>([])
+    const [loadingClasses, setLoadingClasses] = useState(false)
+      // // Fetch classes once
+      const fetchClasses = useCallback(async () => {
+        setLoadingClasses(true)
+    
+        try {
+            const res = await getModel<{ data?: { classes?: BackendClassData[] } }>(
+                '/classes?page=1&limit=100'
+            )
+    
+            const serverClasses = res?.data?.classes
+    
+            if (Array.isArray(serverClasses)) {
+                const classOptions: MultiSelectOption[] = serverClasses.map((cls) => ({
+                    id: cls.id,
+                    name: `${cls.name} (${cls.grade})`,
+                }))
+    
+                setClasses(classOptions)
+            }
+        } catch (err) {
+            console.error('Error fetching classes:', err)
+        } finally {
+            setLoadingClasses(false)
+        }
+    }, []) // setters are stable, so no dependencies needed
+
+  useEffect(() => {
+    if (fetchedRef.current) return
+    fetchedRef.current = true
+    fetchClasses()
+}, [fetchClasses])
+
+
     return (
         <section className="border-t border-zinc-200 mt-5 px-6">
             <div className="flex flex-col gap-2 mb-4 border-b border-zinc-100">

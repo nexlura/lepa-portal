@@ -1,29 +1,18 @@
 'use client'
 
-import { FormEvent, useContext, useEffect, useRef, useState } from 'react'
+import { FormEvent, useContext, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 
 import { FeedbackContext } from '@/context/feedback'
 import FormSubmitFeedback from '@/components/FormAlert'
-import { postFormData, getModel } from '@/lib/connector'
+import { postFormData } from '@/lib/connector'
 import AddStudentHeader from '@/components/Students/AddStudent/Header'
 import PersonalInfoForm from '@/components/Students/AddStudent/PersonalInfoForm'
 import AssignedClassTabs from '@/components/Students/AddStudent/AssignedClassTabs'
-import { MultiSelectOption } from '@/components/UIKit/MultiSelect'
+import StudentAttachments from '@/components/Students/AddStudent/StudentAttachments'
 
-export type AddStudentForm = {
-    firstName: string
-    lastName: string
-    middleName: string
-    gender: string
-    dateOfBirth: string
-    address: string
-    enrollmentDate: string
-    assignedClass: MultiSelectOption | null
-}
-
-export type AddStudentFormErrors = Partial<Record<keyof AddStudentForm, string>>
+import type { AddStudentForm, AddStudentFormErrors } from '@/components/Students/AddStudent/types'
 
 const DEFAULT_FORM: AddStudentForm = {
     firstName: '',
@@ -34,6 +23,7 @@ const DEFAULT_FORM: AddStudentForm = {
     address: '',
     enrollmentDate: new Date().toISOString().split('T')[0],
     assignedClass: null,
+    attachments: [],
 }
 
 const NewStudentAdmissionPage = () => {
@@ -46,14 +36,6 @@ const NewStudentAdmissionPage = () => {
     const [errors, setErrors] = useState<AddStudentFormErrors>({})
     const [localError, setLocalError] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(false)
-    const [classes, setClasses] = useState<MultiSelectOption[]>([])
-    const [loadingClasses, setLoadingClasses] = useState(false)
-
-    type BackendClass = {
-        id: string
-        name: string
-        grade: string
-    }
 
 
     const validate = () => {
@@ -114,6 +96,11 @@ const NewStudentAdmissionPage = () => {
                 formData.append('current_class_id', form.assignedClass.id)
             }
 
+            // Append attachments
+            form.attachments.forEach((attachment) => {
+                formData.append('attachments', attachment.file)
+            })
+
             const resp = await postFormData('/students', formData)
 
             if (resp && typeof resp === 'object' && 'error' in resp && resp.error) {
@@ -140,30 +127,6 @@ const NewStudentAdmissionPage = () => {
         }
     }
 
-    // Fetch classes once
-    useEffect(() => {
-        if (!loadingClasses && classes.length === 0) {
-            setLoadingClasses(true)
-            getModel<{ data?: { classes?: BackendClass[] } }>('/classes?page=1&limit=100')
-                .then((res) => {
-                    const serverClasses = res?.data?.classes
-                    if (serverClasses && Array.isArray(serverClasses)) {
-                        const classOptions: MultiSelectOption[] = serverClasses.map((cls) => ({
-                            id: cls.id,
-                            name: `${cls.name} (${cls.grade})`,
-                        }))
-                        setClasses(classOptions)
-                    }
-                })
-                .catch((err) => {
-                    console.error('Error fetching classes:', err)
-                })
-                .finally(() => {
-                    setLoadingClasses(false)
-                })
-        }
-    }, [classes.length, loadingClasses])
-
 
     return (
         <div className="flex flex-col items-center space-y-8 sm:px-6">
@@ -183,11 +146,13 @@ const NewStudentAdmissionPage = () => {
                     handleSubmit={handleSubmit}
                     firstNameInputRef={firstNameInputRef}
                 />
+                <StudentAttachments
+                    form={form}
+                    setForm={setForm}
+                />
                 <AssignedClassTabs
                     form={form}
                     setForm={setForm}
-                    classes={classes}
-                    loadingClasses={loadingClasses}
                 />
             </div>
         </div>
