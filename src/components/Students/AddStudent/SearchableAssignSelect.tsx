@@ -62,6 +62,7 @@ export default function SearchableAssignSelect({
         <div ref={containerRef} onBlur={handleBlur} className="space-y-4 relative">
             <div className="relative">
                 {/* SEARCH FIELD */}
+                {selected.length < 1 && (
                 <label className="flex items-center gap-2 border-b border-zinc-200 px-4 py-2.5 rounded-md border">
                     <MagnifyingGlassIcon className="size-5 text-zinc-400" />
                     <input
@@ -81,6 +82,7 @@ export default function SearchableAssignSelect({
                     />
                     {open ? <ChevronUpIcon className="size-4 text-zinc-400" /> : <ChevronDownIcon className="size-4 text-zinc-400" />}
                 </label>
+                )}
 
                 {/* OPTIONS DROPDOWN */}
                 {open && (
