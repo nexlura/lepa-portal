@@ -27,7 +27,7 @@ const StudentProfilePage = async ({ params }: {
         photoURL: studentData.photo_url,
         age: 0
     }
-
+    
     return <StudentProfileView student={studentProfile} />
 }
 

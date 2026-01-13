@@ -79,6 +79,7 @@ const NewStudentAdmissionPage = () => {
         setIsLoading(true)
 
         try {
+            // Step 1: Create student without attachments
             const formData = new FormData()
             formData.append('tenant_id', session.user.tenantId)
             formData.append('first_name', form.firstName.trim())
@@ -96,11 +97,6 @@ const NewStudentAdmissionPage = () => {
                 formData.append('current_class_id', form.assignedClass.id)
             }
 
-            // Append attachments
-            form.attachments.forEach((attachment) => {
-                formData.append('attachments', attachment.file)
-            })
-
             const resp = await postFormData('/students', formData)
 
             if (resp && typeof resp === 'object' && 'error' in resp && resp.error) {
@@ -108,17 +104,47 @@ const NewStudentAdmissionPage = () => {
                 return
             }
 
-            if (resp && typeof resp === 'object' && 'status' in resp && resp.status >= 200 && resp.status < 300) {
-                handleSuccess()
+            // Extract student ID from response
+            let studentId: string | null = null
+            if (resp && typeof resp === 'object') {
+                // Try different possible response structures
+                if ('data' in resp && resp.data && typeof resp.data === 'object') {
+                    const data = resp.data as Record<string, unknown>
+                    studentId = (data.id as string) || (data.student_id as string) || null
+                } else {
+                    const respObj = resp as Record<string, unknown>
+                    if ('id' in respObj) {
+                        studentId = respObj.id as string
+                    } else if ('student_id' in respObj) {
+                        studentId = respObj.student_id as string
+                    }
+                }
+            }
+
+            if (!studentId) {
+                setLocalError('Failed to create student: Student ID not found in response')
                 return
             }
 
-            if (!resp || (resp && typeof resp === 'object' && !('error' in resp))) {
-                handleSuccess()
-                return
+            // Step 2: Upload attachments if any
+            if (form.attachments.length > 0) {
+                for (const attachment of form.attachments) {
+                    const attachmentFormData = new FormData()
+                    attachmentFormData.append('student_id', studentId)
+                    attachmentFormData.append('file', attachment.file)
+                    attachmentFormData.append('file_type', 'other')
+                    attachmentFormData.append('file_name', attachment.fileName)
+
+                    const attachmentResp = await postFormData('/students/attachments', attachmentFormData)
+
+                    if (attachmentResp && typeof attachmentResp === 'object' && 'error' in attachmentResp && attachmentResp.error) {
+                        setLocalError(`Failed to upload ${attachment.fileName}: ${attachmentResp.message || 'Upload failed'}`)
+                        return
+                    }
+                }
             }
 
-            setLocalError('Something went wrong. Please try again')
+            handleSuccess()
         } catch (error) {
             console.error('Error during POST request:', error)
             setLocalError('An unexpected error occurred. Please try again.')

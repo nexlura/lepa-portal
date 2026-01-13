@@ -129,7 +129,7 @@ export default function SearchableAssignSelect({
                         <ul className="mt-3 gap-2 border border-zinc-200 rounded-md divide-y divide-zinc-200">
                             {selected.map((option) => (
                                 <li key={option.id} className="flex items-center justify-between py-1 px-3">
-                                    <span>{option.name}</span>
+                                    <span className='capitalize'>{option.name}</span>
                                     <button
                                         type="button"
                                         aria-label={`Remove ${option.name}`}

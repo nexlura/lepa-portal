@@ -1,9 +1,10 @@
 'use client'
 
-import { DocumentTextIcon, XMarkIcon, CloudArrowUpIcon } from '@heroicons/react/24/outline'
+import { DocumentTextIcon, XMarkIcon, CloudArrowUpIcon, PlusCircleIcon } from '@heroicons/react/24/outline'
 import type { ChangeEvent, Dispatch, SetStateAction } from 'react'
 import { useRef } from 'react'
 import type { AddStudentForm, StudentAttachment } from '@/components/Students/AddStudent/types'
+import { Button } from '@/components/UIKit/Button'
 
 interface StudentAttachmentsProps {
     form: AddStudentForm
@@ -104,19 +105,9 @@ const StudentAttachments = ({ form, setForm }: StudentAttachmentsProps) => {
                 <div className="space-y-4 mb-6">
                     {form.attachments.map((attachment, index) => (
                         <div key={index} className="border border-gray-200 rounded-lg p-4">
-                            <div className="flex items-start justify-between">
+                            <div className="flex items-center justify-between">
                                 <div className="flex items-start gap-3 flex-1">
-                                    {attachment.preview ? (
-                                        <div className="flex-shrink-0">
-                                            <img
-                                                src={attachment.preview}
-                                                alt={attachment.fileName}
-                                                className="h-16 w-16 object-cover rounded-md border border-gray-200"
-                                            />
-                                        </div>
-                                    ) : (
                                         <DocumentTextIcon className="h-8 w-8 text-gray-400 flex-shrink-0 mt-1" />
-                                    )}
                                     <div className="flex-1 min-w-0">
                                         <p className="text-sm font-medium text-gray-900 truncate">
                                             {attachment.fileName}
@@ -141,6 +132,8 @@ const StudentAttachments = ({ form, setForm }: StudentAttachmentsProps) => {
             )}
 
             {/* Upload Area */}
+            {form.attachments.length < 1 && (
+
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-primary-400 transition-colors">
                 <div className="text-center">
                     <CloudArrowUpIcon className="mx-auto h-12 w-12 text-gray-400" />
@@ -165,6 +158,31 @@ const StudentAttachments = ({ form, setForm }: StudentAttachmentsProps) => {
                     </div>
                 </div>
             </div>
+            )}
+        
+{form.attachments.length > 0 && (
+  <>
+    <Button
+      type="button"
+      outline
+      onClick={() => fileInputRef.current?.click()}
+    >
+      <PlusCircleIcon className="h-4 w-4 mr-2 text-white" />
+      Add Another
+    </Button>
+
+    <input
+      ref={fileInputRef}
+      type="file"
+      multiple
+      accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+      className="sr-only"
+      onChange={handleFileUpload}
+    />
+  </>
+)}
+
+
         </section>
     )
 }
