@@ -1,29 +1,18 @@
 'use client'
 
-import { FormEvent, useContext, useEffect, useRef, useState } from 'react'
+import { FormEvent, useContext, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 
 import { FeedbackContext } from '@/context/feedback'
 import FormSubmitFeedback from '@/components/FormAlert'
-import { postFormData, getModel } from '@/lib/connector'
+import { postFormData } from '@/lib/connector'
 import AddStudentHeader from '@/components/Students/AddStudent/Header'
 import PersonalInfoForm from '@/components/Students/AddStudent/PersonalInfoForm'
 import AssignedClassTabs from '@/components/Students/AddStudent/AssignedClassTabs'
-import { MultiSelectOption } from '@/components/UIKit/MultiSelect'
+import StudentAttachments from '@/components/Students/AddStudent/StudentAttachments'
 
-export type AddStudentForm = {
-    firstName: string
-    lastName: string
-    middleName: string
-    gender: string
-    dateOfBirth: string
-    address: string
-    enrollmentDate: string
-    assignedClass: MultiSelectOption | null
-}
-
-export type AddStudentFormErrors = Partial<Record<keyof AddStudentForm, string>>
+import type { AddStudentForm, AddStudentFormErrors } from '@/components/Students/AddStudent/types'
 
 const DEFAULT_FORM: AddStudentForm = {
     firstName: '',
@@ -34,6 +23,7 @@ const DEFAULT_FORM: AddStudentForm = {
     address: '',
     enrollmentDate: new Date().toISOString().split('T')[0],
     assignedClass: null,
+    attachments: [],
 }
 
 const NewStudentAdmissionPage = () => {
@@ -46,14 +36,6 @@ const NewStudentAdmissionPage = () => {
     const [errors, setErrors] = useState<AddStudentFormErrors>({})
     const [localError, setLocalError] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(false)
-    const [classes, setClasses] = useState<MultiSelectOption[]>([])
-    const [loadingClasses, setLoadingClasses] = useState(false)
-
-    type BackendClass = {
-        id: string
-        name: string
-        grade: string
-    }
 
 
     const validate = () => {
@@ -97,6 +79,7 @@ const NewStudentAdmissionPage = () => {
         setIsLoading(true)
 
         try {
+            // Step 1: Create student without attachments
             const formData = new FormData()
             formData.append('tenant_id', session.user.tenantId)
             formData.append('first_name', form.firstName.trim())
@@ -121,17 +104,47 @@ const NewStudentAdmissionPage = () => {
                 return
             }
 
-            if (resp && typeof resp === 'object' && 'status' in resp && resp.status >= 200 && resp.status < 300) {
-                handleSuccess()
+            // Extract student ID from response
+            let studentId: string | null = null
+            if (resp && typeof resp === 'object') {
+                // Try different possible response structures
+                if ('data' in resp && resp.data && typeof resp.data === 'object') {
+                    const data = resp.data as Record<string, unknown>
+                    studentId = (data.id as string) || (data.student_id as string) || null
+                } else {
+                    const respObj = resp as Record<string, unknown>
+                    if ('id' in respObj) {
+                        studentId = respObj.id as string
+                    } else if ('student_id' in respObj) {
+                        studentId = respObj.student_id as string
+                    }
+                }
+            }
+
+            if (!studentId) {
+                setLocalError('Failed to create student: Student ID not found in response')
                 return
             }
 
-            if (!resp || (resp && typeof resp === 'object' && !('error' in resp))) {
-                handleSuccess()
-                return
+            // Step 2: Upload attachments if any
+            if (form.attachments.length > 0) {
+                for (const attachment of form.attachments) {
+                    const attachmentFormData = new FormData()
+                    attachmentFormData.append('student_id', studentId)
+                    attachmentFormData.append('file', attachment.file)
+                    attachmentFormData.append('file_type', 'other')
+                    attachmentFormData.append('file_name', attachment.fileName)
+
+                    const attachmentResp = await postFormData('/students/attachments', attachmentFormData)
+
+                    if (attachmentResp && typeof attachmentResp === 'object' && 'error' in attachmentResp && attachmentResp.error) {
+                        setLocalError(`Failed to upload ${attachment.fileName}: ${attachmentResp.message || 'Upload failed'}`)
+                        return
+                    }
+                }
             }
 
-            setLocalError('Something went wrong. Please try again')
+            handleSuccess()
         } catch (error) {
             console.error('Error during POST request:', error)
             setLocalError('An unexpected error occurred. Please try again.')
@@ -139,30 +152,6 @@ const NewStudentAdmissionPage = () => {
             setIsLoading(false)
         }
     }
-
-    // Fetch classes once
-    useEffect(() => {
-        if (!loadingClasses && classes.length === 0) {
-            setLoadingClasses(true)
-            getModel<{ data?: { classes?: BackendClass[] } }>('/classes?page=1&limit=100')
-                .then((res) => {
-                    const serverClasses = res?.data?.classes
-                    if (serverClasses && Array.isArray(serverClasses)) {
-                        const classOptions: MultiSelectOption[] = serverClasses.map((cls) => ({
-                            id: cls.id,
-                            name: `${cls.name} (${cls.grade})`,
-                        }))
-                        setClasses(classOptions)
-                    }
-                })
-                .catch((err) => {
-                    console.error('Error fetching classes:', err)
-                })
-                .finally(() => {
-                    setLoadingClasses(false)
-                })
-        }
-    }, [classes.length, loadingClasses])
 
 
     return (
@@ -183,11 +172,13 @@ const NewStudentAdmissionPage = () => {
                     handleSubmit={handleSubmit}
                     firstNameInputRef={firstNameInputRef}
                 />
+                <StudentAttachments
+                    form={form}
+                    setForm={setForm}
+                />
                 <AssignedClassTabs
                     form={form}
                     setForm={setForm}
-                    classes={classes}
-                    loadingClasses={loadingClasses}
                 />
             </div>
         </div>

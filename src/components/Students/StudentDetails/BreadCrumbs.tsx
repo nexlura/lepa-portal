@@ -10,7 +10,7 @@ const Breadcrumbs = (props: { student: Student }) => {
             <ChevronRightIcon className="mx-2 h-4 w-4" />
             <Link href="/students" className="hover:text-primary-900">Students</Link>
             <ChevronRightIcon className="mx-2 h-4 w-4" />
-            <span className="text-gray-900">{props.student.fullName}</span>
+            <span className="text-gray-900 capitalize">{props.student.fullName}</span>
         </nav>
     )
 }

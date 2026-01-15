@@ -2,19 +2,21 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ArrowLeftIcon, ChevronRightIcon, ShieldExclamationIcon } from '@heroicons/react/24/outline'
+import { ArrowLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline'
 
 import TopCards from '@/components/Students/StudentDetails/TopCards'
 import DocumentsList from '@/components/Students/StudentDetails/DocumentsList'
 import PersonalInfoSection from '@/components/Students/StudentDetails/PersonalInfo'
 import Breadcrumbs from '@/components/Students/StudentDetails/BreadCrumbs'
 import { Student } from '@/app/(portal)/students/[pid]/page'
+import type { StudentDocument } from '@/components/Students/StudentDetails/DocumentsList'
 
 interface StudentProfileViewProps {
     student: Student
+    attachments?: StudentDocument[]
 }
 
-const StudentProfileView = ({ student }: StudentProfileViewProps) => {
+const StudentProfileView = ({ student, attachments = [] }: StudentProfileViewProps) => {
     const router = useRouter()
 
     if (!student) {
@@ -43,9 +45,9 @@ const StudentProfileView = ({ student }: StudentProfileViewProps) => {
                 {/* Breadcrumbs */}
                 <Breadcrumbs student={student} />
 
-                <Link href="/dashboard" className=" text-primary-800 hover:text-primary-900 text-sm flex items-center gap-x-1.5">
+                {/* <Link href="/dashboard" className=" text-primary-800 hover:text-primary-900 text-sm flex items-center gap-x-1.5">
                     Access Information <span><ShieldExclamationIcon className='w-6 h-6' /></span>
-                </Link>
+                </Link> */}
             </div>
 
 
@@ -58,10 +60,7 @@ const StudentProfileView = ({ student }: StudentProfileViewProps) => {
                 <PersonalInfoSection student={student} />
 
                 {/* Right rail: Documents */}
-                <DocumentsList documents={[
-                    { id: '01', name: 'Transcript', previewUrl: '/', url: '/' },
-                    { id: '01', name: 'Birth Certificate', previewUrl: '/', url: '/' }
-                ]} />
+                <DocumentsList documents={attachments} />
             </div>
         </div>
     )

@@ -3,7 +3,7 @@ import SchoolClassesView from '@/components/SchoolClasses/ClassView';
 import { MultiSelectOption } from '@/components/UIKit/MultiSelect';
 import { getModel, isErrorResponse } from '@/lib/connector';
 
-export type BackendClassesData = {
+export type BackendClassData = {
     id: string,
     tenant_id: string,
     name: string,
@@ -55,7 +55,7 @@ const SchoolClassesPage = async ({ params }: PageProps) => {
     }
 
     // Fetch classes data with error handling
-    let classes: BackendClassesData[] = [];
+    let classes: BackendClassData[] = [];
     let totalPages = 0;
     let totalClasses = 0;
     
@@ -97,7 +97,7 @@ const SchoolClassesPage = async ({ params }: PageProps) => {
         }
     }
 
-    const transformedData: SchoolClass[] = classes?.map((classK: BackendClassesData) => {
+    const transformedData: SchoolClass[] = classes?.map((classK: BackendClassData) => {
         return {
             id: classK.id,
             capacity: classK.capacity,
