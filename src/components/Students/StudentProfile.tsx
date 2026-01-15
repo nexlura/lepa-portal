@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ArrowLeftIcon, ChevronRightIcon, ShieldExclamationIcon } from '@heroicons/react/24/outline'
+import { ArrowLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline'
 
 import TopCards from '@/components/Students/StudentDetails/TopCards'
 import DocumentsList from '@/components/Students/StudentDetails/DocumentsList'

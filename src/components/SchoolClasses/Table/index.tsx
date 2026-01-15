@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { useSearchParams } from "next/navigation"
 
 import DataTable from '@/components/DataTable'
-import { BackendClassesData, SchoolClass } from "@/app/(portal)/classes/[pageNumber]/page"
+import { BackendClassData, SchoolClass } from "@/app/(portal)/classes/[pageNumber]/page"
 import SchoolClassesTableControls from "./Controls"
 import ClassesTableHead from "./TableHead"
 import ClassesTableBody from "./TableBody"
@@ -47,10 +47,10 @@ const SchoolClassesTable = ({ classes, totalPages }: ClassesTableProps) => {
     }, [session])
 
     return (
-        <DataTable<SchoolClass, BackendClassesData>
+        <DataTable<SchoolClass, BackendClassData>
             config={{
                 dataKey: 'classes',
-                transformData: (classK: BackendClassesData): SchoolClass => ({
+                transformData: (classK: BackendClassData): SchoolClass => ({
                     id: classK.id,
                     capacity: classK.capacity,
                     className: classK.name,
