@@ -12,8 +12,16 @@ const PersonalInfoSection = ({ student }: PersonalInfoProps) => {
             <div className="text-base font-semibold text-gray-900">Student Information</div>
             <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 capitalize">
                 <div>
-                    <dt className="text-xs text-gray-500">Full name</dt>
-                    <dd className="text-sm text-gray-900 ">{student.fullName}</dd>
+                    <dt className="text-xs text-gray-500">First Name</dt>
+                    <dd className="text-sm text-gray-900 ">{student.firstName}</dd>
+                </div>
+                <div>
+                    <dt className="text-xs text-gray-500">Last Name</dt>
+                    <dd className="text-sm text-gray-900 ">{student.lastName}</dd>
+                </div>
+                <div>
+                    <dt className="text-xs text-gray-500">Middle Name</dt>
+                    <dd className="text-sm text-gray-900 ">{student.middleName || '-'}</dd>
                 </div>
                 <div>
                     <dt className="text-xs text-gray-500">Gender</dt>
@@ -43,7 +51,7 @@ const PersonalInfoSection = ({ student }: PersonalInfoProps) => {
                 </div>
             </dl>
 
-            <div className="pt-4">
+            {/* <div className="pt-4">
                 <div className="text-base font-semibold text-gray-900">Guardian Information</div>
                 <dl className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
                     <div>
@@ -63,7 +71,7 @@ const PersonalInfoSection = ({ student }: PersonalInfoProps) => {
                         <dd className="text-sm text-gray-900">-</dd>
                     </div>
                 </dl>
-            </div>
+            </div> */}
         </div>
     )
 }

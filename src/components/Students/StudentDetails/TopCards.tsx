@@ -35,7 +35,7 @@ const TopCards = ({ student }: TopCardsProps) => {
                         <span className="inline-flex items-center rounded-full bg-gray-100 text-gray-900 px-3 py-1 text-xs">
                             <CalendarIcon className="h-4 w-4 mr-1" />Enrolled: {formatDate(student.enrollmentDate)}
                         </span>
-                        <span className="inline-flex items-center rounded-full bg-gray-900 text-white px-3 py-1 text-xs">
+                        <span className="inline-flex items-center rounded-full bg-gray-900 text-white px-3 py-1 text-xs capitalize">
                             <BookOpenIcon className="h-4 w-4 mr-1" />
                             {`${student.currentClassName}`}
                         </span>
