@@ -4,34 +4,15 @@ import { FormEvent, useContext, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 
-import { MultiSelectOption } from '@/components/UIKit/MultiSelect'
 import FormSubmitFeedback from '@/components/FormAlert'
 import { FeedbackContext } from '@/context/feedback'
-import { postModel, getModel } from '@/lib/connector'
+import { postModel, getModel, postFormData } from '@/lib/connector'
 import PersonalInfoForm from '@/components/Teachers/AddTeacher/PersonalinfoForm'
 import AssignedTabs from '@/components/Teachers/AddTeacher/AssignedTabs'
 import AddTeacherHeader from '@/components/Teachers/AddTeacher/Header'
-
-export type AddTeacherForm = {
-    firstName: string;
-    lastName: string;
-    email: string;
-    phone: string;
-    password: string;
-    address: string;
-    sex: string;
-    subjects: MultiSelectOption[];
-    assignedClasses: MultiSelectOption[];
-}
-
-export type AddTeacherFormErrors = {
-    firstName?: string;
-    lastName?: string;
-    email?: string;
-    phone?: string;
-    password?: string;
-    sex?: string;
-}
+import TeacherAttachments from '@/components/Teachers/AddTeacher/TeacherAttachments'
+import type { AddTeacherForm, AddTeacherFormErrors } from '@/components/Teachers/AddTeacher/types'
+import { MultiSelectOption } from '@/components/UIKit/MultiSelect'
 
 type BackendClass = {
     id: string
@@ -39,7 +20,7 @@ type BackendClass = {
     grade: string
 }
 
-const DEFAULT_FORM = {
+const DEFAULT_FORM: AddTeacherForm = {
     firstName: '',
     lastName: '',
     email: '',
@@ -47,8 +28,9 @@ const DEFAULT_FORM = {
     password: '',
     address: '',
     sex: '',
-    subjects: [] as MultiSelectOption[],
-    assignedClasses: [] as MultiSelectOption[],
+    subjects: [],
+    assignedClasses: [],
+    attachments: [],
 }
 
 const AddTeacherPage = () => {
@@ -140,6 +122,7 @@ const AddTeacherPage = () => {
         setIsLoading(true)
 
         try {
+            // Step 1: Create teacher without attachments
             const postData = {
                 tenant_id: session.user.tenantId,
                 first_name: form.firstName.trim(),
@@ -160,17 +143,47 @@ const AddTeacherPage = () => {
                 return
             }
 
-            if (resp && typeof resp === 'object' && 'status' in resp && resp.status >= 200 && resp.status < 300) {
-                handleVerificationSuccess()
+            // Extract teacher ID from response
+            let teacherId: string | null = null
+            if (resp && typeof resp === 'object') {
+                // Try different possible response structures
+                if ('data' in resp && resp.data && typeof resp.data === 'object') {
+                    const data = resp.data as Record<string, unknown>
+                    teacherId = (data.id as string) || (data.teacher_id as string) || null
+                } else {
+                    const respObj = resp as Record<string, unknown>
+                    if ('id' in respObj) {
+                        teacherId = respObj.id as string
+                    } else if ('teacher_id' in respObj) {
+                        teacherId = respObj.teacher_id as string
+                    }
+                }
+            }
+
+            if (!teacherId) {
+                setLocalError('Failed to create teacher: Teacher ID not found in response')
                 return
             }
 
-            if (!resp || (resp && typeof resp === 'object' && !('error' in resp))) {
-                handleVerificationSuccess()
-                return
+            // Step 2: Upload attachments if any
+            if (form.attachments.length > 0) {
+                for (const attachment of form.attachments) {
+                    const attachmentFormData = new FormData()
+                    attachmentFormData.append('teacher_id', teacherId)
+                    attachmentFormData.append('file', attachment.file)
+                    attachmentFormData.append('file_type', 'other')
+                    attachmentFormData.append('file_name', attachment.fileName)
+
+                    const attachmentResp = await postFormData('/teachers/attachments', attachmentFormData)
+
+                    if (attachmentResp && typeof attachmentResp === 'object' && 'error' in attachmentResp && attachmentResp.error) {
+                        setLocalError(`Failed to upload ${attachment.fileName}: ${attachmentResp.message || 'Upload failed'}`)
+                        return
+                    }
+                }
             }
 
-            setLocalError('Something went wrong. Please try again')
+            handleVerificationSuccess()
         } catch (error) {
             console.error('Error during POST request:', error)
             setLocalError('An unexpected error occurred. Please try again.')
@@ -196,6 +209,10 @@ const AddTeacherPage = () => {
                     firstNameInputRef={firstNameInputRef}
                     form={form}
                     handleSubmit={handleSubmit}
+                    setForm={setForm}
+                />
+                <TeacherAttachments
+                    form={form}
                     setForm={setForm}
                 />
                 <AssignedTabs

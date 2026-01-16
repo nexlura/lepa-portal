@@ -3,7 +3,7 @@ import { Dispatch, FormEvent, RefObject, SetStateAction } from 'react'
 import { Field, Label, ErrorMessage } from '@/components/UIKit/Fieldset'
 import { Input } from '@/components/UIKit/Input'
 import { Listbox, ListboxOption } from '@/components/UIKit/listbox'
-import { AddTeacherForm, AddTeacherFormErrors } from '@/app/(portal)/teachers/new/page'
+import type { AddTeacherForm, AddTeacherFormErrors } from '@/components/Teachers/AddTeacher/types'
 
 interface PersonalInfoFormProps {
     handleSubmit: (event?: FormEvent<HTMLFormElement>) => Promise<void>

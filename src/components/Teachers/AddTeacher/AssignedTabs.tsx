@@ -2,7 +2,7 @@ import { SetStateAction, Dispatch, useState } from "react"
 import clsx from 'clsx'
 
 import { MultiSelectOption } from "../../UIKit/MultiSelect"
-import { AddTeacherForm } from "@/app/(portal)/teachers/new/page"
+import type { AddTeacherForm } from "@/components/Teachers/AddTeacher/types"
 import SearchableAssignSelect from "./SearchableAssignSelect"
 
 const SUBJECT_OPTIONS: MultiSelectOption[] = [
