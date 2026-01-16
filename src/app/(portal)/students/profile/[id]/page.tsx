@@ -1,7 +1,7 @@
 import { getModel } from '@/lib/connector'
 import { BackendStudentData, Student } from '../../[pid]/page'
 import StudentProfileView from '@/components/Students/StudentProfile'
-import type { StudentDocument } from '@/components/Students/StudentDetails/DocumentsList'
+import type { Doc } from '@/components/DocumentsList'
 
 const StudentProfilePage = async ({ params }: {
     params: Promise<{ id: string }>;
@@ -29,7 +29,7 @@ const StudentProfilePage = async ({ params }: {
     }
 
     // Fetch student attachments
-    let attachments: StudentDocument[] = []
+    let attachments: Doc[] = []
     try {
         const attachmentsResponse = await getModel<{ 
             data?: { 

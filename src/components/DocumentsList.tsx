@@ -22,7 +22,7 @@ const formatDate = (dateString?: string): string => {
     }
 }
 
-export interface StudentDocument {
+export interface Doc {
     id: string | number
     name: string
     url?: string
@@ -33,13 +33,13 @@ export interface StudentDocument {
 }
 
 interface DocumentsListProps {
-    documents: StudentDocument[]
+    documents: Doc[]
 }
 
 const DocumentsList = ({ documents }: DocumentsListProps) => {
-    const [previewDoc, setPreviewDoc] = useState<StudentDocument | null>(null)
+    const [previewDoc, setPreviewDoc] = useState<Doc | null>(null)
 
-    const handleDownload = async (doc: StudentDocument) => {
+    const handleDownload = async (doc: Doc) => {
         if (!doc.url && !doc.previewUrl) return
         const downloadUrl = doc.url || doc.previewUrl
         if (!downloadUrl) return

@@ -1,4 +1,5 @@
-import TeacherProfileView, { TeacherProfile } from '@/components/Teachers/TeacherProfileView'
+import { Doc } from '@/components/DocumentsList'
+import TeacherProfileView, { TeacherProfile } from '@/components/Teachers/TeacherProfile'
 import { getModel } from '@/lib/connector'
 
 type PageProps = {
@@ -76,7 +77,64 @@ const TeacherProfilePage = async ({ params }: PageProps) => {
         classes: normalizeClasses(teacherData.assigned_classes),
     }
 
-    return <TeacherProfileView teacher={teacherProfile} />
+    let attachments: Doc[] = []
+    try {
+        const attachmentsResponse = await getModel<{ 
+            data?: { 
+                attachments?: Array<{
+                    id: string | number
+                    file_name: string
+                    file_type?: string
+                    file_url?: string
+                    preview_url?: string
+                    uploaded_at?: string
+                    file_size?: number
+                }>
+            } | Array<{
+                id: string | number
+                file_name: string
+                file_type?: string
+                file_url?: string
+                preview_url?: string
+                uploaded_at?: string
+                file_size?: number
+            }>
+        }>(`/teachers/${teacherId}/attachments`)
+        
+        // Handle different response structures
+        let attachmentList: Array<{
+            id: string | number
+            file_name: string
+            file_type?: string
+            file_url?: string
+            preview_url?: string
+            uploaded_at?: string
+            file_size?: number
+        }> = []
+        
+        if (attachmentsResponse?.data) {
+            if (Array.isArray(attachmentsResponse.data)) {
+                attachmentList = attachmentsResponse.data
+            } else if ('attachments' in attachmentsResponse.data && Array.isArray(attachmentsResponse.data.attachments)) {
+                attachmentList = attachmentsResponse.data.attachments
+            }
+        }
+        
+        attachments = attachmentList.map((att) => ({
+            id: att.id,
+            name: att.file_name,
+            url: att.file_url,
+            previewUrl: att.preview_url || att.file_url,
+            fileType: att.file_type,
+            uploadedAt: att.uploaded_at,
+            fileSize: att.file_size,
+        }))
+    } catch (error) {
+        console.error('Error fetching student attachments:', error)
+        // Continue with empty attachments array
+    }
+
+    return <TeacherProfileView teacher={teacherProfile} attachments={attachments} />
 }
 
 export default TeacherProfilePage

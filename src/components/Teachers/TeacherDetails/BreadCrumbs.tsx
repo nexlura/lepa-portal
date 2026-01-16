@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { ChevronRightIcon } from '@heroicons/react/24/outline'
-import { TeacherProfile } from '../TeacherProfileView'
+import { TeacherProfile } from '../TeacherProfile'
 
 interface BreadcrumbsProps {
     teacher: TeacherProfile

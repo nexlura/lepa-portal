@@ -1,4 +1,4 @@
-import { TeacherProfile } from '../TeacherProfileView'
+import { TeacherProfile } from '../TeacherProfile'
 import { formatDate } from '@/utils/formatDate'
 import { getTitleFromGender } from '@/utils/titleByGender'
 

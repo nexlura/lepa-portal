@@ -5,15 +5,15 @@ import { useRouter } from 'next/navigation'
 import { ArrowLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline'
 
 import TopCards from '@/components/Students/StudentDetails/TopCards'
-import DocumentsList from '@/components/Students/StudentDetails/DocumentsList'
+import DocumentsList from '@/components/DocumentsList'
 import PersonalInfoSection from '@/components/Students/StudentDetails/PersonalInfo'
 import Breadcrumbs from '@/components/Students/StudentDetails/BreadCrumbs'
 import { Student } from '@/app/(portal)/students/[pid]/page'
-import type { StudentDocument } from '@/components/Students/StudentDetails/DocumentsList'
+import type { Doc } from '@/components/DocumentsList'
 
 interface StudentProfileViewProps {
     student: Student
-    attachments?: StudentDocument[]
+    attachments?: Doc[]
 }
 
 const StudentProfileView = ({ student, attachments = [] }: StudentProfileViewProps) => {

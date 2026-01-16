@@ -1,11 +1,9 @@
 'use client'
 
-import Link from 'next/link'
-import { ShieldExclamationIcon } from '@heroicons/react/24/outline'
 import Breadcrumbs from './TeacherDetails/BreadCrumbs'
 import TopCards from './TeacherDetails/TopCards'
 import PersonalInfoSection from './TeacherDetails/PersonalInfo'
-import TeachingResponsibilities from './TeacherDetails/TeachingResponsibilities'
+import DocumentsList, { Doc } from '../DocumentsList'
 
 export type TeacherProfile = {
     id: number
@@ -24,18 +22,20 @@ export type TeacherProfile = {
 
 interface TeacherProfileViewProps {
     teacher: TeacherProfile
+    attachments?: Doc[]
+
 }
 
-const TeacherProfileView = ({ teacher }: TeacherProfileViewProps) => {
+const TeacherProfileView = ({ teacher, attachments = [] }: TeacherProfileViewProps) => {
     return (
         <div className="space-y-6">
             <div className="w-full flex justify-between items-center">
                 {/* Breadcrumbs */}
                 <Breadcrumbs teacher={teacher} />
 
-                <Link href="/dashboard" className="text-primary-800 hover:text-primary-900 text-sm flex items-center gap-x-1.5">
+                {/* <Link href="/dashboard" className="text-primary-800 hover:text-primary-900 text-sm flex items-center gap-x-1.5">
                     Access Information <span><ShieldExclamationIcon className="w-6 h-6" /></span>
-                </Link>
+                </Link> */}
             </div>
 
             {/* Top cards */}
@@ -47,7 +47,8 @@ const TeacherProfileView = ({ teacher }: TeacherProfileViewProps) => {
                 <PersonalInfoSection teacher={teacher} />
 
                 {/* Right rail: Teaching Responsibilities */}
-                <TeachingResponsibilities teacher={teacher} />
+                <DocumentsList documents={attachments} />
+
             </div>
         </div>
     )
