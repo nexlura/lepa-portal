@@ -5,11 +5,12 @@ import { Field, Label } from '@/components/UIKit/Fieldset'
 import { Button } from '../UIKit/Button'
 
 interface TeacherData {
-    name: string
+    firstName: string
+    lastName: string
+    gender: string
     email: string
-    subject: string
-    phone?: string
-    department?: string
+    phone: string
+    password: string
 }
 interface CSVValidationResult {
     isValid: boolean
@@ -47,7 +48,7 @@ const ImportTeachersModal = ({
                 }
 
                 const headers = lines[0].split(',').map(h => h.trim().toLowerCase())
-                const requiredHeaders = ['name', 'email', 'subject']
+                const requiredHeaders = ['first_name', 'last_name', 'gender', 'email', 'phone', 'password']
                 const missingHeaders = requiredHeaders.filter(h => !headers.includes(h))
 
                 if (missingHeaders.length > 0) {
@@ -66,33 +67,43 @@ const ImportTeachersModal = ({
                     const line = lines[i]
                     const values = line.split(',').map(v => v.trim())
 
-                    if (values.length < 3) {
+                    if (values.length < requiredHeaders.length) {
                         errors.push(`Row ${i + 1}: Insufficient data`)
                         continue
                     }
 
                     const teacher: TeacherData = {
-                        name: values[headers.indexOf('name')] || '',
+                        firstName: values[headers.indexOf('first_name')] || '',
+                        lastName: values[headers.indexOf('last_name')] || '',
+                        gender: values[headers.indexOf('gender')] || '',
                         email: values[headers.indexOf('email')] || '',
-                        subject: values[headers.indexOf('subject')] || '',
-                        phone: headers.includes('phone') ? values[headers.indexOf('phone')] || '' : '',
-                        department: headers.includes('department') ? values[headers.indexOf('department')] || '' : ''
+                        phone: values[headers.indexOf('phone')] || '',
+                        password: values[headers.indexOf('password')] || '',
                     }
 
                     // Validate required fields
-                    if (!teacher.name.trim()) {
-                        errors.push(`Row ${i + 1}: Name is required`)
+                    if (!teacher.firstName.trim()) {
+                        errors.push(`Row ${i + 1}: first_name is required`)
+                    }
+                    if (!teacher.lastName.trim()) {
+                        errors.push(`Row ${i + 1}: last_name is required`)
+                    }
+                    if (!teacher.gender.trim()) {
+                        errors.push(`Row ${i + 1}: gender is required`)
                     }
                     if (!teacher.email.trim()) {
                         errors.push(`Row ${i + 1}: Email is required`)
                     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(teacher.email)) {
                         errors.push(`Row ${i + 1}: Invalid email format`)
                     }
-                    if (!teacher.subject.trim()) {
-                        errors.push(`Row ${i + 1}: Subject is required`)
+                    if (!teacher.phone.trim()) {
+                        errors.push(`Row ${i + 1}: phone is required`)
+                    }
+                    if (!teacher.password.trim()) {
+                        errors.push(`Row ${i + 1}: password is required`)
                     }
 
-                    if (teacher.name.trim() && teacher.email.trim() && teacher.subject.trim()) {
+                    if (teacher.firstName && teacher.lastName && teacher.gender && teacher.email && teacher.phone && teacher.password) {
                         teachers.push(teacher)
                     }
                 }
@@ -153,7 +164,11 @@ const ImportTeachersModal = ({
     }
 
     const downloadTemplate = () => {
-        const csvContent = 'name,email,subject,phone,department\nDr. Emily Wilson,emily.wilson@lepa.edu,Mathematics,+1 (555) 123-4567,STEM\nMr. David Chen,david.chen@lepa.edu,Science,+1 (555) 234-5678,STEM'
+        const csvContent = [
+            'first_name,last_name,gender,email,phone,password',
+            'Emily,Wilson,female,emily.wilson@lepa.edu,+15551234567,Secret123',
+            'David,Chen,male,david.chen@lepa.edu,+15552345678,SecurePass!'
+        ].join('\n')
         const blob = new Blob([csvContent], { type: 'text/csv' })
         const url = window.URL.createObjectURL(blob)
         const a = document.createElement('a')
@@ -190,7 +205,7 @@ const ImportTeachersModal = ({
                             />
                         </div>
                         <p className="mt-2 text-sm text-gray-500">
-                            The CSV should include columns for: name, email, subject (required), phone, department (optional)
+                            Required headers: first_name, last_name, gender, email, phone, password
                         </p>
                     </Field>
 

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Session } from 'next-auth'
-import { PlusIcon, BookOpenIcon } from '@heroicons/react/24/outline'
+import { PlusIcon, BookOpenIcon, ArrowUpOnSquareIcon } from '@heroicons/react/24/outline'
 
 import { Button } from '@/components/UIKit/Button'
 import { SchoolClass } from '@/app/(portal)/classes/[pageNumber]/page'
@@ -10,6 +10,7 @@ import EmptyState from '../EmptyState'
 import ClassesStats from './ClassesStats'
 import AddSchoolClassModal from './AddClassModal'
 import SchoolClassesTable from '@/components/SchoolClasses/Table'
+import ImportClassesModal from './ImportClassesModal'
 interface ClassesAnalytics {
     totalClasses: number;
     totalCapacity: number;
@@ -25,6 +26,11 @@ interface ClassesViewProps {
 
 const SchoolClassesView = ({ classes, totalPages, session, analytics }: ClassesViewProps) => {
     const [isAddOpen, setIsAddOpen] = useState(false)
+    const [isImportModal, setIsImportModal] = useState(false)
+
+    const handleImpModalClose = () => {
+        setIsImportModal(false)
+    }
     //show empty-state component when we have zero items
     if (classes.length < 1) {
         return (
@@ -54,6 +60,7 @@ const SchoolClassesView = ({ classes, totalPages, session, analytics }: ClassesV
     }
 
     return (
+        <>
         <div className="space-y-6">
             {/* Page header */}
             <div className="flex items-center justify-between">
@@ -64,6 +71,14 @@ const SchoolClassesView = ({ classes, totalPages, session, analytics }: ClassesV
                     </p>
                 </div>
                 <div className="flex items-center gap-3">
+                <Button
+                        type='button'
+                        outline
+                        onClick={() => setIsImportModal(true)}
+                    >
+                        <ArrowUpOnSquareIcon className="h-4 w-4 mr-2 text-white" color='white' />
+                        Import Classes
+                    </Button>
                     <Button
                         color="primary"
                         onClick={() => setIsAddOpen(true)}
@@ -78,8 +93,15 @@ const SchoolClassesView = ({ classes, totalPages, session, analytics }: ClassesV
             {/* Classes table */}
             <SchoolClassesTable classes={classes} totalPages={totalPages} />
 
-            <AddSchoolClassModal open={isAddOpen} onClose={setIsAddOpen} session={session} />
         </div>
+            <AddSchoolClassModal open={isAddOpen} onClose={setIsAddOpen} session={session} />
+            <ImportClassesModal
+                onClose={handleImpModalClose}
+                onSubmit={() => console.log('called')}
+                open={isImportModal}
+            />
+        </>
+
     );
 };
 

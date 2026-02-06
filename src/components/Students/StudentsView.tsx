@@ -1,12 +1,14 @@
 'use client'
 
-import { ClipboardDocumentListIcon, PlusIcon } from '@heroicons/react/24/outline'
+import { ArrowUpOnSquareIcon, ClipboardDocumentListIcon, PlusIcon } from '@heroicons/react/24/outline'
+import { useState } from 'react';
 
 import { Button } from '@/components/UIKit/Button';
 import EmptyState from '@/components/EmptyState';
 import { Student } from '@/app/(portal)/students/[pid]/page';
 import StudentsTable from '@/components/Students/StudentTable';
 import StudentsStats from './StudentsStats';
+import ImportStudentsModal from './ImportStudentsModal';
 
 interface StudentsAnalytics {
     totalStudents: number;
@@ -26,6 +28,11 @@ export interface StudentsViewProps {
 
 
 const StudentsView = ({ students, totalPages, analytics }: StudentsViewProps) => {
+    const [isImportModal, setIsImportModal] = useState(false)
+
+    const handleImpModalClose = () => {
+        setIsImportModal(false)
+    }
 
     if (students.length < 1) {
         return (
@@ -50,6 +57,7 @@ const StudentsView = ({ students, totalPages, analytics }: StudentsViewProps) =>
     }
 
     return (
+        <>
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
@@ -59,6 +67,14 @@ const StudentsView = ({ students, totalPages, analytics }: StudentsViewProps) =>
                     </p>
                 </div>
                 <div className="flex space-x-3">
+                <Button
+                        type='button'
+                        outline
+                        onClick={() => setIsImportModal(true)}
+                    >
+                        <ArrowUpOnSquareIcon className="h-4 w-4 mr-2 text-white" color='white' />
+                        Import Students
+                    </Button>
                     <Button
                         href="/students/new"
                         color='primary'
@@ -74,6 +90,12 @@ const StudentsView = ({ students, totalPages, analytics }: StudentsViewProps) =>
 
             <StudentsTable totalPages={totalPages} students={students} />
         </div>
+        <ImportStudentsModal 
+        open={isImportModal} 
+        onClose={handleImpModalClose} 
+        onSubmit={() => console.log()} 
+        />
+        </>
     )
 }
 

@@ -5,7 +5,8 @@ import { Field, Label } from '@/components/UIKit/Fieldset'
 import { Button } from '../UIKit/Button'
 
 interface ClassData {
-    name: string
+    className: string
+    grade: string
     capacity: string
 }
 interface CSVValidationResult {
@@ -44,7 +45,7 @@ const ImportClassesModal = ({
                 }
 
                 const headers = lines[0].split(',').map(h => h.trim().toLowerCase())
-                const requiredHeaders = ['name', 'capacity',]
+                const requiredHeaders = ['class_name', 'grade', 'capacity']
                 const missingHeaders = requiredHeaders.filter(h => !headers.includes(h))
 
                 if (missingHeaders.length > 0) {
@@ -63,26 +64,30 @@ const ImportClassesModal = ({
                     const line = lines[i]
                     const values = line.split(',').map(v => v.trim())
 
-                    if (values.length < 2) {
+                    if (values.length < requiredHeaders.length) {
                         errors.push(`Row ${i + 1}: Insufficient data`)
                         continue
                     }
 
                     const klass: ClassData = {
-                        name: values[headers.indexOf('name')] || '',
+                        className: values[headers.indexOf('class_name')] || '',
+                        grade: values[headers.indexOf('grade')] || '',
                         capacity: values[headers.indexOf('capacity')] || '',
                     }
 
                     // Validate required fields
-                    if (!klass.name.trim()) {
-                        errors.push(`Row ${i + 1}: Name is required`)
+                    if (!klass.className.trim()) {
+                        errors.push(`Row ${i + 1}: class_name is required`)
+                    }
+                    if (!klass.grade.trim()) {
+                        errors.push(`Row ${i + 1}: grade is required`)
                     }
                     if (!klass.capacity.trim()) {
                         errors.push(`Row ${i + 1}: Capacity is required`)
                     }
 
                     // Add the class to the classes array if it's valid
-                    if (klass.name.trim() && klass.capacity.trim()) {
+                    if (klass.className.trim() && klass.grade.trim() && klass.capacity.trim()) {
                         classes.push(klass)
                     }
                 }
@@ -143,7 +148,11 @@ const ImportClassesModal = ({
     }
 
     const downloadTemplate = () => {
-        const csvContent = 'name,capacity\nClass 4,40\nClass 5,35'
+        const csvContent = [
+            'class_name,grade,capacity',
+            'Class 4,Grade 4,40',
+            'Class 5,Grade 5,35'
+        ].join('\n')
         const blob = new Blob([csvContent], { type: 'text/csv' })
         const url = window.URL.createObjectURL(blob)
         const a = document.createElement('a')
@@ -169,7 +178,7 @@ const ImportClassesModal = ({
                 <div className="mt-4 space-y-6">
                     {/* File Upload */}
                     <Field>
-                        <Label className="text-sm/6 text-gray-900 font-medium">CSV File</Label>
+                            <Label className="text-sm/6 text-gray-900 font-medium">CSV File</Label>
                         <div className="mt-1">
                             <input
                                 ref={fileInputRef}
@@ -179,9 +188,9 @@ const ImportClassesModal = ({
                                 className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                             />
                         </div>
-                        <p className="mt-2 text-sm text-gray-500">
-                            The CSV should include columns for: name, capacity,  (required)
-                        </p>
+                            <p className="mt-2 text-sm text-gray-500">
+                                Required headers: class_name, grade, capacity
+                            </p>
                     </Field>
 
                     {/* Processing State */}

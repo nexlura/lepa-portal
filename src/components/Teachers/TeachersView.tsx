@@ -1,11 +1,13 @@
 'use client'
 
-import { AcademicCapIcon, PlusIcon } from '@heroicons/react/24/outline'
+import { AcademicCapIcon, ArrowUpOnSquareIcon, PlusIcon } from '@heroicons/react/24/outline'
 
 import { Button } from '@/components/UIKit/Button'
 import TeachersTable from './Table'
 import TeachersStats from './TeachersStats'
 import EmptyState from '../EmptyState'
+import { useState } from 'react'
+import ImportTeachersModal from './ImportTeachersModal'
 
 export interface Teacher {
     id: number
@@ -33,6 +35,12 @@ interface TeachersViewProps {
 };
 
 const TeachersView = ({ teachers, totalPages, analytics }: TeachersViewProps) => {
+    const [isImportModal, setIsImportModal] = useState(false)
+
+    const handleImpModalClose = () => {
+        setIsImportModal(false)
+    }
+
     if (teachers?.length < 1) {
         return (
             <>
@@ -55,6 +63,7 @@ const TeachersView = ({ teachers, totalPages, analytics }: TeachersViewProps) =>
     }
 
     return (
+        <>
         <div className="space-y-6">
             {/* Page header */}
             <div className="flex items-center justify-between">
@@ -65,6 +74,14 @@ const TeachersView = ({ teachers, totalPages, analytics }: TeachersViewProps) =>
                     </p>
                 </div>
                 <div className="flex space-x-3">
+                <Button
+                        type='button'
+                        outline
+                        onClick={() => setIsImportModal(true)}
+                    >
+                        <ArrowUpOnSquareIcon className="h-4 w-4 mr-2 text-white" color='white' />
+                        Import Teachers
+                    </Button>
                     <Button
                         href="/teachers/new"
                         color='primary'
@@ -80,6 +97,13 @@ const TeachersView = ({ teachers, totalPages, analytics }: TeachersViewProps) =>
 
             <TeachersTable teachers={teachers} totalPages={totalPages} />
         </div>
+        <ImportTeachersModal 
+            onClose={handleImpModalClose} 
+            onSubmit={() => console.log('called')} 
+            open={isImportModal}
+        />
+        </>
+
     )
 }
 
