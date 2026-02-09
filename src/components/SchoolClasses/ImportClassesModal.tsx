@@ -22,10 +22,11 @@ const ImportClassesModal = ({
 }: {
     open: boolean
     onClose: (open: boolean) => void
-    onSubmit: (classes: ClassData[]) => void
+    onSubmit: (file: File) => void
 }) => {
     const [validationResult, setValidationResult] = useState<CSVValidationResult | null>(null)
     const [isProcessing, setIsProcessing] = useState(false)
+    const [selectedFile, setSelectedFile] = useState<File | null>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
 
     const validateCSV = (file: File): Promise<CSVValidationResult> => {
@@ -112,10 +113,12 @@ const ImportClassesModal = ({
                 classes: [],
                 errors: ['Please select a valid CSV file']
             })
+            setSelectedFile(null)
             return
         }
 
         setIsProcessing(true)
+        setSelectedFile(file)
 
         try {
             const result = await validateCSV(file)
@@ -132,8 +135,8 @@ const ImportClassesModal = ({
     }
 
     const handleSubmit = () => {
-        if (validationResult?.isValid && validationResult.classes.length > 0) {
-            onSubmit(validationResult.classes)
+        if (validationResult?.isValid && validationResult.classes.length > 0 && selectedFile) {
+            onSubmit(selectedFile)
             handleClose()
         }
     }
@@ -141,6 +144,7 @@ const ImportClassesModal = ({
     const handleClose = () => {
         setValidationResult(null)
         setIsProcessing(false)
+        setSelectedFile(null)
         if (fileInputRef.current) {
             fileInputRef.current.value = ''
         }
@@ -231,7 +235,7 @@ const ImportClassesModal = ({
                                     <div className="space-y-2 max-h-40 overflow-y-auto">
                                         {validationResult.classes.slice(0, 5).map((klass, index) => (
                                             <div key={index} className="text-sm text-gray-600">
-                                                <span className="font-medium">{klass.name}</span> - {klass.capacity}
+                                                <span className="font-medium">{klass.className}</span> - {klass.grade}
                                             </div>
                                         ))}
                                         {validationResult.classes.length > 5 && (

@@ -1,16 +1,19 @@
 'use client'
 
-import { useState } from 'react'
+import { useContext, useState } from 'react'
 import { Session } from 'next-auth'
 import { PlusIcon, BookOpenIcon, ArrowUpOnSquareIcon } from '@heroicons/react/24/outline'
 
 import { Button } from '@/components/UIKit/Button'
 import { SchoolClass } from '@/app/(portal)/classes/[pageNumber]/page'
+import { postFormData } from '@/lib/connector'
 import EmptyState from '../EmptyState'
 import ClassesStats from './ClassesStats'
 import AddSchoolClassModal from './AddClassModal'
 import SchoolClassesTable from '@/components/SchoolClasses/Table'
 import ImportClassesModal from './ImportClassesModal'
+import revalidatePage from '@/app/actions/revalidate-path'
+import { FeedbackContext } from '@/context/feedback'
 interface ClassesAnalytics {
     totalClasses: number;
     totalCapacity: number;
@@ -25,11 +28,36 @@ interface ClassesViewProps {
 };
 
 const SchoolClassesView = ({ classes, totalPages, session, analytics }: ClassesViewProps) => {
+    const { setFeedback } = useContext(FeedbackContext)
+
     const [isAddOpen, setIsAddOpen] = useState(false)
     const [isImportModal, setIsImportModal] = useState(false)
 
     const handleImpModalClose = () => {
         setIsImportModal(false)
+    }
+
+    const handleVerificationSuccess = () => {
+        revalidatePage('/classes/1');
+        setFeedback({ status: 'success', text: 'Classes added successfully!' })
+    };
+    //handle import classes
+    const handleImportSubmit = async (file: File) => {
+        if (!session?.user?.tenantId) {
+            console.error('Tenant ID not found for bulk upload')
+            return
+        }
+
+        try {
+            const formData = new FormData()
+            formData.append('tenant_id', session.user.tenantId)
+            formData.append('file', file)
+
+            await postFormData('/classes/bulk-upload', formData)
+            handleVerificationSuccess()
+        } catch (error) {
+            console.error('Error during classes bulk upload:', error)
+        }
     }
     //show empty-state component when we have zero items
     if (classes.length < 1) {
@@ -97,7 +125,7 @@ const SchoolClassesView = ({ classes, totalPages, session, analytics }: ClassesV
             <AddSchoolClassModal open={isAddOpen} onClose={setIsAddOpen} session={session} />
             <ImportClassesModal
                 onClose={handleImpModalClose}
-                onSubmit={() => console.log('called')}
+                onSubmit={handleImportSubmit}
                 open={isImportModal}
             />
         </>
