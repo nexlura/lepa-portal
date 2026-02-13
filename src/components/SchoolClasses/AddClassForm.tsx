@@ -3,9 +3,9 @@ import { Dispatch, RefObject, SetStateAction } from 'react'
 import { Field, Label, ErrorMessage } from '@/components/UIKit/Fieldset'
 import { Input } from '@/components/UIKit/Input'
 import SelectMenu from '../UIKit/SelectMenu'
-import FormSubmitFeedback from '../FormAlert'
 import { ClassForm, ClassformErrors } from './AddClassModal'
 import { MultiSelectOption } from '../UIKit/MultiSelect'
+import FormSubmitFeedback from '../SubmitFeedback'
 
 interface AddClassFormProps {
     localError: string | null
