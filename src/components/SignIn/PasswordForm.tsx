@@ -5,7 +5,8 @@ import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { authenticate } from '@/lib/actions';
 import { Button } from '@/components/UIKit/Button'
 import { Field, Label } from '@/components/UIKit/Fieldset'
-import FormSubmitFeedback from '../FormAlert';
+import FormSubmitFeedback from '../SubmitFeedback';
+
 
 
 const PasswordForm = (props: { identifier: string }) => {

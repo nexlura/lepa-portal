@@ -121,11 +121,7 @@ const SchoolClassesView = ({ classes, totalPages, session, analytics }: ClassesV
             })
             setShowBulkDetails(false)
 
-            // Revalidate listing when at least one class was created
-            // if (failureCount < 1) {
-            //     revalidatePage('/classes/1');
-            //     setFeedback({ status: 'success', text: 'Classes added successfully!' })
-            // }
+            
         } catch (error) {
             console.error('Error during classes bulk upload:', error)
             setFeedback({
@@ -169,7 +165,12 @@ const SchoolClassesView = ({ classes, totalPages, session, analytics }: ClassesV
            <ClassesMainHeader setIsAddOpen={setIsAddOpen} setIsImportModal={setIsImportModal} />
             {/* Bulk upload summary (if any) */}
             {bulkResult && bulkResult.failureCount > 0 && (
-               <BulkUploadFeedback bulkResult={bulkResult} showBulkDetails={showBulkDetails} setShowBulkDetails={setShowBulkDetails} />
+               <BulkUploadFeedback 
+               bulkResult={bulkResult} 
+               showBulkDetails={showBulkDetails} 
+               setShowBulkDetails={setShowBulkDetails} 
+               setBulkResult={setBulkResult} 
+               />
             )}
 
             <ClassesStats analytics={analytics} />

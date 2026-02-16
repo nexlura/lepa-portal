@@ -1,5 +1,6 @@
-import { XCircleIcon, XMarkIcon } from "@heroicons/react/24/outline"
+import { ExclamationTriangleIcon, XCircleIcon, XMarkIcon,  } from "@heroicons/react/24/outline"
 import { Dispatch, SetStateAction } from "react"
+
 
 type BulkUploadResult = {
     successCount: number
@@ -12,13 +13,17 @@ interface BulkUploadFeedbackProps {
     bulkResult: BulkUploadResult
     showBulkDetails: boolean
     setShowBulkDetails: Dispatch<SetStateAction<boolean>>
+    setBulkResult: Dispatch<SetStateAction<BulkUploadResult | null>>
 }
-const BulkUploadFeedback = ({ bulkResult,  showBulkDetails, setShowBulkDetails }: BulkUploadFeedbackProps) => {
+const BulkUploadFeedback = ({ bulkResult,  showBulkDetails, setShowBulkDetails, setBulkResult }: BulkUploadFeedbackProps) => {
+
+    const message = `Upload completed with issues — ${bulkResult.successCount} class${
+        bulkResult.successCount > 1 ? "es were" : " was"
+      } created successfully.`;
 
     return (
         <div className="flex rounded-md border border-gray-200 bg-gray-50 p-4 text-sm text-gray-800 ">
             <div>
-
         <div>
             {bulkResult.successCount === 0 && bulkResult.failureCount === bulkResult.totalCount && (
                 <span className="flex font-medium text-red-700">
@@ -28,10 +33,12 @@ const BulkUploadFeedback = ({ bulkResult,  showBulkDetails, setShowBulkDetails }
                 </span>
             )}
             {bulkResult.successCount > 0 && bulkResult.failureCount > 0 && (
-                <div className="font-medium space-y-0.5">
-                    <div className="text-gray-900">⚠️ Upload completed with issues.</div>
-                    <div className="text-green-700">{bulkResult.successCount} class{bulkResult.successCount === 1 ? '' : 'es'} created successfully.</div>
-                    <div className="text-amber-700">{bulkResult.failureCount} class{bulkResult.failureCount === 1 ? '' : 'es'} were skipped.</div>
+                <div className="flex font-medium space-y-0.5">
+                            <div className="shrink-0">
+          <ExclamationTriangleIcon aria-hidden="true" className="size-5 text-yellow-400 mr-2" />
+        </div>
+
+                    <div className="text-sm font-medium text-yellow-800">{message}</div>
                 </div>
             )}
         </div>
@@ -43,7 +50,7 @@ const BulkUploadFeedback = ({ bulkResult,  showBulkDetails, setShowBulkDetails }
                     className="text-xs font-medium text-amber-700 hover:text-amber-900 underline"
                     onClick={() => setShowBulkDetails(prev => !prev)}
                 >
-                    {showBulkDetails ? 'Hide failed rows' : 'View failed rows'}
+                    {showBulkDetails ? 'Hide failed rows' : `View (${bulkResult.failureCount}) failed rows`}
                 </button>
                 {showBulkDetails && (
                     <ul className="mt-2 list-disc list-inside text-xs text-gray-700 space-y-1">
@@ -60,6 +67,7 @@ const BulkUploadFeedback = ({ bulkResult,  showBulkDetails, setShowBulkDetails }
             <button
               type="button"
               className="inline-flex rounded-md bg-gray-50 p-1.5 text-gray-500 hover:bg-gray-100 focus-visible:ring-2 focus-visible:ring-green-600 focus-visible:ring-offset-2 focus-visible:ring-offset-green-50 focus-visible:outline-hidden"
+              onClick={() => setBulkResult(null)}
             >
               <span className="sr-only">Dismiss</span>
               <XMarkIcon aria-hidden="true" className="size-5" />
