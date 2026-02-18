@@ -1,8 +1,10 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 
 import { Dialog, DialogActions, DialogBody, DialogDescription, DialogTitle } from '@/components/UIKit/Dialog'
 import { Field, Label } from '@/components/UIKit/Fieldset'
 import { Button } from '@/components/UIKit/Button'
+import SelectClassSection from './SelectClassSection'
+import { MultiSelectOption } from '@/components/UIKit/MultiSelect'
 
 export type MinimalStudent = {
     firstName: string
@@ -26,11 +28,15 @@ const ImportStudentsModal = ({
 }: {
     open: boolean
     onClose: (open: boolean) => void
-    onSubmit: (students: MinimalStudent[]) => void
+    onSubmit: (file: File, selectedClassId: string) => void
 }) => {
+    const fileInputRef = useRef<HTMLInputElement>(null)
+
     const [validationResult, setValidationResult] = useState<CSVValidationResult | null>(null)
     const [isProcessing, setIsProcessing] = useState(false)
-    const fileInputRef = useRef<HTMLInputElement>(null)
+    const [selectedFile, setSelectedFile] = useState<File | null>(null)
+    const [selectedClass, setSelectedClass] = useState<MultiSelectOption | null>(null)
+
 
     const validateCSV = (file: File): Promise<CSVValidationResult> => {
         return new Promise((resolve) => {
@@ -88,14 +94,17 @@ const ImportStudentsModal = ({
         if (!file) return
         if (!file.name.endsWith('.csv')) {
             setValidationResult({ isValid: false, students: [], errors: ['Please select a .csv file'] })
+            setSelectedFile(null)
             return
         }
         setIsProcessing(true)
         try {
             const result = await validateCSV(file)
             setValidationResult(result)
+            setSelectedFile(file)
         } catch {
             setValidationResult({ isValid: false, students: [], errors: ['Error processing CSV file'] })
+            setSelectedFile(null)
         } finally {
             setIsProcessing(false)
         }
@@ -104,13 +113,15 @@ const ImportStudentsModal = ({
     const handleClose = () => {
         setValidationResult(null)
         setIsProcessing(false)
+        setSelectedFile(null)
+        setSelectedClass(null)
         if (fileInputRef.current) fileInputRef.current.value = ''
         onClose(false)
     }
 
     const handleSubmit = () => {
-        if (validationResult?.isValid && validationResult.students.length) {
-            onSubmit(validationResult.students)
+        if (validationResult?.isValid && validationResult.students.length && selectedFile) {
+            onSubmit(selectedFile, selectedClass?.id || '')
             handleClose()
         }
     }
@@ -138,6 +149,7 @@ const ImportStudentsModal = ({
                 <button onClick={downloadTemplate} className="ml-2 text-blue-600 hover:text-blue-800 underline">Download template</button>
             </DialogDescription>
             <DialogBody>
+            <SelectClassSection selectedClass={selectedClass} setSelectedClass={setSelectedClass} />
                 <div className="mt-4 space-y-6">
                     <Field>
                             <Label className="text-sm/6 text-gray-900 font-medium">CSV File</Label>
