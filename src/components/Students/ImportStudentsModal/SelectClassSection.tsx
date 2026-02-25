@@ -7,10 +7,11 @@ import SearchableAssignSelect from "../AddStudent/SearchableAssignSelect"
 interface SelectClassSectionProps {
     selectedClass: MultiSelectOption | null
     setSelectedClass: Dispatch<SetStateAction<MultiSelectOption | null>>
+    error?: string
 }
 
 
-const SelectClassSection = ({selectedClass, setSelectedClass}: SelectClassSectionProps) => {
+const SelectClassSection = ({selectedClass, setSelectedClass, error}: SelectClassSectionProps) => {
     const fetchedRef = useRef(false)
 
 
@@ -70,10 +71,16 @@ const SelectClassSection = ({selectedClass, setSelectedClass}: SelectClassSectio
                             ? 'No classes available'
                             : 'No matches found'
                     }
+                    error={error}
                     onChange={(selected) =>
                         setSelectedClass(selected.length > 0 ? selected[0] : null)
-                      }
+                    }
                 />
+                {error && (
+                    <p className="mt-1 text-xs text-red-600">
+                        {error}
+                    </p>
+                )}
             </div>
         </section>
     )

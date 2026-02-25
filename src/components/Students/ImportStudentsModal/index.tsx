@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useEffect, useState, useRef} from 'react'
 
 import { Dialog, DialogActions, DialogBody, DialogDescription, DialogTitle } from '@/components/UIKit/Dialog'
 import { Field, Label } from '@/components/UIKit/Fieldset'
@@ -36,8 +36,14 @@ const ImportStudentsModal = ({
     const [isProcessing, setIsProcessing] = useState(false)
     const [selectedFile, setSelectedFile] = useState<File | null>(null)
     const [selectedClass, setSelectedClass] = useState<MultiSelectOption | null>(null)
+    const [classError, setClassError] = useState<string | null>(null)
 
-
+    // Clear class error as soon as the user selects a class
+    useEffect(() => {
+        if (selectedClass?.id && classError) {
+            setClassError(null)
+        }
+    }, [selectedClass, classError])
     const validateCSV = (file: File): Promise<CSVValidationResult> => {
         return new Promise((resolve) => {
             const reader = new FileReader()
@@ -115,15 +121,25 @@ const ImportStudentsModal = ({
         setIsProcessing(false)
         setSelectedFile(null)
         setSelectedClass(null)
+        setClassError(null)
         if (fileInputRef.current) fileInputRef.current.value = ''
         onClose(false)
     }
 
     const handleSubmit = () => {
-        if (validationResult?.isValid && validationResult.students.length && selectedFile) {
-            onSubmit(selectedFile, selectedClass?.id || '')
-            handleClose()
+        // Require: valid CSV, at least one student, and a selected file
+        if (!validationResult?.isValid) return
+        if (!validationResult.students.length) return
+        if (!selectedFile) return
+
+        // If class is missing, show inline validation and do not submit
+        if (!selectedClass?.id) {
+            setClassError('Please select a class for these students.')
+            return
         }
+
+        onSubmit(selectedFile, selectedClass.id)
+        handleClose()
     }
 
     const downloadTemplate = () => {
@@ -143,13 +159,17 @@ const ImportStudentsModal = ({
 
     return (
         <Dialog size="lg" open={open} onClose={handleClose} className="relative z-20">
-            <DialogTitle>Import Students (Minimal)</DialogTitle>
+            <DialogTitle>Import Students</DialogTitle>
             <DialogDescription>
-                Upload a CSV with the minimal fields. You can complete full details later.
+                Upload a CSV with the minimal fields.
                 <button onClick={downloadTemplate} className="ml-2 text-blue-600 hover:text-blue-800 underline">Download template</button>
             </DialogDescription>
             <DialogBody>
-            <SelectClassSection selectedClass={selectedClass} setSelectedClass={setSelectedClass} />
+            <SelectClassSection
+                selectedClass={selectedClass}
+                setSelectedClass={setSelectedClass}
+                error={classError || undefined}
+            />
                 <div className="mt-4 space-y-6">
                     <Field>
                             <Label className="text-sm/6 text-gray-900 font-medium">CSV File</Label>
@@ -162,9 +182,6 @@ const ImportStudentsModal = ({
                                 className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                             />
                         </div>
-                            <p className="mt-2 text-sm text-gray-500">
-                                Required headers: first_name, last_name, gender, date_of_birth, enrollment_date. Optional: middle_name
-                            </p>
                     </Field>
 
                     {isProcessing && (
@@ -218,7 +235,15 @@ const ImportStudentsModal = ({
             </DialogBody>
             <DialogActions>
                 <Button plain onClick={handleClose}>Cancel</Button>
-                <Button color="primary" onClick={handleSubmit} disabled={!validationResult?.isValid || !validationResult.students.length}>
+                <Button
+                    color="primary"
+                    onClick={handleSubmit}
+                    disabled={
+                        !validationResult?.isValid ||
+                        !validationResult.students.length ||
+                        !selectedFile
+                    }
+                >
                     Import {validationResult?.students.length || 0} Students
                 </Button>
             </DialogActions>

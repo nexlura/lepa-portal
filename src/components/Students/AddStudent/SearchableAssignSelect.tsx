@@ -12,8 +12,10 @@ interface SearchableAssignSelectProps {
     options: MultiSelectOption[]
     selected: MultiSelectOption[]
     loading?: boolean
-    onChange: (next: MultiSelectOption[]) => void
     emptyLabel?: string
+    error?: string
+    onChange: (next: MultiSelectOption[]) => void
+
 }
 
 export default function SearchableAssignSelect({
@@ -21,8 +23,9 @@ export default function SearchableAssignSelect({
     options,
     selected,
     loading,
-    onChange,
     emptyLabel = 'No matches found',
+    error,
+    onChange
 }: SearchableAssignSelectProps) {
     const [query, setQuery] = useState('')
     const [open, setOpen] = useState(false)
@@ -63,12 +66,16 @@ export default function SearchableAssignSelect({
             <div className="relative">
                 {/* SEARCH FIELD */}
                 {selected.length < 1 && (
-                <label className="flex items-center gap-2 border-b border-zinc-200 px-4 py-2.5 rounded-md border">
+                <label className={clsx(
+                    'flex items-center gap-2 border-b px-4 py-2.5 rounded-md border',
+                    error ? 'border-red-300' : 'border-zinc-200'
+                )}>
                     <MagnifyingGlassIcon className="size-5 text-zinc-400" />
                     <input
                         type="text"
                         placeholder={placeholder}
-                        className="flex-1 border-0 bg-transparent text-sm text-gray-900 placeholder:text-zinc-400 focus:outline-none"
+                        className=
+                            'flex-1 border-0 bg-transparent text-sm text-gray-900 placeholder:text-zinc-400 focus:outline-none'
                         value={query}
                         onFocus={() => {
                             setOpen(true)
