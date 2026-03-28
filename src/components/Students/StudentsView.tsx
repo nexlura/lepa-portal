@@ -18,6 +18,7 @@ import { postFormData } from '@/lib/connector';
 import revalidatePage from '@/app/actions/revalidate-path';
 import { FeedbackContext } from '@/context/feedback';
 import BulkUploadFeedback, { BulkUploadResult } from '../BulkUploadFeedback';
+import StudentsMainHeader from './MainHeader';
 
 interface StudentsAnalytics {
   totalStudents: number;
@@ -167,6 +168,10 @@ const StudentsView = ({
           subHeading="Import students from a CSV or add a student manually."
           button={
             <div className="flex flex-wrap items-center justify-center gap-3">
+              <Button href="/students/new" color="primary">
+                <PlusIcon className="h-4 w-4 mr-2 text-white" color="white" />
+                Add Student
+              </Button>
               <Button
                 type="button"
                 outline
@@ -177,10 +182,6 @@ const StudentsView = ({
                   color="white"
                 />
                 Import Students
-              </Button>
-              <Button href="/students/new" color="primary">
-                <PlusIcon className="h-4 w-4 mr-2 text-white" color="white" />
-                Add Student
               </Button>
             </div>
           }
@@ -198,31 +199,7 @@ const StudentsView = ({
   return (
     <>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Students</h1>
-            <p className="mt-1 text-sm text-gray-500">
-              Manage all student records and information.
-            </p>
-          </div>
-          <div className="flex space-x-3">
-            <Button
-              type="button"
-              outline
-              onClick={() => setIsImportModal(true)}
-            >
-              <ArrowUpOnSquareIcon
-                className="h-4 w-4 mr-2 text-white"
-                color="white"
-              />
-              Import Students
-            </Button>
-            <Button href="/students/new" color="primary">
-              <PlusIcon className="h-4 w-4 mr-2 text-white" color="white" />
-              Add Student
-            </Button>
-          </div>
-        </div>
+        <StudentsMainHeader setIsImportModal={setIsImportModal} />
 
         {bulkResult && bulkResult.failureCount > 0 && (
           <BulkUploadFeedback

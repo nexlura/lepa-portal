@@ -17,6 +17,7 @@ import { postFormData } from '@/lib/connector';
 import revalidatePage from '@/app/actions/revalidate-path';
 import { FeedbackContext } from '@/context/feedback';
 import BulkUploadFeedback, { BulkUploadResult } from '../BulkUploadFeedback';
+import TeachersMainHeader from './MainHeader';
 
 export interface Teacher {
   id: number;
@@ -205,31 +206,7 @@ const TeachersView = ({
     <>
       <div className="space-y-6">
         {/* Page header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Teachers</h1>
-            <p className="mt-1 text-sm text-gray-500">
-              Manage all teacher records and information.
-            </p>
-          </div>
-          <div className="flex space-x-3">
-            <Button
-              type="button"
-              outline
-              onClick={() => setIsImportModal(true)}
-            >
-              <ArrowUpOnSquareIcon
-                className="h-4 w-4 mr-2 text-white"
-                color="white"
-              />
-              Import Teachers
-            </Button>
-            <Button href="/teachers/new" color="primary">
-              <PlusIcon className="h-4 w-4 mr-2 text-white" color="white" />
-              Add Teacher
-            </Button>
-          </div>
-        </div>
+        <TeachersMainHeader setIsImportModal={setIsImportModal} />
 
         {bulkResult && bulkResult.failureCount > 0 && (
           <BulkUploadFeedback
