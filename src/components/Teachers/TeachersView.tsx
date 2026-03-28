@@ -160,16 +160,42 @@ const TeachersView = ({
   if (teachers?.length < 1) {
     return (
       <>
+        {bulkResult && bulkResult.failureCount > 0 && (
+          <BulkUploadFeedback
+            bulkResult={bulkResult}
+            showBulkDetails={showBulkDetails}
+            setShowBulkDetails={setShowBulkDetails}
+            setBulkResult={setBulkResult}
+          />
+        )}
         <EmptyState
           heading="No Teachers Found"
-          subHeading="Get started by adding teachers"
+          subHeading="Import teachers from a CSV or add a teacher manually."
           button={
-            <Button href="/teachers/new" color="primary">
-              <PlusIcon className="h-4 w-4 mr-2 text-white" color="white" />
-              Add Teacher
-            </Button>
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <Button href="/teachers/new" color="primary">
+                <PlusIcon className="h-4 w-4 mr-2 text-white" color="white" />
+                Add Teacher
+              </Button>
+              <Button
+                type="button"
+                outline
+                onClick={() => setIsImportModal(true)}
+              >
+                <ArrowUpOnSquareIcon
+                  className="h-4 w-4 mr-2 text-white"
+                  color="white"
+                />
+                Import Teachers
+              </Button>
+            </div>
           }
           icon={<AcademicCapIcon className="size-12 text-gray-500" />}
+        />
+        <ImportTeachersModal
+          onClose={handleImpModalClose}
+          onSubmit={handleImportSubmit}
+          open={isImportModal}
         />
       </>
     );

@@ -154,16 +154,42 @@ const StudentsView = ({
   if (students.length < 1) {
     return (
       <>
+        {bulkResult && bulkResult.failureCount > 0 && (
+          <BulkUploadFeedback
+            bulkResult={bulkResult}
+            showBulkDetails={showBulkDetails}
+            setShowBulkDetails={setShowBulkDetails}
+            setBulkResult={setBulkResult}
+          />
+        )}
         <EmptyState
           heading="No Students Found"
-          subHeading="Get started by importing admissions data"
+          subHeading="Import students from a CSV or add a student manually."
           button={
-            <Button href="/students/new" color="primary">
-              <PlusIcon className="h-4 w-4 mr-2 text-white" color="white" />
-              Add Student
-            </Button>
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <Button
+                type="button"
+                outline
+                onClick={() => setIsImportModal(true)}
+              >
+                <ArrowUpOnSquareIcon
+                  className="h-4 w-4 mr-2 text-white"
+                  color="white"
+                />
+                Import Students
+              </Button>
+              <Button href="/students/new" color="primary">
+                <PlusIcon className="h-4 w-4 mr-2 text-white" color="white" />
+                Add Student
+              </Button>
+            </div>
           }
           icon={<ClipboardDocumentListIcon className="size-12 text-gray-500" />}
+        />
+        <ImportStudentsModal
+          open={isImportModal}
+          onClose={handleImpModalClose}
+          onSubmit={handleImportSubmit}
         />
       </>
     );
