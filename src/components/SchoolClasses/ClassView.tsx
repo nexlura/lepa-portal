@@ -9,7 +9,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 import { Button } from '@/components/UIKit/Button';
-import { SchoolClass } from '@/app/(portal)/classes/[pageNumber]/page';
+import { SchoolClass } from '@/app/(portal)/school-classes/[pageNumber]/page';
 import { postFormData } from '@/lib/connector';
 import EmptyState from '../EmptyState';
 import ClassesStats from './ClassesStats';
@@ -56,7 +56,7 @@ const SchoolClassesView = ({
   const handleImpModalClose = () => {
     setIsImportModal(false);
   };
-  //handle import classes
+
   const handleImportSubmit = async (file: File) => {
     if (!session?.user?.tenantId) {
       console.error('Tenant ID not found for bulk upload');
@@ -70,13 +70,18 @@ const SchoolClassesView = ({
 
       const resp = await postFormData('/classes/bulk-upload', formData);
 
-      // Default summary values
       let successCount = 0;
       let failureCount = 0;
       let totalCount = 0;
       let failedMessages: string[] = [];
 
-      if (resp && typeof resp === 'object' && 'data' in resp && resp.data) {
+      if (
+        resp &&
+        typeof resp === 'object' &&
+        'data' in resp &&
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (resp as any).data
+      ) {
         const data = (resp as { data: Record<string, unknown> }).data;
         successCount = Number(data?.success_count ?? 0);
         failureCount = Number(data?.failure_count ?? 0);
@@ -88,15 +93,16 @@ const SchoolClassesView = ({
 
       let status: 'success' | 'error' = 'success';
       let text = '';
-
       const plural = (n: number, word: string) =>
         `${n} ${word}${n === 1 ? '' : 'es'}`;
 
-      if (successCount === totalCount && failureCount === 0) {
+      if (successCount === totalCount) {
         status = 'success';
         text = `${plural(successCount, 'class')} uploaded successfully.`;
-        revalidatePage('/classes/1');
-        setFeedback({ status: status, text: text });
+        revalidatePage('/school-classes/1');
+        setFeedback({ status, text });
+        setBulkResult(null);
+        return;
       } else if (successCount === 0 && failureCount === totalCount) {
         status = 'error';
 
@@ -107,11 +113,13 @@ const SchoolClassesView = ({
           );
 
         if (allExist) {
-          text = `Upload failed. All ${plural(totalCount, 'class')} already exist for this academic year.`;
+          text = `Upload failed. All ${plural(totalCount, 'class')} already exist.`;
         } else {
           text = `Upload failed. All ${plural(totalCount, 'row')} failed validation.`;
         }
       } else {
+        status = 'error';
+
         const allExist =
           failedMessages.length > 0 &&
           failedMessages.every((msg) =>
@@ -125,9 +133,11 @@ const SchoolClassesView = ({
             ? `${plural(failureCount, 'class')} were skipped because they already exist.`
             : `${plural(failureCount, 'row')} were skipped due to validation errors.`,
         ].join(' ');
-      }
 
-      revalidatePage('/classes/1');
+        if (successCount > 0) {
+          revalidatePage('/school-classes/1');
+        }
+      }
 
       setBulkResult({
         successCount,
@@ -144,6 +154,7 @@ const SchoolClassesView = ({
       });
     }
   };
+
   //show empty-state component when we have zero items
   if (classes.length < 1) {
     return (
