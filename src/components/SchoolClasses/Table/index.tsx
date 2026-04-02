@@ -27,8 +27,10 @@ const SchoolClassesTable = ({ classes, totalPages }: ClassesTableProps) => {
     searchParams.get('grade') || 'all grades',
   );
 
+  const normalizedGradeFilter =
+    gradeFilter === 'all grades' ? null : gradeFilter;
+
   const [schoolLevel, setSchoolLevel] = useState<string | null>();
-  // const schoolLevel = session?.user?.schoolLevel; // e.g., 'primary', 'jss', 'sss
 
   const getYears = (level: string) =>
     SL_LEVEL_BY_ID[level]?.years.map((y) => y.name) ?? [];
@@ -91,7 +93,7 @@ const SchoolClassesTable = ({ classes, totalPages }: ClassesTableProps) => {
             params.delete('grade');
           }
         },
-        queryDeps: [gradeFilter],
+        queryDeps: [normalizedGradeFilter],
       }}
       initialData={classes}
       initialTotalPages={totalPages}
