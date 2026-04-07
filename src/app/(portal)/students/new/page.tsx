@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 
 import { FeedbackContext } from '@/context/feedback'
-import FormSubmitFeedback from '@/components/FormAlert'
 import { postFormData } from '@/lib/connector'
 import AddStudentHeader from '@/components/Students/AddStudent/Header'
 import PersonalInfoForm from '@/components/Students/AddStudent/PersonalInfoForm'
@@ -13,6 +12,7 @@ import AssignedClassTabs from '@/components/Students/AddStudent/AssignedClassTab
 import StudentAttachments from '@/components/Students/AddStudent/StudentAttachments'
 
 import type { AddStudentForm, AddStudentFormErrors } from '@/components/Students/AddStudent/types'
+import FormSubmitFeedback from '@/components/SubmitFeedback'
 
 const DEFAULT_FORM: AddStudentForm = {
     firstName: '',

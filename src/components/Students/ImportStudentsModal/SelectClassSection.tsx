@@ -1,24 +1,27 @@
 import {
-  SetStateAction,
-  Dispatch,
   useEffect,
   useState,
   useCallback,
   useRef,
+  Dispatch,
+  SetStateAction,
 } from 'react';
 
 import { MultiSelectOption } from '../../UIKit/MultiSelect';
-import type { AddStudentForm } from '@/components/Students/AddStudent/types';
-import SearchableAssignSelect from './SearchableAssignSelect';
 import { getModel } from '@/lib/connector';
 import { BackendClassData } from '@/app/(portal)/school-classes/[pageNumber]/page';
-
-interface AssignedClassTabsProps {
-  form: AddStudentForm;
-  setForm: Dispatch<SetStateAction<AddStudentForm>>;
+import SearchableAssignSelect from '../AddStudent/SearchableAssignSelect';
+interface SelectClassSectionProps {
+  selectedClass: MultiSelectOption | null;
+  setSelectedClass: Dispatch<SetStateAction<MultiSelectOption | null>>;
+  error?: string;
 }
 
-const AssignedClassTabs = ({ form, setForm }: AssignedClassTabsProps) => {
+const SelectClassSection = ({
+  selectedClass,
+  setSelectedClass,
+  error,
+}: SelectClassSectionProps) => {
   const fetchedRef = useRef(false);
 
   const [classes, setClasses] = useState<MultiSelectOption[]>([]);
@@ -56,12 +59,12 @@ const AssignedClassTabs = ({ form, setForm }: AssignedClassTabsProps) => {
   }, [fetchClasses]);
 
   return (
-    <section className="border-t border-zinc-200 mt-5 px-6">
-      <div className="flex flex-col gap-2 mb-4 border-b border-zinc-100">
+    <section className="mb-5">
+      <div className="flex flex-col gap-2 mb-4">
         <div className="mt-4">
-          <h3 className="text-sm font-medium text-gray-900">Assigned Class</h3>
+          <h3 className="text-sm/6 text-gray-900 font-medium">Select Class</h3>
           <p className="mt-1 text-sm text-gray-500">
-            Select the class this student will be assigned to
+            Select the class this students will be assigned to
           </p>
         </div>
       </div>
@@ -69,23 +72,22 @@ const AssignedClassTabs = ({ form, setForm }: AssignedClassTabsProps) => {
         <SearchableAssignSelect
           placeholder="Search classes…"
           options={classes}
-          selected={form.assignedClass ? [form.assignedClass] : []}
+          selected={selectedClass ? [selectedClass] : []}
           loading={loadingClasses}
           emptyLabel={
             !loadingClasses && classes.length === 0
               ? 'No classes available'
               : 'No matches found'
           }
+          error={error}
           onChange={(selected) =>
-            setForm((f) => ({
-              ...f,
-              assignedClass: selected.length > 0 ? selected[0] : null,
-            }))
+            setSelectedClass(selected.length > 0 ? selected[0] : null)
           }
         />
+        {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
       </div>
     </section>
   );
 };
 
-export default AssignedClassTabs;
+export default SelectClassSection;

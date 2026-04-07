@@ -7,9 +7,9 @@ import axios from 'axios'
 
 import { Button } from '@/components/UIKit/Button'
 import { Field, Label } from '@/components/UIKit/Fieldset'
-import FormSubmitFeedback from '../FormAlert'
 import { invokeInternalAPIRoute } from '@/lib/connector'
 import { useAuthSwitcher, usePasswordRedirect } from '@/hooks'
+import FormSubmitFeedback from '../SubmitFeedback'
 
 interface PhoneFormProps {
     phoneNumber: string

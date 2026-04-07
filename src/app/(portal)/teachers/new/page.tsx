@@ -5,12 +5,12 @@ import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 
 import { MultiSelectOption } from '@/components/UIKit/MultiSelect'
-import FormSubmitFeedback from '@/components/FormAlert'
 import { FeedbackContext } from '@/context/feedback'
 import { postModel, getModel } from '@/lib/connector'
 import PersonalInfoForm from '@/components/Teachers/AddTeacher/PersonalinfoForm'
 import AssignedTabs from '@/components/Teachers/AddTeacher/AssignedTabs'
 import AddTeacherHeader from '@/components/Teachers/AddTeacher/Header'
+import FormSubmitFeedback from '@/components/SubmitFeedback'
 
 export type AddTeacherForm = {
     firstName: string;

@@ -1,17 +1,18 @@
-import { useState, useRef } from 'react'
+import { useEffect, useState, useRef} from 'react'
 
 import { Dialog, DialogActions, DialogBody, DialogDescription, DialogTitle } from '@/components/UIKit/Dialog'
 import { Field, Label } from '@/components/UIKit/Fieldset'
 import { Button } from '@/components/UIKit/Button'
+import SelectClassSection from './SelectClassSection'
+import { MultiSelectOption } from '@/components/UIKit/MultiSelect'
 
 export type MinimalStudent = {
-    name: string
-    dateOfBirth: string
-    grade: string
+    firstName: string
+    lastName: string
+    middleName?: string
     gender?: string
-    email?: string
-    guardianName?: string
-    guardianPhone?: string
+    dateOfBirth: string
+    enrollmentDate: string
 }
 
 type CSVValidationResult = {
@@ -27,12 +28,22 @@ const ImportStudentsModal = ({
 }: {
     open: boolean
     onClose: (open: boolean) => void
-    onSubmit: (students: MinimalStudent[]) => void
+    onSubmit: (file: File, selectedClassId: string) => void
 }) => {
-    const [validationResult, setValidationResult] = useState<CSVValidationResult | null>(null)
-    const [isProcessing, setIsProcessing] = useState(false)
     const fileInputRef = useRef<HTMLInputElement>(null)
 
+    const [validationResult, setValidationResult] = useState<CSVValidationResult | null>(null)
+    const [isProcessing, setIsProcessing] = useState(false)
+    const [selectedFile, setSelectedFile] = useState<File | null>(null)
+    const [selectedClass, setSelectedClass] = useState<MultiSelectOption | null>(null)
+    const [classError, setClassError] = useState<string | null>(null)
+
+    // Clear class error as soon as the user selects a class
+    useEffect(() => {
+        if (selectedClass?.id && classError) {
+            setClassError(null)
+        }
+    }, [selectedClass, classError])
     const validateCSV = (file: File): Promise<CSVValidationResult> => {
         return new Promise((resolve) => {
             const reader = new FileReader()
@@ -44,7 +55,7 @@ const ImportStudentsModal = ({
                     return
                 }
                 const headers = lines[0].split(',').map(h => h.trim().toLowerCase())
-                const requiredHeaders = ['name', 'date_of_birth', 'grade']
+                const requiredHeaders = ['first_name', 'last_name', 'gender', 'date_of_birth', 'enrollment_date']
                 const missing = requiredHeaders.filter(h => !headers.includes(h))
                 if (missing.length) {
                     resolve({ isValid: false, students: [], errors: [`Missing required headers: ${missing.join(', ')}`] })
@@ -59,20 +70,21 @@ const ImportStudentsModal = ({
                     const get = (key: string) => values[headers.indexOf(key)] || ''
 
                     const student: MinimalStudent = {
-                        name: get('name'),
+                        firstName: get('first_name'),
+                        lastName: get('last_name'),
+                        middleName: headers.includes('middle_name') ? get('middle_name') : '',
+                        gender: get('gender'),
                         dateOfBirth: get('date_of_birth'),
-                        grade: get('grade'),
-                        gender: headers.includes('gender') ? get('gender') : undefined,
-                        email: headers.includes('email') ? get('email') : undefined,
-                        guardianName: headers.includes('guardian_name') ? get('guardian_name') : undefined,
-                        guardianPhone: headers.includes('guardian_phone') ? get('guardian_phone') : undefined,
+                        enrollmentDate: get('enrollment_date'),
                     }
 
-                    if (!student.name) errors.push(`Row ${i + 1}: name is required`)
+                    if (!student.firstName) errors.push(`Row ${i + 1}: first_name is required`)
+                    if (!student.lastName) errors.push(`Row ${i + 1}: last_name is required`)
+                    if (!student.gender) errors.push(`Row ${i + 1}: gender is required`)
                     if (!student.dateOfBirth) errors.push(`Row ${i + 1}: date_of_birth is required`)
-                    if (!student.grade) errors.push(`Row ${i + 1}: grade is required`)
+                    if (!student.enrollmentDate) errors.push(`Row ${i + 1}: enrollment_date is required`)
 
-                    if (student.name && student.dateOfBirth && student.grade) {
+                    if (student.firstName && student.lastName && student.gender && student.dateOfBirth && student.enrollmentDate) {
                         students.push(student)
                     }
                 }
@@ -88,14 +100,17 @@ const ImportStudentsModal = ({
         if (!file) return
         if (!file.name.endsWith('.csv')) {
             setValidationResult({ isValid: false, students: [], errors: ['Please select a .csv file'] })
+            setSelectedFile(null)
             return
         }
         setIsProcessing(true)
         try {
             const result = await validateCSV(file)
             setValidationResult(result)
+            setSelectedFile(file)
         } catch {
             setValidationResult({ isValid: false, students: [], errors: ['Error processing CSV file'] })
+            setSelectedFile(null)
         } finally {
             setIsProcessing(false)
         }
@@ -104,36 +119,60 @@ const ImportStudentsModal = ({
     const handleClose = () => {
         setValidationResult(null)
         setIsProcessing(false)
+        setSelectedFile(null)
+        setSelectedClass(null)
+        setClassError(null)
         if (fileInputRef.current) fileInputRef.current.value = ''
         onClose(false)
     }
 
     const handleSubmit = () => {
-        if (validationResult?.isValid && validationResult.students.length) {
-            onSubmit(validationResult.students)
-            handleClose()
+        // Require: valid CSV, at least one student, and a selected file
+        if (!validationResult?.isValid) return
+        if (!validationResult.students.length) return
+        if (!selectedFile) return
+
+        // If class is missing, show inline validation and do not submit
+        if (!selectedClass?.id) {
+            setClassError('Please select a class for these students.')
+            return
         }
+
+        onSubmit(selectedFile, selectedClass.id)
+        handleClose()
     }
 
     const downloadTemplate = () => {
-        const url = '/students_minimal_template.csv'
+        const csvContent = [
+            'first_name,last_name,middle_name,gender,date_of_birth,enrollment_date',
+            'Amina,Marrah,,female,2010-05-12,2023-09-01',
+            'James,Conteh,Abu,male,2009-11-03,2023-09-01'
+        ].join('\n')
+        const blob = new Blob([csvContent], { type: 'text/csv' })
+        const url = window.URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url
-        a.download = 'students_minimal_template.csv'
+        a.download = 'students_template.csv'
         a.click()
+        window.URL.revokeObjectURL(url)
     }
 
     return (
         <Dialog size="lg" open={open} onClose={handleClose} className="relative z-20">
-            <DialogTitle>Import Students (Minimal)</DialogTitle>
+            <DialogTitle>Import Students</DialogTitle>
             <DialogDescription>
-                Upload a CSV with the minimal fields. You can complete full details later.
+                Upload a CSV with the minimal fields.
                 <button onClick={downloadTemplate} className="ml-2 text-blue-600 hover:text-blue-800 underline">Download template</button>
             </DialogDescription>
             <DialogBody>
+            <SelectClassSection
+                selectedClass={selectedClass}
+                setSelectedClass={setSelectedClass}
+                error={classError || undefined}
+            />
                 <div className="mt-4 space-y-6">
                     <Field>
-                        <Label className="text-sm/6 text-gray-900 font-medium">CSV File</Label>
+                            <Label className="text-sm/6 text-gray-900 font-medium">CSV File</Label>
                         <div className="mt-1">
                             <input
                                 ref={fileInputRef}
@@ -143,9 +182,6 @@ const ImportStudentsModal = ({
                                 className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                             />
                         </div>
-                        <p className="mt-2 text-sm text-gray-500">
-                            Required headers: name, date_of_birth, grade. Optional: gender, email, guardian_name, guardian_phone
-                        </p>
                     </Field>
 
                     {isProcessing && (
@@ -183,7 +219,8 @@ const ImportStudentsModal = ({
                                     <div className="space-y-2 max-h-40 overflow-y-auto">
                                         {validationResult.students.slice(0, 5).map((s, i) => (
                                             <div key={i} className="text-sm text-gray-600">
-                                                <span className="font-medium">{s.name}</span> - {s.grade} (DOB: {s.dateOfBirth})
+                                                <span className="font-medium">{s.firstName} {s.lastName}</span>
+                                                {s.middleName ? ` ${s.middleName}` : ''} — {s.gender || 'N/A'} (DOB: {s.dateOfBirth}, Enroll: {s.enrollmentDate})
                                             </div>
                                         ))}
                                         {validationResult.students.length > 5 && (
@@ -198,7 +235,15 @@ const ImportStudentsModal = ({
             </DialogBody>
             <DialogActions>
                 <Button plain onClick={handleClose}>Cancel</Button>
-                <Button color="primary" onClick={handleSubmit} disabled={!validationResult?.isValid || !validationResult.students.length}>
+                <Button
+                    color="primary"
+                    onClick={handleSubmit}
+                    disabled={
+                        !validationResult?.isValid ||
+                        !validationResult.students.length ||
+                        !selectedFile
+                    }
+                >
                     Import {validationResult?.students.length || 0} Students
                 </Button>
             </DialogActions>

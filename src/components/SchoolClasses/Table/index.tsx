@@ -1,102 +1,104 @@
-'use client'
+'use client';
 
-import { useEffect, useState } from "react"
-import { useSearchParams } from "next/navigation"
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 
-import DataTable from '@/components/DataTable'
-import { BackendClassData, SchoolClass } from "@/app/(portal)/classes/[pageNumber]/page"
-import SchoolClassesTableControls from "./Controls"
-import ClassesTableHead from "./TableHead"
-import ClassesTableBody from "./TableBody"
-import { SL_LEVEL_BY_ID } from "@/data/sierraleone-grades"
-import { useSession } from "next-auth/react"
+import DataTable from '@/components/DataTable';
+import {
+  BackendClassData,
+  SchoolClass,
+} from '@/app/(portal)/school-classes/[pageNumber]/page';
+import SchoolClassesTableControls from './Controls';
+import ClassesTableHead from './TableHead';
+import ClassesTableBody from './TableBody';
+import { SL_LEVEL_BY_ID } from '@/data/sierraleone-grades';
+import { useSession } from 'next-auth/react';
 
 interface ClassesTableProps {
-    classes: SchoolClass[]
-    totalPages: number
+  classes: SchoolClass[];
+  totalPages: number;
 }
 
 const SchoolClassesTable = ({ classes, totalPages }: ClassesTableProps) => {
-    const searchParams = useSearchParams()
-    const { data: session } = useSession();
+  const searchParams = useSearchParams();
+  const { data: session } = useSession();
 
-    const [gradeFilter, setGradeFilter] = useState<string>(
-        searchParams.get("grade") || 'all grades'
-    )
+  const [gradeFilter, setGradeFilter] = useState<string>(
+    searchParams.get('grade') || 'all grades',
+  );
 
-    const [schoolLevel, setSchoolLevel] = useState<string | null>()
-    // const schoolLevel = session?.user?.schoolLevel; // e.g., 'primary', 'jss', 'sss
+  const normalizedGradeFilter =
+    gradeFilter === 'all grades' ? null : gradeFilter;
 
-    const getYears = (level: string) =>
-        SL_LEVEL_BY_ID[level]?.years.map(y => (y.name)) ?? [];
+  const [schoolLevel, setSchoolLevel] = useState<string | null>();
 
-    const levelGrades = schoolLevel === 'secondary'
-        ? [
-            ...getYears('jss'),
-            ...getYears('sss'),
-        ]
-        : getYears(schoolLevel || 'primary');
+  const getYears = (level: string) =>
+    SL_LEVEL_BY_ID[level]?.years.map((y) => y.name) ?? [];
 
-    const gradeOptions = ['all grades', ...levelGrades]
+  const levelGrades =
+    schoolLevel === 'secondary'
+      ? [...getYears('jss'), ...getYears('sss')]
+      : getYears(schoolLevel || 'primary');
 
-    useEffect(() => {
-        if (session?.user) {
-            setSchoolLevel(session.user.schoolLevel)
-        }
+  const gradeOptions = ['all grades', ...levelGrades];
 
-    }, [session])
+  useEffect(() => {
+    if (session?.user) {
+      setSchoolLevel(session.user.schoolLevel);
+    }
+  }, [session]);
 
-    return (
-        <DataTable<SchoolClass, BackendClassData>
-            config={{
-                dataKey: 'classes',
-                transformData: (classK: BackendClassData): SchoolClass => ({
-                    id: classK.id,
-                    capacity: classK.capacity,
-                    className: classK.name,
-                    createdAt: classK.created_at,
-                    currentSize: classK.current_size,
-                    teachers: classK.teachers.map(t => ({
-                        id: t.id,
-                        name: t.full_name
-                    })),
-                    grade: classK.grade
-                }),
-                title: 'All Classes',
-                tableHead: <ClassesTableHead />,
-                tableBody: (classes) => <ClassesTableBody classes={classes} />,
-                controls: ({ searchInput }) => (
-                    <SchoolClassesTableControls
-                        gradeFilter={gradeFilter}
-                        gradeOptions={gradeOptions}
-                        setGradeFilter={setGradeFilter}
-                        searchInput={searchInput}
-                    />
-                ),
-                searchPlaceholder: 'All Classes...',
-                columnCount: 5,
-                buildQueryParams: (params, search, _page) => {
-                    void _page
-                    params.set('search', search)
-                    if (gradeFilter === 'all grades') {
-                        return
-                    } else {
-                        params.set('grade', gradeFilter)
-                    }
-                },
-                buildUrlParams: (params) => {
-                    if (gradeFilter && gradeFilter !== 'all grades') {
-                        params.set('grade', gradeFilter)
-                    } else {
-                        params.delete('grade')
-                    }
-                },
-                queryDeps: [gradeFilter],
-            }}
-            initialData={classes}
-            initialTotalPages={totalPages}
-        />
-    )
-}
+  return (
+    <DataTable<SchoolClass, BackendClassData>
+      config={{
+        dataKey: 'classes',
+        transformData: (classK: BackendClassData): SchoolClass => ({
+          id: classK.id,
+          capacity: classK.capacity,
+          className: classK.name,
+          createdAt: classK.created_at,
+          currentSize: classK.current_size,
+          teachers: classK.teachers.map((t) => ({
+            id: t.id,
+            name: t.full_name,
+          })),
+          grade: classK.grade,
+        }),
+        title: 'All Classes',
+        tableHead: <ClassesTableHead />,
+        tableBody: (classes) => <ClassesTableBody classes={classes} />,
+        controls: ({ searchInput }) => (
+          <SchoolClassesTableControls
+            gradeFilter={gradeFilter}
+            gradeOptions={gradeOptions}
+            setGradeFilter={setGradeFilter}
+            searchInput={searchInput}
+          />
+        ),
+        searchPlaceholder: 'All Classes...',
+        columnCount: 5,
+        buildQueryParams: (params, search, _page) => {
+          void _page;
+          params.set('search', search);
+          if (gradeFilter === 'all grades') {
+            return;
+          } else {
+            params.set('grade', gradeFilter);
+          }
+        },
+        buildUrlParams: (params) => {
+          if (gradeFilter && gradeFilter !== 'all grades') {
+            params.set('grade', gradeFilter);
+          } else {
+            params.delete('grade');
+          }
+        },
+        queryDeps: [normalizedGradeFilter],
+      }}
+      initialData={classes}
+      initialTotalPages={totalPages}
+    />
+  );
+};
 
-export default SchoolClassesTable
+export default SchoolClassesTable;

@@ -8,8 +8,8 @@ import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/UIKit/Button'
 import { Field, Label } from '@/components/UIKit/Fieldset'
 import { invokeInternalAPIRoute } from '@/lib/connector'
-import FormSubmitFeedback from '../FormAlert'
 import { useAuthSwitcher, usePasswordRedirect } from '@/hooks';
+import FormSubmitFeedback from '../SubmitFeedback';
 interface EmailFormProps {
     email: string
     setEmail: Dispatch<SetStateAction<string>>
