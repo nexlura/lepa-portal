@@ -93,7 +93,7 @@ const StudentsView = ({
       const plural = (n: number, word: string) =>
         `${n} ${word}${n === 1 ? '' : 's'}`;
 
-      if (successCount === totalCount && failureCount === 0) {
+      if (successCount === totalCount) {
         status = 'success';
         text = `${plural(successCount, 'student')} uploaded successfully.`;
         revalidatePage('/students/1');
