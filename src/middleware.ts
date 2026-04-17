@@ -1,6 +1,4 @@
 import { NextResponse, NextRequest } from 'next/server';
-
-import { auth } from './auth';
 import { handlePathRedirect } from './utils/pathRedirect';
 
 export const config = {
@@ -13,29 +11,25 @@ export const config = {
   ],
 };
 
-export async function middleware(req: NextRequest) {
+export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
+  const hasSessionCookie =
+    req.cookies.has('authjs.session-token') ||
+    req.cookies.has('__Secure-authjs.session-token') ||
+    req.cookies.has('next-auth.session-token') ||
+    req.cookies.has('__Secure-next-auth.session-token');
 
   // Skip middleware for /auth routes
   if (pathname.startsWith('/auth')) {
     return NextResponse.next();
   }
 
-  const session = await auth();
-
-  // redirect to dashboard or login page if user try to access the "/" route
+  // Redirect root based on presence of auth session cookie.
   if (pathname === '/') {
-    if (session?.user) {
+    if (hasSessionCookie) {
       return NextResponse.redirect(new URL('/dashboard', req.url));
     }
 
-    const redirectUrl = new URL('/auth/verify', req.url);
-    redirectUrl.searchParams.set('phone', '');
-    return NextResponse.redirect(redirectUrl);
-  }
-
-  // redirect unauthenticated users to login page
-  if (!session?.user) {
     const redirectUrl = new URL('/auth/verify', req.url);
     redirectUrl.searchParams.set('phone', '');
     return NextResponse.redirect(redirectUrl);
