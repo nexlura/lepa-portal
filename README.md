@@ -88,4 +88,4 @@ yarn lint
 ## Deployment notes
 
 - Ensure `.env` values for production (e.g., `NEXTAUTH_URL` to your domain and a strong `NEXTAUTH_SECRET`).
-- If using a DB or OAuth providers, configure corresponding env vars in your hosting platform (Vercel, etc.).
+- If using a DB or OAuth providers, configure corresponding env vars in your hosting platform (Vercel, etc.)...
