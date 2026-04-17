@@ -64,7 +64,7 @@ export async function middleware(req: NextRequest) {
   const userRole = session.user.role?.toLowerCase() || '';
   const isSystemAdmin = userRole === 'system_admin' || userRole === 'system admin' || userRole.includes('system');
   const isAgency = userRole === 'agency' || userRole.includes('agency');
-  
+
   // Protect system-admin routes - only system admins can access
   if (pathname.startsWith('/system-admin')) {
     if (!isSystemAdmin) {
