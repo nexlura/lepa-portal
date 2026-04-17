@@ -6,6 +6,8 @@ import ClassOverview from '@/components/Dashboard/Analytics/ClassOverview';
 import TeachersSection from '@/components/Dashboard/Analytics/TeachersSection';
 import StudentInsights from '@/components/Dashboard/Analytics/StudentInsights';
 
+export const dynamic = 'force-dynamic';
+
 // Type definitions for analytics API response
 interface AnalyticsResponse {
     success?: boolean;
