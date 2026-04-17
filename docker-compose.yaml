@@ -6,8 +6,7 @@ services:
     ports:
       - 3000:3000
     environment:
-      - NEXTAUTH_URL=https://*.lepa.cc
+      - NEXTAUTH_URL=https://app.lepa.cc
       - NEXTAUTH_SECRET=nextauth-secret-2025-a7b8c9d0e1f2g3h4i5j6k7l8m9n0o1p2q3r4s5t6u7v8w9x0y1z2
-      - AUTH_TRUST_HOST=https://*.lepa.cc
-      - NEXT_PUBLIC_LEPA_HOST_HEADER=https://*.lepa.cc
+      - AUTH_TRUST_HOST=true
       - NEXT_PUBLIC_API_URL=https://api.lepa.cc
