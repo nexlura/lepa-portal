@@ -129,7 +129,7 @@ const isClientSide = (): boolean => {
 };
 
 // Base request handler with improved error handling
-// Automatically routes client-side requests through Next.js proxy to avoid CORS
+// Client-side: same-origin `/lepa-api/*` (see next.config rewrites) avoids CORS; sends auth + tenant headers.
 const sendRequest = async <T = any>(
   method: RequestMethod,
   url: string,
@@ -145,9 +145,9 @@ const sendRequest = async <T = any>(
       trimStringValues(processedBody);
     }
 
-    // If client-side, route through Next.js proxy to avoid CORS
+    // If client-side, route through same-origin rewrite (next.config.ts) to avoid CORS
     if (isClientSide()) {
-      return await sendRequestViaProxy<T>(method, url, processedBody, config);
+      return await sendRequestViaRewrite<T>(method, url, processedBody, config);
     }
 
     // Server-side: use direct external API call
@@ -281,8 +281,8 @@ const sendRequest = async <T = any>(
   }
 };
 
-// Client-side request handler that routes through Next.js proxy
-const sendRequestViaProxy = async <T = any>(
+// Client-side: fetch same-origin path; Next rewrites to external API (see next.config.ts).
+const sendRequestViaRewrite = async <T = any>(
   method: RequestMethod,
   url: string,
   body: Record<string, any> | FormData | null = null,
@@ -316,11 +316,10 @@ const sendRequestViaProxy = async <T = any>(
       });
     }
 
-    // Build proxy URL
-    const proxyUrl = invokeInternalAPIRoute(`proxy/${path}`);
+    const basePath = `/lepa-api/${path}`;
     const finalUrl = searchParams.toString()
-      ? `${proxyUrl}?${searchParams.toString()}`
-      : proxyUrl;
+      ? `${basePath}?${searchParams.toString()}`
+      : basePath;
 
     // Determine if body is FormData
     const isFormData = body instanceof FormData;
@@ -330,17 +329,36 @@ const sendRequestViaProxy = async <T = any>(
     if (!isFormData) {
       headers['Content-Type'] = 'application/json';
     }
-    // Merge any additional headers from config
+
+    const { getSession } = await import('next-auth/react');
+    const session = await getSession();
+    if (session?.user?.accessToken) {
+      headers['Authorization'] = `Bearer ${session.user.accessToken}`;
+    }
+
+    const tenantHost =
+      typeof window !== 'undefined'
+        ? getTenantDomain(window.location.host)
+        : '';
+    const lepaHostHeader =
+      (config.headers?.['X-Lepa-Host-Header'] as string | undefined) ||
+      tenantHost ||
+      process.env.NEXT_PUBLIC_LEPA_HOST_HEADER ||
+      '';
+    if (lepaHostHeader) {
+      headers['X-Lepa-Host-Header'] = lepaHostHeader;
+    }
+
+    // Merge any additional headers from config (caller wins)
     if (config.headers) {
       Object.entries(config.headers).forEach(([key, value]) => {
         // Don't override Content-Type for FormData
         if (!(isFormData && key.toLowerCase() === 'content-type')) {
-          headers[key] = String(value);
+          headers[key] = String(value ?? '');
         }
       });
     }
 
-    // Make request to proxy
     const response = await fetch(finalUrl, {
       method,
       headers,
@@ -408,7 +426,7 @@ const sendRequestViaProxy = async <T = any>(
     } as any;
   } catch (error: any) {
     // Handle network errors
-    console.error('Proxy request error:', error);
+    console.error('API rewrite request error:', error);
     return {
       error: true,
       status: undefined,
