@@ -129,7 +129,7 @@ const isClientSide = (): boolean => {
 };
 
 // Base request handler with improved error handling
-// Client-side: same-origin `/lepa-api/*` (see next.config rewrites) avoids CORS; sends auth + tenant headers.
+// Automatically routes client-side requests through Next.js proxy to avoid CORS
 const sendRequest = async <T = any>(
   method: RequestMethod,
   url: string,
@@ -145,9 +145,9 @@ const sendRequest = async <T = any>(
       trimStringValues(processedBody);
     }
 
-    // If client-side, route through same-origin rewrite (next.config.ts) to avoid CORS
+    // If client-side, route through Next.js proxy to avoid CORS
     if (isClientSide()) {
-      return await sendRequestViaRewrite<T>(method, url, processedBody, config);
+      return await sendRequestViaProxy<T>(method, url, processedBody, config);
     }
 
     // Server-side: use direct external API call
@@ -281,8 +281,8 @@ const sendRequest = async <T = any>(
   }
 };
 
-// Client-side: fetch same-origin path; Next rewrites to external API (see next.config.ts).
-const sendRequestViaRewrite = async <T = any>(
+// Client-side request handler that routes through Next.js proxy
+const sendRequestViaProxy = async <T = any>(
   method: RequestMethod,
   url: string,
   body: Record<string, any> | FormData | null = null,
@@ -316,10 +316,11 @@ const sendRequestViaRewrite = async <T = any>(
       });
     }
 
-    const basePath = `/lepa-api/${path}`;
+    // Build proxy URL
+    const proxyUrl = invokeInternalAPIRoute(`proxy/${path}`);
     const finalUrl = searchParams.toString()
-      ? `${basePath}?${searchParams.toString()}`
-      : basePath;
+      ? `${proxyUrl}?${searchParams.toString()}`
+      : proxyUrl;
 
     // Determine if body is FormData
     const isFormData = body instanceof FormData;
@@ -329,27 +330,7 @@ const sendRequestViaRewrite = async <T = any>(
     if (!isFormData) {
       headers['Content-Type'] = 'application/json';
     }
-
-    const { getSession } = await import('next-auth/react');
-    const session = await getSession();
-    if (session?.user?.accessToken) {
-      headers['Authorization'] = `Bearer ${session.user.accessToken}`;
-    }
-
-    const tenantHost =
-      typeof window !== 'undefined'
-        ? getTenantDomain(window.location.host)
-        : '';
-    const lepaHostHeader =
-      (config.headers?.['X-Lepa-Host-Header'] as string | undefined) ||
-      tenantHost ||
-      process.env.NEXT_PUBLIC_LEPA_HOST_HEADER ||
-      '';
-    if (lepaHostHeader) {
-      headers['X-Lepa-Host-Header'] = lepaHostHeader;
-    }
-
-    // Merge any additional headers from config (caller wins)
+    // Merge any additional headers from config
     if (config.headers) {
       Object.entries(config.headers).forEach(([key, value]) => {
         // Don't override Content-Type for FormData
@@ -359,6 +340,7 @@ const sendRequestViaRewrite = async <T = any>(
       });
     }
 
+    // Make request to proxy
     const response = await fetch(finalUrl, {
       method,
       headers,
@@ -375,31 +357,24 @@ const sendRequestViaRewrite = async <T = any>(
     if (response.status >= 200 && response.status < 300) {
       const contentType = response.headers.get('content-type');
       const contentLength = response.headers.get('content-length');
-      
-      // Check if response has content before parsing
+
       if (contentType && contentType.includes('application/json')) {
-        // If content-length is 0, return null
         if (contentLength === '0') {
           return null;
         }
-        
+
         try {
-          // Read response as text first to check if it's empty
           const text = await response.text();
-          
-          // If body is empty, return null
           if (!text || text.trim() === '') {
             return null;
           }
-          
-          // Parse JSON
-          const data = JSON.parse(text);
-          return data;
+          return JSON.parse(text);
         } catch (parseError: any) {
-          // If JSON parsing fails, return null instead of throwing
-          // Only log in development to avoid noise
           if (NODE_ENV === 'development') {
-            console.warn('Failed to parse JSON response:', parseError?.message || 'Invalid JSON');
+            console.warn(
+              'Failed to parse JSON response:',
+              parseError?.message || 'Invalid JSON'
+            );
           }
           return null;
         }
@@ -426,7 +401,7 @@ const sendRequestViaRewrite = async <T = any>(
     } as any;
   } catch (error: any) {
     // Handle network errors
-    console.error('API rewrite request error:', error);
+    console.error('Proxy request error:', error);
     return {
       error: true,
       status: undefined,
