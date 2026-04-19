@@ -1,18 +1,9 @@
-import path from 'path';
-import { fileURLToPath } from 'url';
-
 import type { NextConfig } from 'next';
 
-// Turbopack walks up for lockfiles; parent monorepo folders can steal the root.
-// Pin the app root so `next dev --turbopack` matches this project.
-const projectRoot = path.dirname(fileURLToPath(import.meta.url));
-
+// Vercel expects the default serverless output. `standalone` is for Docker/self-host.
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  output: 'standalone',
-  turbopack: {
-    root: projectRoot,
-  },
+  ...(process.env.VERCEL ? {} : { output: 'standalone' as const }),
 };
 
 export default nextConfig;
