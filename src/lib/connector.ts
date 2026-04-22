@@ -22,6 +22,10 @@ const DEFAULT_EXTERNAL_URL = 'http://localhost:8081';
 
 // Internal API route (Next.js API routes)
 export const invokeInternalAPIRoute = (route: string): string => {
+  // In browser, always call same-origin API routes.
+  if (typeof window !== 'undefined') {
+    return `/api/${route}`;
+  }
   const baseUrl = NEXTAUTH_URL || DEFAULT_INTERNAL_URL;
   return `${baseUrl}/api/${route}`;
 };
