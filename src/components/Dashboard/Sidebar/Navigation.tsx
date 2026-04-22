@@ -1,13 +1,17 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
+import { useSession } from 'next-auth/react';
 import {
   HomeIcon,
   UserGroupIcon,
   AcademicCapIcon,
   BookOpenIcon,
+  BuildingOffice2Icon,
+  ClipboardDocumentListIcon,
   ChevronDownIcon,
   ChevronRightIcon,
 } from '@heroicons/react/24/outline';
@@ -19,18 +23,40 @@ interface NavigationItem {
   subItems?: { name: string; href: string }[];
 }
 
-const navigation: NavigationItem[] = [
+const tenantNavigation: NavigationItem[] = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
   { name: 'Classes', href: '/school-classes', icon: BookOpenIcon },
   { name: 'Teachers', href: '/teachers', icon: AcademicCapIcon },
   { name: 'Students', href: '/students', icon: UserGroupIcon },
 ];
 
+const systemNavigation: NavigationItem[] = [
+  { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
+  { name: 'Admissions', href: '/admissions', icon: ClipboardDocumentListIcon },
+  { name: 'Tenants', href: '/settings?section=system', icon: BuildingOffice2Icon },
+];
+
+const agencyNavigation: NavigationItem[] = [
+  { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
+  { name: 'Admissions', href: '/admissions', icon: ClipboardDocumentListIcon },
+];
+
 const SidebarNavigation: React.FC<{ collapsed?: boolean }> = ({
   collapsed,
 }) => {
   const pathname = usePathname();
+  const { data: session } = useSession();
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
+  const role = (session?.user?.role || '').toLowerCase();
+  const navigation = useMemo(
+    () =>
+      role.includes('system') || role.includes('super') || role.includes('platform')
+        ? systemNavigation
+        : role.includes('agency')
+          ? agencyNavigation
+          : tenantNavigation,
+    [role],
+  );
 
   const toggleExpanded = (itemName: string) => {
     setExpandedItems((prev) =>
@@ -49,7 +75,7 @@ const SidebarNavigation: React.FC<{ collapsed?: boolean }> = ({
       .map((item) => item.name);
 
     setExpandedItems(activeParents);
-  }, [pathname]);
+  }, [pathname, navigation]);
 
   const isItemActive = (item: NavigationItem) => {
     if (item.href) {

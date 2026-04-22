@@ -17,6 +17,7 @@ declare module 'next-auth' {
     schoolName?: string;
     tenantId?: string;
     schoolLevel?: string;
+    hostHeader?: string;
   }
 
   export interface Session {
@@ -30,6 +31,7 @@ declare module 'next-auth' {
       schoolName?: string;
       tenantId?: string;
       schoolLevel?: string;
+      hostHeader?: string;
     };
   }
 }
@@ -43,6 +45,7 @@ declare module 'next-auth/jwt' {
     schoolName?: string;
     tenantId?: string;
     schoolLevel?: string;
+    hostHeader?: string;
   }
 }
 
@@ -110,9 +113,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         try {
           const resp = await postModel<APIAuthResponse>('/auth/login', {
-            identifier: parsed.data.identifier,
-            password: parsed.data.password,
-          });
+              identifier: parsed.data.identifier,
+              password: parsed.data.password,
+            },
+            {
+              headers: {
+                'X-Lepa-Host-Header': host,
+              },
+            }
+          );
 
           // Check if response is an error
           if (isErrorResponse(resp)) {
@@ -143,6 +152,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
               schoolName: tenant?.school_name || '',
               tenantId: tenant?.id || '',
               schoolLevel: tenant?.level || '',
+              hostHeader: host,
             };
           }
         } catch (error) {
@@ -165,6 +175,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           schoolName?: string;
           tenantId?: string;
           schoolLevel?: string;
+          hostHeader?: string;
         };
         if (u.userId) token.userId = u.userId;
         if (u.role) token.role = u.role;
@@ -173,6 +184,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (u.schoolName) token.schoolName = u.schoolName;
         if (u.schoolLevel) token.schoolLevel = u.schoolLevel;
         if (u.tenantId) token.tenantId = u.tenantId;
+        if (u.hostHeader) token.hostHeader = u.hostHeader;
       }
 
       // Persist updates from client-side session.update()
@@ -180,8 +192,31 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const s = session as import('next-auth').Session;
         if (s.user?.accessToken) token.accessToken = s.user.accessToken;
         if (s.user?.refreshToken) token.refreshToken = s.user.refreshToken;
+        if (s.user?.hostHeader) token.hostHeader = s.user.hostHeader;
       }
       return token as JWT;
+    },
+    async redirect({ url, baseUrl }) {
+      try {
+        const { headers } = await import('next/headers');
+        const h = await headers();
+        const host = h.get('x-forwarded-host') || h.get('host');
+        const proto = h.get('x-forwarded-proto') || 'https';
+        const dynamicBaseUrl = host ? `${proto}://${host}` : baseUrl;
+
+        if (url.startsWith('/')) {
+          return `${dynamicBaseUrl}${url}`;
+        }
+
+        const targetUrl = new URL(url);
+        if (targetUrl.origin === dynamicBaseUrl) {
+          return url;
+        }
+
+        return dynamicBaseUrl;
+      } catch {
+        return baseUrl;
+      }
     },
     async session({ session, token }) {
       if (token) {
@@ -198,6 +233,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         // tenantId should always be set if available, regardless of schoolName
         if (token.tenantId) {
           session.user.tenantId = token.tenantId;
+        }
+        if (token.hostHeader) {
+          session.user.hostHeader = token.hostHeader;
         }
       }
       return session;

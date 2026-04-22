@@ -18,9 +18,11 @@ export function middleware(req: NextRequest) {
     req.cookies.has('__Secure-authjs.session-token') ||
     req.cookies.has('next-auth.session-token') ||
     req.cookies.has('__Secure-next-auth.session-token');
-
   // Skip middleware for /auth routes
   if (pathname.startsWith('/auth')) {
+    if (hasSessionCookie) {
+      return NextResponse.redirect(new URL('/dashboard', req.url));
+    }
     return NextResponse.next();
   }
 
@@ -30,6 +32,12 @@ export function middleware(req: NextRequest) {
       return NextResponse.redirect(new URL('/dashboard', req.url));
     }
 
+    const redirectUrl = new URL('/auth/verify', req.url);
+    redirectUrl.searchParams.set('phone', '');
+    return NextResponse.redirect(redirectUrl);
+  }
+
+  if (!hasSessionCookie) {
     const redirectUrl = new URL('/auth/verify', req.url);
     redirectUrl.searchParams.set('phone', '');
     return NextResponse.redirect(redirectUrl);

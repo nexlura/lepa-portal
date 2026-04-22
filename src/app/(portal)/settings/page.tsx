@@ -1,6 +1,11 @@
 import { Cog6ToothIcon, BellIcon, ShieldCheckIcon, UserIcon } from '@heroicons/react/24/outline';
+import Link from 'next/link';
+import { auth } from '@/auth';
 
-export default function SettingsPage() {
+export default async function SettingsPage() {
+    const session = await auth();
+    const role = (session?.user?.role || '').toLowerCase();
+    const canManageTenants = role.includes('system') || role.includes('super') || role.includes('agency') || role.includes('platform');
     const settingsSections = [
         {
             id: 'profile',
@@ -130,6 +135,25 @@ export default function SettingsPage() {
                                 </p>
                             </div>
                         </button>
+
+                        {canManageTenants && (
+                            <Link
+                                href="/admissions"
+                                className="relative group bg-white p-6 border border-gray-200 rounded-lg hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                            >
+                                <div>
+                                    <span className="rounded-lg inline-flex p-3 bg-purple-50 text-purple-700 ring-4 ring-white">
+                                        <Cog6ToothIcon className="h-6 w-6" />
+                                    </span>
+                                </div>
+                                <div className="mt-4">
+                                    <h3 className="text-lg font-medium">Create Tenant</h3>
+                                    <p className="mt-2 text-sm text-gray-500">
+                                        Access tenant onboarding and setup actions.
+                                    </p>
+                                </div>
+                            </Link>
+                        )}
                     </div>
                 </div>
             </div>
