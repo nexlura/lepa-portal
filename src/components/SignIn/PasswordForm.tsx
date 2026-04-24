@@ -19,7 +19,8 @@ const PasswordForm = (props: { identifier: string }) => {
     const [inputType, setInputType] = useState<HTMLInputTypeAttribute | undefined>('password')
 
 
-    const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
+    // Don't set a default callbackUrl - let middleware handle role-based redirect
+    const callbackUrl = searchParams.get('callbackUrl') || '/';
     const email = searchParams.get('email');
     const phone = searchParams.get('phone');
 

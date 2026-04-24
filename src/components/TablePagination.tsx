@@ -1,16 +1,15 @@
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 
 export interface PaginationProps {
     totalPages: number;
-    currentPage: number;
+    currentPage?: number;
     onPageChange?: (page: number) => void;
 }
 
 const generatePagesCounter = (totalPages: number, currentPage: number = 1) => {
     const pages: Array<{ page: string; type: 'page' | 'ellipsis' }> = [];
 
-    // If we have 7 or fewer pages, show all pages
     if (totalPages <= 7) {
         for (let i = 1; i <= totalPages; i++) {
             pages.push({ page: i.toString(), type: 'page' });
@@ -18,14 +17,11 @@ const generatePagesCounter = (totalPages: number, currentPage: number = 1) => {
         return pages;
     }
 
-    // Always show first page
     pages.push({ page: '1', type: 'page' });
 
-    // Calculate the range around current page
     let startPage = Math.max(2, currentPage - 1);
     let endPage = Math.min(totalPages - 1, currentPage + 1);
 
-    // Adjust range if we're near the beginning or end
     if (currentPage <= 3) {
         startPage = 2;
         endPage = Math.min(4, totalPages - 1);
@@ -34,22 +30,18 @@ const generatePagesCounter = (totalPages: number, currentPage: number = 1) => {
         endPage = totalPages - 1;
     }
 
-    // Add ellipsis after first page if needed
     if (startPage > 2) {
         pages.push({ page: '...', type: 'ellipsis' });
     }
 
-    // Add pages in the middle range
     for (let i = startPage; i <= endPage; i++) {
         pages.push({ page: i.toString(), type: 'page' });
     }
 
-    // Add ellipsis before last page if needed
     if (endPage < totalPages - 1) {
         pages.push({ page: '...', type: 'ellipsis' });
     }
 
-    // Always show last page (if there's more than 1 page)
     if (totalPages > 1) {
         pages.push({ page: totalPages.toString(), type: 'page' });
     }
@@ -57,15 +49,17 @@ const generatePagesCounter = (totalPages: number, currentPage: number = 1) => {
     return pages;
 }
 
-const TablePagination = ({ totalPages, currentPage, onPageChange }: PaginationProps) => {
+const TablePagination = ({ totalPages, currentPage: controlledPage, onPageChange }: PaginationProps) => {
     const router = useRouter();
     const pathname = usePathname();
+    const searchParams = useSearchParams();
+    const queryPage = Number(searchParams.get('page')) || 1;
+    const currentPage = controlledPage || queryPage;
 
     const handlePageChange = (page: number) => {
         if (onPageChange) {
             onPageChange(page);
         } else {
-            // Fallback: if no onPageChange provided, use URL-based routing
             const parts = pathname.split("/").filter(Boolean);
             const basePath = parts.length > 2 ? `/${parts.slice(0, -1).join("/")}` : pathname;
             router.push(`${basePath}/${page}`);

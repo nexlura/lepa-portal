@@ -1,5 +1,5 @@
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import TablePagination from "./TablePagination";
-
 
 export interface TableFootProps {
     totalPages: number
@@ -7,15 +7,34 @@ export interface TableFootProps {
     onPageChange: (page: number) => void
 }
 
-const TableFoot = ({ totalPages, currentPage, onPageChange }: TableFootProps) => {
+const TableFoot = ({ totalPages, currentPage = 1, onPageChange }: Partial<TableFootProps> & { totalPages: number }) => {
+    const searchParams = useSearchParams()
+    const route = useRouter()
+    const pathname = usePathname()
+
     return (
-        <tfoot className="relative h-16">
-            <tr className=" absolute left-0 right-0 top-0 bottom-0">
-                <TablePagination
-                    totalPages={totalPages}
-                    currentPage={currentPage}
-                    onPageChange={onPageChange}
-                />
+        <tfoot>
+            <tr>
+                <td colSpan={1000} className="px-0">
+                    <TablePagination
+                        totalPages={totalPages}
+                        currentPage={currentPage}
+                        onPageChange={(page) => {
+                            if (onPageChange) {
+                                onPageChange(page)
+                                return
+                            }
+                            const params = new URLSearchParams(searchParams.toString());
+                            if (page > 1) {
+                                params.set('page', page.toString());
+                            } else {
+                                params.delete('page');
+                            }
+                            const newPath = `${pathname || ''}${params.toString() ? `?${params.toString()}` : ''}`;
+                            route.push(newPath);
+                        }}
+                    />
+                </td>
             </tr>
         </tfoot>
     )

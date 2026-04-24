@@ -1,0 +1,595 @@
+'use client';
+
+import { useState, useContext, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+
+import { Dialog, DialogActions, DialogBody, DialogDescription, DialogTitle } from '@/components/UIKit/Dialog';
+import { Field, Label, ErrorMessage } from '@/components/UIKit/Fieldset';
+import { Input } from '@/components/UIKit/Input';
+import { Button } from '@/components/UIKit/Button';
+import SearchableSelect, { SearchableSelectOption } from '@/components/UIKit/SearchableSelect';
+import { FeedbackContext } from '@/context/feedback';
+import { postModel, patchModel, getModel, isErrorResponse } from '@/lib/connector';
+import { Tenant } from '@/app/(portal)/system-admin/tenants/page';
+
+export type TenantFormData = {
+    domain: string;
+    schoolName: string;
+    address: string;
+    phone: string;
+    level: 'kindergarten' | 'nursery' | 'primary' | 'secondary';
+    code: string;
+    agencyId: string;
+    status: 'active' | 'inactive';
+}
+
+type BackendAgencyData = {
+    id: string;
+    name: string;
+    type: string;
+    status: string;
+    domain?: string;
+    managed_schools_count?: number;
+    tenant_count?: number;
+    created_at: string;
+    region?: string;
+    contact_email?: string;
+};
+
+type BackendTenantDetailData = {
+    id: string;
+    school_name: string;
+    status?: string;
+    is_active?: boolean;
+    created_at: string;
+    domain?: string;
+    address?: string;
+    phone?: string;
+    level?: string;
+    code?: string;
+    agency_id?: string;
+    total_students?: number;
+    total_teachers?: number;
+    total_classes?: number;
+};
+
+type TenantDetailApiResponse = {
+    success?: boolean;
+    code?: number;
+    data?: BackendTenantDetailData;
+    message?: string;
+};
+
+type AgenciesApiResponse = {
+    data?: {
+        agencies?: BackendAgencyData[];
+        total?: number;
+        total_pages?: number;
+    };
+};
+
+const TenantModal = ({
+    open,
+    onClose,
+    tenant,
+    agencyId,
+}: {
+    open: boolean;
+    onClose: (open: boolean) => void;
+    tenant?: Tenant | null;
+    agencyId?: string | null;
+}) => {
+    const router = useRouter();
+    const { data: session } = useSession();
+    const { setFeedback } = useContext(FeedbackContext);
+
+    const isEditMode = !!tenant;
+
+    // Determine if agency field should be disabled (when agencyId is provided)
+    const hasValidAgencyId = agencyId && typeof agencyId === 'string' && agencyId.trim().length > 0;
+    const isAgencyFieldDisabled = hasValidAgencyId;
+
+    const [form, setForm] = useState<TenantFormData>({
+        domain: '',
+        schoolName: '',
+        address: '',
+        phone: '',
+        level: 'primary',
+        code: '',
+        agencyId: hasValidAgencyId ? agencyId : '',
+        status: 'active',
+    });
+
+    const [agencies, setAgencies] = useState<SearchableSelectOption[]>([]);
+    const [errors, setErrors] = useState<Partial<Record<keyof TenantFormData, string>>>({});
+    const [isLoading, setIsLoading] = useState(false);
+    const [isLoadingAgencies, setIsLoadingAgencies] = useState(false);
+    const [isLoadingTenant, setIsLoadingTenant] = useState(false);
+
+    // Sync agencyId to form when provided and modal opens (create mode only)
+    // This ensures the agencyId is set even if the form was reset
+    useEffect(() => {
+        if (open && hasValidAgencyId && !tenant) {
+            // Use a small timeout to ensure this runs after any form reset
+            const timeoutId = setTimeout(() => {
+                setForm((f) => {
+                    // Only update if the agencyId in form doesn't match the prop
+                    if (f.agencyId !== agencyId) {
+                        return { ...f, agencyId: agencyId! };
+                    }
+                    return f;
+                });
+            }, 0);
+            return () => clearTimeout(timeoutId);
+        }
+    }, [open, agencyId, tenant, hasValidAgencyId]);
+
+    // Fetch agencies for dropdown (always fetch so we can display the agency name even when disabled)
+    useEffect(() => {
+        if (open) {
+            setIsLoadingAgencies(true);
+            getModel<AgenciesApiResponse>('/agencies?limit=100')
+                .then((res) => {
+                    if (res && !isErrorResponse(res) && res.data?.agencies) {
+                        const transformedAgencies: SearchableSelectOption[] = res.data.agencies.map((agency: BackendAgencyData) => ({
+                            id: agency.id,
+                            name: agency.name,
+                        }));
+                        setAgencies(transformedAgencies);
+                        
+                        // After agencies are loaded, ensure agencyId is set in form if provided
+                        if (hasValidAgencyId && !tenant) {
+                            setForm((f) => {
+                                if (f.agencyId !== agencyId) {
+                                    return { ...f, agencyId: agencyId! };
+                                }
+                                return f;
+                            });
+                        }
+                    }
+                })
+                .catch((error) => {
+                    console.warn('Error fetching agencies:', error);
+                })
+                .finally(() => {
+                    setIsLoadingAgencies(false);
+                });
+        }
+    }, [open, agencyId, tenant, hasValidAgencyId]);
+
+    // Fetch full tenant details when editing
+    useEffect(() => {
+        if (tenant?.id && open && isEditMode) {
+            setIsLoadingTenant(true);
+            getModel<TenantDetailApiResponse>(`/tenants/${tenant.id}`)
+                .then((res) => {
+                    if (res && !isErrorResponse(res) && res.data) {
+                        const tenantData = res.data;
+                        // Convert is_active boolean to status string
+                        const isActive = tenantData.is_active !== undefined ? tenantData.is_active : (tenantData.status === 'active');
+                        setForm({
+                            domain: tenantData.domain || '',
+                            schoolName: tenantData.school_name,
+                            address: tenantData.address || '',
+                            phone: tenantData.phone || '',
+                            level: (tenantData.level as 'kindergarten' | 'nursery' | 'primary' | 'secondary') || 'primary',
+                            code: tenantData.code || '',
+                            agencyId: tenantData.agency_id || '',
+                            status: isActive ? 'active' : 'inactive',
+                        });
+                        setErrors({});
+                    }
+                })
+                .catch((error) => {
+                    console.warn('Error fetching tenant details:', error);
+                    // Fallback to passed tenant data
+                    if (tenant) {
+                        setForm({
+                            domain: tenant.domain || '',
+                            schoolName: tenant.name,
+                            address: tenant.address || '',
+                            phone: tenant.phone || '',
+                            level: tenant.level || 'primary',
+                            code: tenant.code || '',
+                            agencyId: tenant.agencyId || '',
+                            status: tenant.status || 'active',
+                        });
+                    }
+                })
+                .finally(() => {
+                    setIsLoadingTenant(false);
+                });
+        } else if (!tenant && open) {
+            // Reset form for create mode, but preserve agencyId if provided via prop
+            const initialAgencyId = (agencyId && typeof agencyId === 'string' && agencyId.trim().length > 0) ? agencyId : '';
+            setForm({
+                domain: '',
+                schoolName: '',
+                address: '',
+                phone: '',
+                level: 'primary',
+                code: '',
+                agencyId: initialAgencyId,
+                status: 'active',
+            });
+            setErrors({});
+        }
+    }, [tenant?.id, open, isEditMode, agencyId]);
+
+    // Check if form is valid for submission
+    const isFormValid = () => {
+        return (
+            form.domain.trim() !== '' &&
+            form.schoolName.trim() !== '' &&
+            form.address.trim() !== '' &&
+            form.phone.trim() !== '' &&
+            form.level !== '' &&
+            (hasValidAgencyId || form.agencyId !== '')
+        );
+    };
+
+    const validate = () => {
+        const next: Partial<Record<keyof TenantFormData, string>> = {};
+        
+        // Domain validation - supports subdomains (e.g., school.lepa.cc)
+        const domainRegex = /^([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/;
+        
+        if (!form.domain.trim()) {
+            next.domain = 'Domain is required';
+        } else if (form.domain.trim().length < 3 || form.domain.trim().length > 100) {
+            next.domain = 'Domain must be between 3 and 100 characters';
+        } else if (!domainRegex.test(form.domain.trim())) {
+            next.domain = 'Enter a valid domain (e.g., school.lepa.cc)';
+        }
+        
+        // School name validation
+        if (!form.schoolName.trim()) {
+            next.schoolName = 'School name is required';
+        } else if (form.schoolName.trim().length < 2 || form.schoolName.trim().length > 100) {
+            next.schoolName = 'School name must be between 2 and 100 characters';
+        }
+        
+        // Address validation
+        if (!form.address.trim()) {
+            next.address = 'Address is required';
+        } else if (form.address.trim().length < 5 || form.address.trim().length > 200) {
+            next.address = 'Address must be between 5 and 200 characters';
+        }
+        
+        // Phone validation
+        if (!form.phone.trim()) {
+            next.phone = 'Phone is required';
+        } else if (form.phone.trim().length < 10 || form.phone.trim().length > 20) {
+            next.phone = 'Phone must be between 10 and 20 characters';
+        }
+        
+        // Level validation
+        if (!form.level) {
+            next.level = 'Level is required';
+        }
+        
+        // Code validation (optional)
+        if (form.code.trim() && (form.code.trim().length < 2 || form.code.trim().length > 50)) {
+            next.code = 'Code must be between 2 and 50 characters if provided';
+        }
+        
+        // Agency validation (only if agencyId prop is not provided)
+        if (!agencyId && !form.agencyId) {
+            next.agencyId = 'Agency is required';
+        }
+
+        setErrors(next);
+        return Object.keys(next).length === 0;
+    };
+
+    const handleSubmit = async () => {
+        if (!validate()) return;
+        if (isEditMode && !tenant) return;
+
+        setIsLoading(true);
+
+        try {
+            if (isEditMode && tenant) {
+                // Edit mode: PATCH request with only changed fields
+                const updateData: Partial<{
+                    domain: string;
+                    school_name: string;
+                    address: string;
+                    phone: string;
+                    level: string;
+                    code?: string;
+                    agency_id: string;
+                    is_active: boolean;
+                }> = {};
+
+                // Get current tenant data for comparison (use form data as source of truth since we fetched it)
+                const currentTenant = tenant;
+                
+                // Only include fields if they're different from current
+                if (form.domain.trim() !== (currentTenant.domain || '')) {
+                    updateData.domain = form.domain.trim();
+                }
+                if (form.schoolName.trim() !== currentTenant.name) {
+                    updateData.school_name = form.schoolName.trim();
+                }
+                if (form.address.trim() !== (currentTenant.address || '')) {
+                    updateData.address = form.address.trim();
+                }
+                if (form.phone.trim() !== (currentTenant.phone || '')) {
+                    updateData.phone = form.phone.trim();
+                }
+                if (form.level !== (currentTenant.level || 'primary')) {
+                    updateData.level = form.level;
+                }
+                if (form.code.trim() !== (currentTenant.code || '')) {
+                    updateData.code = form.code.trim() || undefined;
+                }
+                if (form.agencyId !== (currentTenant.agencyId || '')) {
+                    updateData.agency_id = form.agencyId;
+                }
+                // Convert status string to boolean for is_active
+                const currentIsActive = (currentTenant.status || 'active') === 'active';
+                const newIsActive = form.status === 'active';
+                if (newIsActive !== currentIsActive) {
+                    updateData.is_active = newIsActive;
+                }
+
+                // Only send request if there are changes
+                if (Object.keys(updateData).length === 0) {
+                    setFeedback({ 
+                        status: 'success', 
+                        text: 'No changes to save' 
+                    });
+                    handleClose();
+                    return;
+                }
+
+                const response = await patchModel(`/tenants/${tenant.id}`, updateData);
+
+                if (isErrorResponse(response)) {
+                    setFeedback({ 
+                        status: 'error', 
+                        text: response.message || 'Failed to update tenant' 
+                    });
+                } else {
+                    setFeedback({ 
+                        status: 'success', 
+                        text: 'Tenant updated successfully!' 
+                    });
+                    handleClose();
+                    router.refresh();
+                }
+            } else {
+                // Create mode: POST request
+                const response = await postModel('/tenants', {
+                    domain: form.domain.trim(),
+                    school_name: form.schoolName.trim(),
+                    address: form.address.trim(),
+                    phone: form.phone.trim(),
+                    level: form.level,
+                    code: form.code.trim() || undefined,
+                    agency_id: agencyId || form.agencyId,
+                    is_active: form.status === 'active',
+                });
+
+                if (isErrorResponse(response)) {
+                    setFeedback({ 
+                        status: 'error', 
+                        text: response.message || 'Failed to create tenant' 
+                    });
+                } else {
+                    setFeedback({ 
+                        status: 'success', 
+                        text: 'Tenant created successfully!' 
+                    });
+                    handleClose();
+                    router.refresh();
+                }
+            }
+        } catch (error: any) {
+            setFeedback({ 
+                status: 'error', 
+                text: error?.message || 'An unexpected error occurred' 
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleClose = () => {
+        onClose(false);
+        if (isEditMode && tenant) {
+            setForm({
+                domain: tenant.domain || '',
+                schoolName: tenant.name,
+                address: tenant.address || '',
+                phone: tenant.phone || '',
+                level: tenant.level || 'primary',
+                code: tenant.code || '',
+                agencyId: tenant.agencyId || '',
+                status: tenant.status || 'active',
+            });
+        } else {
+            setForm({
+                domain: '',
+                schoolName: '',
+                address: '',
+                phone: '',
+                level: 'primary',
+                code: '',
+                agencyId: hasValidAgencyId ? agencyId! : '',
+                status: 'active',
+            });
+        }
+        setErrors({});
+    };
+
+    return (
+        <Dialog size="xl" open={open} onClose={handleClose} className="relative z-20">
+            <DialogTitle>{isEditMode ? 'Edit Tenant' : 'Create New Tenant'}</DialogTitle>
+            <DialogDescription>
+                {isEditMode 
+                    ? 'Update tenant information. Only changed fields will be updated.'
+                    : agencyId 
+                        ? 'Add a new school tenant to your agency.'
+                        : 'Add a new school tenant to the system.'
+                }
+            </DialogDescription>
+            <DialogBody>
+                {isLoadingTenant ? (
+                    <div className="flex items-center justify-center py-8">
+                        <div className="text-sm text-gray-500">Loading tenant details...</div>
+                    </div>
+                ) : (
+                <div className="mt-4 space-y-6">
+                    {/* Row 1: Domain and School Name */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <Field>
+                            <Label className="text-sm font-medium text-gray-900 mb-2 block break-words">Domain</Label>
+                            <Input
+                                type="text"
+                                placeholder="e.g., school.lepa.cc"
+                                value={form.domain}
+                                onChange={(e) => setForm((f) => ({ ...f, domain: e.target.value }))}
+                                invalid={Boolean(errors.domain)}
+                                className="w-full min-w-0"
+                            />
+                            {errors.domain ? <ErrorMessage className="mt-2">{errors.domain}</ErrorMessage> : null}
+                        </Field>
+
+                        <Field>
+                            <Label className="text-sm font-medium text-gray-900 mb-2 block break-words">School Name</Label>
+                            <Input
+                                type="text"
+                                placeholder="e.g., Springfield High School"
+                                value={form.schoolName}
+                                onChange={(e) => setForm((f) => ({ ...f, schoolName: e.target.value }))}
+                                invalid={Boolean(errors.schoolName)}
+                                className="w-full min-w-0"
+                            />
+                            {errors.schoolName ? <ErrorMessage className="mt-2">{errors.schoolName}</ErrorMessage> : null}
+                        </Field>
+                    </div>
+
+                    {/* Row 2: Level and Status */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <Field>
+                            <SearchableSelect
+                                label="Level"
+                                value={form.level}
+                                onChange={(value) => setForm((f) => ({ ...f, level: (value || 'primary') as 'kindergarten' | 'nursery' | 'primary' | 'secondary' }))}
+                                options={[
+                                    { id: 'kindergarten', name: 'Kindergarten' },
+                                    { id: 'nursery', name: 'Nursery' },
+                                    { id: 'primary', name: 'Primary' },
+                                    { id: 'secondary', name: 'Secondary' },
+                                ]}
+                                placeholder="Search level..."
+                                emptyLabel="No levels found"
+                                error={errors.level}
+                            />
+                        </Field>
+
+                        <Field>
+                            <SearchableSelect
+                                label="Status"
+                                value={form.status}
+                                onChange={(value) => setForm((f) => ({ ...f, status: (value || 'active') as 'active' | 'inactive' }))}
+                                options={[
+                                    { id: 'active', name: 'Active' },
+                                    { id: 'inactive', name: 'Inactive' },
+                                ]}
+                                placeholder="Search status..."
+                                emptyLabel="No statuses found"
+                                error={errors.status}
+                            />
+                        </Field>
+                    </div>
+
+                    {/* Row 3: Agency (always show, but disabled when agencyId prop is provided) */}
+                    <Field>
+                        <SearchableSelect
+                            label="Agency"
+                            value={form.agencyId || null}
+                            onChange={(value) => setForm((f) => ({ ...f, agencyId: value || '' }))}
+                            options={agencies}
+                            placeholder={isLoadingAgencies ? "Loading agencies..." : "Search agencies..."}
+                            emptyLabel="No agencies found"
+                            loading={isLoadingAgencies}
+                            error={errors.agencyId}
+                            disabled={isLoadingAgencies || isAgencyFieldDisabled}
+                        />
+                    </Field>
+
+                    {/* Row 4: Address */}
+                    <Field>
+                        <Label className="text-sm font-medium text-gray-900 mb-2 block break-words">Address</Label>
+                        <Input
+                            type="text"
+                            placeholder="e.g., 123 Main Street, City, State"
+                            value={form.address}
+                            onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
+                            invalid={Boolean(errors.address)}
+                            className="w-full min-w-0"
+                        />
+                        {errors.address ? <ErrorMessage className="mt-2">{errors.address}</ErrorMessage> : null}
+                    </Field>
+
+                    {/* Row 5: Phone and Code */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <Field>
+                            <Label className="text-sm font-medium text-gray-900 mb-2 block">Phone</Label>
+                            <Input
+                                type="tel"
+                                placeholder="e.g., +1234567890"
+                                value={form.phone}
+                                onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
+                                invalid={Boolean(errors.phone)}
+                                className="w-full"
+                            />
+                            {errors.phone ? <ErrorMessage className="mt-2">{errors.phone}</ErrorMessage> : null}
+                        </Field>
+
+                        <Field>
+                            <Label className="text-sm font-medium text-gray-900 mb-2 block">
+                                Code <span className="text-gray-400 font-normal">(Optional)</span>
+                            </Label>
+                            <Input
+                                type="text"
+                                placeholder="e.g., SCH001"
+                                value={form.code}
+                                onChange={(e) => setForm((f) => ({ ...f, code: e.target.value }))}
+                                invalid={Boolean(errors.code)}
+                                className="w-full"
+                            />
+                            {errors.code ? <ErrorMessage className="mt-2">{errors.code}</ErrorMessage> : null}
+                        </Field>
+                    </div>
+                </div>
+                )}
+            </DialogBody>
+            <DialogActions>
+                <Button
+                    onClick={handleClose}
+                    disabled={isLoading}
+                >
+                    Cancel
+                </Button>
+                <Button
+                    color="primary"
+                    onClick={handleSubmit}
+                    disabled={isLoading || isLoadingTenant || !isFormValid()}
+                >
+                    {isLoading 
+                        ? (isEditMode ? 'Updating...' : 'Creating...') 
+                        : (isEditMode ? 'Update Tenant' : 'Create Tenant')
+                    }
+                </Button>
+            </DialogActions>
+        </Dialog>
+    );
+};
+
+export default TenantModal;
+

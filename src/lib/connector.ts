@@ -207,7 +207,7 @@ const sendRequest = async <T = any>(
       ),
     };
 
-    // console.log(session?.user?.accessToken);
+    console.log(session?.user?.accessToken);
 
     const requestConfig: AxiosRequestConfig = {
       ...config,
@@ -359,30 +359,43 @@ const sendRequestViaProxy = async <T = any>(
 
     // Handle successful responses
     if (response.status >= 200 && response.status < 300) {
-      const contentType = response.headers.get('content-type');
+      const contentType = response.headers.get('content-type') || '';
       const contentLength = response.headers.get('content-length');
 
-      if (contentType && contentType.includes('application/json')) {
-        if (contentLength === '0') {
-          return null;
-        }
+      // If content-length is 0, return null immediately
+      if (contentLength === '0') {
+        return null;
+      }
 
+      // Check if response has content before parsing
+      // Handle both explicit JSON content-type and cases where it might be missing
+      if (contentType.includes('application/json') || !contentType) {
         try {
           const text = await response.text();
+
+          // If body is empty or whitespace, return null
           if (!text || text.trim() === '') {
             return null;
           }
           return JSON.parse(text);
         } catch (parseError: any) {
+          // If JSON parsing fails, return null instead of throwing
+          // Only log in development to avoid noise
           if (NODE_ENV === 'development') {
             console.warn(
               'Failed to parse JSON response:',
-              parseError?.message || 'Invalid JSON'
+              parseError?.message || 'Invalid JSON',
+              {
+                url: finalUrl,
+                contentType,
+                contentLength,
+              }
             );
           }
           return null;
         }
       }
+      // For non-JSON responses, return null
       return null;
     }
 

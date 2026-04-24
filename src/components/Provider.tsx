@@ -21,7 +21,48 @@ const TokenRefresher = () => {
 
             try {
                 const check = await fetch("/api/auth/session");
-                const sessionData = await check.json();
+                
+                // Check if response is ok and has content
+                if (!check.ok) {
+                    if (!window.location.pathname.startsWith("/auth")) {
+                        await signOut({ callbackUrl: "/" });
+                    }
+                    return;
+                }
+                
+                // Check content type and content length before parsing
+                const contentType = check.headers.get('content-type');
+                const contentLength = check.headers.get('content-length');
+                
+                // If no content or not JSON, treat as no session
+                if (contentLength === '0' || !contentType?.includes('application/json')) {
+                    if (!window.location.pathname.startsWith("/auth")) {
+                        await signOut({ callbackUrl: "/" });
+                    }
+                    return;
+                }
+                
+                // Read response as text first to check if it's empty
+                const text = await check.text();
+                if (!text || text.trim() === '') {
+                    if (!window.location.pathname.startsWith("/auth")) {
+                        await signOut({ callbackUrl: "/" });
+                    }
+                    return;
+                }
+                
+                // Parse JSON safely
+                let sessionData;
+                try {
+                    sessionData = JSON.parse(text);
+                } catch (parseError) {
+                    // If JSON parsing fails, treat as no session
+                    if (!window.location.pathname.startsWith("/auth")) {
+                        await signOut({ callbackUrl: "/" });
+                    }
+                    return;
+                }
+                
                 // Check if session is null or invalid (no user)
                 if (!sessionData || !sessionData.user || check.status === 401) {
                     if (!window.location.pathname.startsWith("/auth")) {
@@ -41,8 +82,14 @@ const TokenRefresher = () => {
                     }
                 }
             } catch (err) {
-                console.error("Error refreshing token:", err);
-                if (session?.user) await signOut({ callbackUrl: "/" });
+                // Silently handle errors - don't log to avoid console noise
+                if (session?.user) {
+                    try {
+                        await signOut({ callbackUrl: "/" });
+                    } catch {
+                        // Silently handle signOut errors
+                    }
+                }
             } finally {
                 isRefreshingRef.current = false;
             }

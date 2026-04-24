@@ -11,11 +11,31 @@ type RefreshResponse = {
 };
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
+  let session = null;
+  try {
+    session = await auth();
+  } catch (error) {
+    console.warn('Error fetching session in refresh route:', error);
+    return NextResponse.json(
+      { message: 'user is unauthenticated' },
+      { 
+        status: 401,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+  }
+
   if (!session?.user) {
     return NextResponse.json(
       { message: 'user is unauthenticated' },
-      { status: 401 }
+      { 
+        status: 401,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
     );
   }
 

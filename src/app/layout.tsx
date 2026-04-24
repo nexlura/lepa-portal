@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Merriweather } from "next/font/google";
+import { Inter } from "next/font/google";
 
 import { auth } from "../auth";
 import "./globals.css";
@@ -11,12 +11,13 @@ const inter = Inter({
   display: "swap",
 });
 
-const merriweather = Merriweather({
-  variable: "--font-merriweather",
-  subsets: ["latin"],
-  weight: ["300", "400", "700", "900"],
-  display: "swap",
-});
+// Temporarily disabled Merriweather due to Turbopack font loading issue
+// const merriweather = Merriweather({
+//   variable: "--font-merriweather",
+//   subsets: ["latin"],
+//   weight: ["300", "400", "700", "900"],
+//   display: "swap",
+// });
 
 export const metadata: Metadata = {
   title: "Lepa",
@@ -32,12 +33,22 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await auth(); // fetch session on server
+  // Fetch session on server with error handling
+  // Use a helper function to safely get session without throwing errors
+  const getSessionSafely = async () => {
+    try {
+      return await auth();
+    } catch {
+      return null;
+    }
+  };
+
+  const session = await getSessionSafely();
 
   return (
     <html lang="en" className="h-full bg-white">
       <body
-        className={`${inter.variable} ${merriweather.variable} antialiased h-full`}
+        className={`${inter.variable} antialiased h-full`}
       >
         <Provider session={session}>
           {children}

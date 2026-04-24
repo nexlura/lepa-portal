@@ -1,7 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
@@ -10,12 +9,15 @@ import {
   UserGroupIcon,
   AcademicCapIcon,
   BookOpenIcon,
+  BuildingOfficeIcon,
   BuildingOffice2Icon,
-  ClipboardDocumentListIcon,
+  UsersIcon,
+  ShieldCheckIcon,
   ChevronDownIcon,
   ChevronRightIcon,
 } from '@heroicons/react/24/outline';
 import { Tooltip } from '@/components/UIKit/Tooltip';
+
 interface NavigationItem {
   name: string;
   href?: string;
@@ -30,33 +32,35 @@ const tenantNavigation: NavigationItem[] = [
   { name: 'Students', href: '/students', icon: UserGroupIcon },
 ];
 
-const systemNavigation: NavigationItem[] = [
-  { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
-  { name: 'Admissions', href: '/admissions', icon: ClipboardDocumentListIcon },
-  { name: 'Tenants', href: '/settings?section=system', icon: BuildingOffice2Icon },
+const systemAdminNavigation: NavigationItem[] = [
+  { name: 'Dashboard', href: '/system-admin/dashboard', icon: HomeIcon },
+  { name: 'Agencies', href: '/system-admin/agencies', icon: BuildingOffice2Icon },
+  { name: 'Tenants', href: '/system-admin/tenants', icon: BuildingOfficeIcon },
+  { name: 'System Users', href: '/system-admin/users', icon: UsersIcon },
+  { name: 'Roles & Permissions', href: '/system-admin/roles', icon: ShieldCheckIcon },
 ];
 
 const agencyNavigation: NavigationItem[] = [
-  { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
-  { name: 'Admissions', href: '/admissions', icon: ClipboardDocumentListIcon },
+  { name: 'Dashboard', href: '/agency/dashboard', icon: HomeIcon },
+  { name: 'Tenants', href: '/agency/tenants', icon: BuildingOfficeIcon },
+  { name: 'Users', href: '/agency/users', icon: UsersIcon },
 ];
 
-const SidebarNavigation: React.FC<{ collapsed?: boolean }> = ({
-  collapsed,
-}) => {
+const SidebarNavigation: React.FC<{ collapsed?: boolean }> = ({ collapsed }) => {
   const pathname = usePathname();
   const { data: session } = useSession();
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
+
   const role = (session?.user?.role || '').toLowerCase();
-  const navigation = useMemo(
-    () =>
-      role.includes('system') || role.includes('super') || role.includes('platform')
-        ? systemNavigation
-        : role.includes('agency')
-          ? agencyNavigation
-          : tenantNavigation,
-    [role],
-  );
+  const navigation = useMemo(() => {
+    if (role.includes('system') || role.includes('super') || role.includes('platform') || pathname.startsWith('/system-admin')) {
+      return systemAdminNavigation;
+    }
+    if (role.includes('agency') || pathname.startsWith('/agency')) {
+      return agencyNavigation;
+    }
+    return tenantNavigation;
+  }, [role, pathname]);
 
   const toggleExpanded = (itemName: string) => {
     setExpandedItems((prev) =>
@@ -66,7 +70,6 @@ const SidebarNavigation: React.FC<{ collapsed?: boolean }> = ({
     );
   };
 
-  // Keep parents expanded if pathname matches any of their subitems
   useEffect(() => {
     const activeParents = navigation
       .filter((item) =>
@@ -90,7 +93,7 @@ const SidebarNavigation: React.FC<{ collapsed?: boolean }> = ({
   const isSubItemActive = (href: string) => pathname === href;
 
   return (
-    <nav className={`flex-1 py-6 space-y-2 px-4`}>
+    <nav className="flex-1 py-6 space-y-2 px-4">
       {navigation.map((item) => {
         const isActive = isItemActive(item);
         const isExpanded = expandedItems.includes(item.name);
@@ -129,19 +132,16 @@ const SidebarNavigation: React.FC<{ collapsed?: boolean }> = ({
               )}
 
               {!collapsed && isExpanded && (
-                <div className="ml-5 mt-2 ">
+                <div className="ml-5 mt-2">
                   {item.subItems.map((subItem) => (
                     <Link
                       key={subItem.name}
                       href={subItem.href}
-                      className={`relative border-l-2 border-gray-200 group flex text-gray-500 items-center pl-4 py-1 text-[0.84rem] font-medium transition-colors
-                                                    ${
-                                                      isSubItemActive(
-                                                        subItem.href,
-                                                      )
-                                                        ? 'text-gray-900 border-primary-300'
-                                                        : 'hover:bg-primary-50 hover:text-gray-900 '
-                                                    }`}
+                      className={`relative border-l-2 border-gray-200 group flex text-gray-500 items-center pl-4 py-1 text-[0.84rem] font-medium transition-colors ${
+                        isSubItemActive(subItem.href)
+                          ? 'text-gray-900 border-primary-300'
+                          : 'hover:bg-primary-50 hover:text-gray-900'
+                      }`}
                     >
                       {subItem.name}
                     </Link>
