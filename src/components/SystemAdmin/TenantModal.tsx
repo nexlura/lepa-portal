@@ -87,7 +87,9 @@ const TenantModal = ({
     const isEditMode = !!tenant;
 
     // Determine if agency field should be disabled (when agencyId is provided)
-    const hasValidAgencyId = agencyId && typeof agencyId === 'string' && agencyId.trim().length > 0;
+    const hasValidAgencyId = Boolean(
+        agencyId && typeof agencyId === 'string' && agencyId.trim().length > 0
+    );
     const isAgencyFieldDisabled = hasValidAgencyId;
 
     const [form, setForm] = useState<TenantFormData>({
@@ -97,7 +99,7 @@ const TenantModal = ({
         phone: '',
         level: 'primary',
         code: '',
-        agencyId: hasValidAgencyId ? agencyId : '',
+        agencyId: hasValidAgencyId ? String(agencyId) : '',
         status: 'active',
     });
 
@@ -224,7 +226,6 @@ const TenantModal = ({
             form.schoolName.trim() !== '' &&
             form.address.trim() !== '' &&
             form.phone.trim() !== '' &&
-            form.level !== '' &&
             (hasValidAgencyId || form.agencyId !== '')
         );
     };

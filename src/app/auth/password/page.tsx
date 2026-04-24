@@ -1,20 +1,3 @@
-'use client'
+import AuthPasswordClient from './AuthPasswordClient';
 
-import PasswordForm from '@/components/SignIn/PasswordForm';
-import { useSearchParams } from 'next/navigation';
-
-const AuthPasswordPage = () => {
-    const searchParams = useSearchParams();
-
-    const email = searchParams.get('email');
-    const phone = searchParams.get('phone');
-
-    return (
-        <div className="py-8 px-4 sm:px-10">
-            {email && <PasswordForm identifier={email} />}
-            {phone && <PasswordForm identifier={phone} />}
-        </div>
-    )
-}
-
-export default AuthPasswordPage
+export default AuthPasswordClient;

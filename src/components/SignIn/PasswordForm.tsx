@@ -1,5 +1,4 @@
 import { HTMLInputTypeAttribute, useActionState, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 
 import { authenticate } from '@/lib/actions';
@@ -7,10 +6,14 @@ import { Button } from '@/components/UIKit/Button'
 import { Field, Label } from '@/components/UIKit/Fieldset'
 import FormSubmitFeedback from '../SubmitFeedback';
 
+type PasswordFormProps = {
+    identifier: string;
+    /** From query string; defaults to `/` so middleware can apply role-based redirect */
+    callbackUrl?: string;
+};
 
-
-const PasswordForm = (props: { identifier: string }) => {
-    const searchParams = useSearchParams()
+const PasswordForm = (props: PasswordFormProps) => {
+    const callbackUrl = props.callbackUrl ?? '/';
     const [errorMessage, formAction, isPending] = useActionState(
         authenticate,
         undefined,
@@ -18,21 +21,13 @@ const PasswordForm = (props: { identifier: string }) => {
 
     const [inputType, setInputType] = useState<HTMLInputTypeAttribute | undefined>('password')
 
-
-    // Don't set a default callbackUrl - let middleware handle role-based redirect
-    const callbackUrl = searchParams.get('callbackUrl') || '/';
-    const email = searchParams.get('email');
-    const phone = searchParams.get('phone');
-
-
     return (
         <form className="space-y-6" action={formAction}>
             {errorMessage && (
                 <FormSubmitFeedback msg={errorMessage} />
             )}
 
-            {email && <input type="hidden" name="email" value={props.identifier} />}
-            {phone && <input type="hidden" name="email" value={props.identifier} />}
+            <input type="hidden" name="email" value={props.identifier} />
 
 
             <Field>

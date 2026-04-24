@@ -3,16 +3,7 @@
 import { useState } from 'react';
 import { BuildingOfficeIcon } from '@heroicons/react/24/outline';
 import TenantDetailsModal from '@/components/SystemAdmin/TenantDetailsModal';
-
-interface Tenant {
-    id: string;
-    name: string;
-    status: 'active' | 'inactive';
-    studentCount: number;
-    teacherCount: number;
-    classCount: number;
-    createdAt: string;
-}
+import { Tenant } from '@/app/(portal)/system-admin/tenants/page';
 
 interface AgencyTenantsOverviewProps {
     tenants: Tenant[];
@@ -91,7 +82,10 @@ const AgencyTenantsOverview = ({ tenants }: AgencyTenantsOverviewProps) => {
                 <TenantDetailsModal
                     open={isViewModalOpen}
                     onClose={handleCloseModal}
-                    tenantId={selectedTenant.id}
+                    tenant={selectedTenant}
+                    onEdit={() => {
+                        // Agency dashboard currently exposes read-only tenant details.
+                    }}
                 />
             )}
         </>

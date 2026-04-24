@@ -71,6 +71,11 @@ const UserAccessManagementModal = ({ open, onClose, userId, userName }: UserAcce
                 return;
             }
 
+            if (!response) {
+                setError('Failed to load available roles');
+                return;
+            }
+
             let roles: BackendRoleData[] = [];
             if (response.data) {
                 if (Array.isArray(response.data)) {

@@ -56,8 +56,11 @@ export async function assignRoleToUser(
         if (isErrorResponse(response)) {
             return {
                 success: false,
-                error: response.message || response.error?.message || 'Failed to assign role',
+                error: response.message || 'Failed to assign role',
             };
+        }
+        if (!response) {
+            return { success: false, error: 'Unexpected empty response' };
         }
 
         return {
@@ -79,7 +82,7 @@ export async function getUserRoles(userId: string): Promise<{ success: boolean; 
     try {
         const response = await getModel<{ 
             success?: boolean; 
-            data?: Role[] | { roles?: Role[]; user_roles?: Role[] };
+            data?: Role[] | { roles?: Role[]; user_roles?: Role[]; data?: Role[] };
             roles?: Role[];
             user_roles?: Role[];
             message?: string;
@@ -88,8 +91,11 @@ export async function getUserRoles(userId: string): Promise<{ success: boolean; 
         if (isErrorResponse(response)) {
             return {
                 success: false,
-                error: response.message || response.error?.message || 'Failed to fetch user roles',
+                error: response.message || 'Failed to fetch user roles',
             };
+        }
+        if (!response) {
+            return { success: false, error: 'Unexpected empty response' };
         }
 
         // Handle different response structures
@@ -175,8 +181,11 @@ export async function getUsersByRole(
         if (isErrorResponse(response)) {
             return {
                 success: false,
-                error: response.message || response.error?.message || 'Failed to fetch users',
+                error: response.message || 'Failed to fetch users',
             };
+        }
+        if (!response) {
+            return { success: false, error: 'Unexpected empty response' };
         }
 
         const users = response.data?.users || response.users || [];
@@ -208,8 +217,11 @@ export async function removeRoleFromUser(
         if (isErrorResponse(response)) {
             return {
                 success: false,
-                error: response.message || response.error?.message || 'Failed to remove role',
+                error: response.message || 'Failed to remove role',
             };
+        }
+        if (!response) {
+            return { success: false, error: 'Unexpected empty response' };
         }
 
         return {
@@ -240,8 +252,11 @@ export async function bulkAssignRolesToUser(
         if (isErrorResponse(response)) {
             return {
                 success: false,
-                error: response.message || response.error?.message || 'Failed to assign roles',
+                error: response.message || 'Failed to assign roles',
             };
+        }
+        if (!response) {
+            return { success: false, error: 'Unexpected empty response' };
         }
 
         return {
@@ -273,8 +288,11 @@ export async function bulkRemoveRolesFromUser(
         if (isErrorResponse(response)) {
             return {
                 success: false,
-                error: response.message || response.error?.message || 'Failed to remove roles',
+                error: response.message || 'Failed to remove roles',
             };
+        }
+        if (!response) {
+            return { success: false, error: 'Unexpected empty response' };
         }
 
         return {
@@ -309,8 +327,11 @@ export async function assignPermissionToRole(
         if (isErrorResponse(response)) {
             return {
                 success: false,
-                error: response.message || response.error?.message || 'Failed to assign permission',
+                error: response.message || 'Failed to assign permission',
             };
+        }
+        if (!response) {
+            return { success: false, error: 'Unexpected empty response' };
         }
 
         return {
@@ -338,8 +359,11 @@ export async function removePermissionFromRole(
         if (isErrorResponse(response)) {
             return {
                 success: false,
-                error: response.message || response.error?.message || 'Failed to remove permission',
+                error: response.message || 'Failed to remove permission',
             };
+        }
+        if (!response) {
+            return { success: false, error: 'Unexpected empty response' };
         }
 
         return {
@@ -370,8 +394,11 @@ export async function bulkAssignPermissionsToRole(
         if (isErrorResponse(response)) {
             return {
                 success: false,
-                error: response.message || response.error?.message || 'Failed to assign permissions',
+                error: response.message || 'Failed to assign permissions',
             };
+        }
+        if (!response) {
+            return { success: false, error: 'Unexpected empty response' };
         }
 
         return {
@@ -398,8 +425,11 @@ export async function getRolePermissions(roleId: string): Promise<{ success: boo
         if (isErrorResponse(response)) {
             return {
                 success: false,
-                error: response.message || response.error?.message || 'Failed to fetch role permissions',
+                error: response.message || 'Failed to fetch role permissions',
             };
+        }
+        if (!response) {
+            return { success: false, error: 'Unexpected empty response' };
         }
 
         const permissions = response.data || response.permissions || [];
@@ -431,8 +461,11 @@ export async function getAllPermissions(): Promise<{ success: boolean; permissio
         if (isErrorResponse(response)) {
             return {
                 success: false,
-                error: response.message || response.error?.message || 'Failed to fetch permissions',
+                error: response.message || 'Failed to fetch permissions',
             };
+        }
+        if (!response) {
+            return { success: false, error: 'Unexpected empty response' };
         }
 
         const permissions = response.data || response.permissions || [];
@@ -464,8 +497,11 @@ export async function getUserPermissions(userId: string): Promise<{ success: boo
         if (isErrorResponse(response)) {
             return {
                 success: false,
-                error: response.message || response.error?.message || 'Failed to fetch user permissions',
+                error: response.message || 'Failed to fetch user permissions',
             };
+        }
+        if (!response) {
+            return { success: false, error: 'Unexpected empty response' };
         }
 
         const permissions = response.data || response.permissions || [];
@@ -497,8 +533,11 @@ export async function checkUserPermission(
         if (isErrorResponse(response)) {
             return {
                 success: false,
-                error: response.message || response.error?.message || 'Failed to check permission',
+                error: response.message || 'Failed to check permission',
             };
+        }
+        if (!response) {
+            return { success: false, error: 'Unexpected empty response' };
         }
 
         const hasPermission = response.has_permission ?? response.hasPermission ?? false;
@@ -530,8 +569,11 @@ export async function checkUserHasAnyPermission(
         if (isErrorResponse(response)) {
             return {
                 success: false,
-                error: response.message || response.error?.message || 'Failed to check permissions',
+                error: response.message || 'Failed to check permissions',
             };
+        }
+        if (!response) {
+            return { success: false, error: 'Unexpected empty response' };
         }
 
         const hasPermission = response.has_permission ?? response.hasPermission ?? false;

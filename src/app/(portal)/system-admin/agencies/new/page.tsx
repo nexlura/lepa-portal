@@ -193,7 +193,7 @@ const NewAgencyPage = () => {
                 <div className="mt-8 flex items-center justify-end gap-3">
                     <Button
                         type="button"
-                        color="secondary"
+                        outline
                         onClick={() => router.back()}
                         disabled={isLoading}
                     >
@@ -201,7 +201,7 @@ const NewAgencyPage = () => {
                     </Button>
                     <Button
                         type="button"
-                        color="secondary"
+                        outline
                         onClick={handleReset}
                         disabled={isLoading}
                     >

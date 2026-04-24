@@ -116,7 +116,7 @@ const PermissionModal = ({
                 : await postModel('/rbac/permissions', requestData);
 
             if (isErrorResponse(response)) {
-                const errorMessage = response.message || response.error?.message || 'Failed to create permission';
+                const errorMessage = response.message || 'Failed to create permission';
                 setFeedback({ 
                     status: 'error', 
                     text: errorMessage 
