@@ -3,6 +3,9 @@ import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { headers } from 'next/headers';
 
+/** Portal uses `headers()` + session; avoid static prerender (and connector `headers()` during SSG). */
+export const dynamic = 'force-dynamic';
+
 const APP_HOST = process.env.NEXT_PUBLIC_APP_HOST || 'app.lepa.cc';
 const BASE_DOMAIN = process.env.NEXT_PUBLIC_BASE_DOMAIN || 'lepa.cc';
 

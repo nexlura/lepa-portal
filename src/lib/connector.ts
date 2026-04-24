@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios, { AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
+import type { Session } from 'next-auth';
 import { NextRequest } from 'next/server';
 import { auth } from '@/auth';
 import { getTenantDomain } from '@/utils/hostHeader';
@@ -155,19 +156,24 @@ const sendRequest = async <T = any>(
     }
 
     // Server-side: use direct external API call
-    // Automatically get session and host header
-    const session = await auth().catch(() => null);
+    // Automatically get session and host header (avoid surfacing DYNAMIC_SERVER_USAGE during SSG)
+    let session: Session | null = null;
+    try {
+      session = await auth();
+    } catch {
+      session = null;
+    }
 
     // Dynamically import headers() only on server-side to avoid client-side import errors
     let hostHeader = '';
     try {
       const { headers: getHeaders } = await import('next/headers');
-      const headerList = await getHeaders().catch(() => null);
+      const headerList = await getHeaders();
       const host =
-        headerList?.get('host') || headerList?.get('x-forwarded-host') || '';
+        headerList.get('host') || headerList.get('x-forwarded-host') || '';
       hostHeader = getTenantDomain(host);
     } catch {
-      // If headers() is not available (e.g., in API routes or client context), use env fallback
+      // Static prerender, middleware, or other contexts without request headers
       hostHeader = process.env.NEXT_PUBLIC_LEPA_HOST_HEADER || '';
     }
 
