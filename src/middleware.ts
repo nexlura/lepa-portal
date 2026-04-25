@@ -32,6 +32,7 @@ export async function middleware(req: NextRequest) {
   // Treat a valid session cookie as authenticated even if token decode fails in middleware.
   // This avoids production login loops caused by edge/runtime token decode inconsistencies.
   const isAuthenticated = Boolean(token) || hasSessionCookie;
+  const hasResolvedRole = Boolean(token?.role);
   const roleHome = getRoleHomePath(token?.role as string | undefined);
   // Skip middleware for /auth routes
   if (pathname.startsWith('/auth')) {
@@ -59,13 +60,18 @@ export async function middleware(req: NextRequest) {
   }
 
   // Enforce role home boundaries.
-  if (pathname.startsWith('/system-admin') && !roleHome.startsWith('/system-admin')) {
+  if (
+    hasResolvedRole &&
+    pathname.startsWith('/system-admin') &&
+    !roleHome.startsWith('/system-admin')
+  ) {
     return NextResponse.redirect(new URL(roleHome, req.url));
   }
-  if (pathname.startsWith('/agency') && !roleHome.startsWith('/agency')) {
+  if (hasResolvedRole && pathname.startsWith('/agency') && !roleHome.startsWith('/agency')) {
     return NextResponse.redirect(new URL(roleHome, req.url));
   }
   if (
+    hasResolvedRole &&
     pathname === '/dashboard' &&
     (isSystemRoleHome(roleHome) || isAgencyRoleHome(roleHome))
   ) {
