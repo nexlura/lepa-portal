@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 import { handlePathRedirect } from './utils/pathRedirect';
+import { getRoleHomePath, isAgencyRoleHome, isSystemRoleHome } from './utils/roleHome';
 
 export const config = {
   matcher: [
@@ -10,13 +11,6 @@ export const config = {
     // - public files (optional)
     '/((?!api/auth|_next/static|_next/image|favicon.ico|auth).*)',
   ],
-};
-
-const getRoleHome = (role?: string) => {
-  const r = (role || '').toLowerCase();
-  if (r.includes('system')) return '/system-admin/dashboard';
-  if (r.includes('agency')) return '/agency/dashboard';
-  return '/dashboard';
 };
 
 export async function middleware(req: NextRequest) {
@@ -38,7 +32,7 @@ export async function middleware(req: NextRequest) {
   // Treat a valid session cookie as authenticated even if token decode fails in middleware.
   // This avoids production login loops caused by edge/runtime token decode inconsistencies.
   const isAuthenticated = Boolean(token) || hasSessionCookie;
-  const roleHome = getRoleHome(token?.role as string | undefined);
+  const roleHome = getRoleHomePath(token?.role as string | undefined);
   // Skip middleware for /auth routes
   if (pathname.startsWith('/auth')) {
     if (isAuthenticated) {
@@ -73,7 +67,7 @@ export async function middleware(req: NextRequest) {
   }
   if (
     pathname === '/dashboard' &&
-    (roleHome.startsWith('/system-admin') || roleHome.startsWith('/agency'))
+    (isSystemRoleHome(roleHome) || isAgencyRoleHome(roleHome))
   ) {
     return NextResponse.redirect(new URL(roleHome, req.url));
   }

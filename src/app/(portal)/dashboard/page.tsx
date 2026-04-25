@@ -5,6 +5,9 @@ import DashboardStats from '@/components/Dashboard/Analytics/Stats';
 import ClassOverview from '@/components/Dashboard/Analytics/ClassOverview';
 import TeachersSection from '@/components/Dashboard/Analytics/TeachersSection';
 import StudentInsights from '@/components/Dashboard/Analytics/StudentInsights';
+import { auth } from '@/auth';
+import { redirect } from 'next/navigation';
+import { getRoleHomePath } from '@/utils/roleHome';
 
 export const dynamic = 'force-dynamic';
 
@@ -75,6 +78,12 @@ interface AnalyticsResponse {
 }
 
 export default async function AdminDashboard() {
+    const session = await auth();
+    const roleHomePath = getRoleHomePath(session?.user?.role);
+    if (roleHomePath !== '/dashboard') {
+        redirect(roleHomePath);
+    }
+
     // Fetch analytics data from API with error handling
     let analytics: AnalyticsResponse['data'] | undefined;
     let analyticsError: string | null = null;
