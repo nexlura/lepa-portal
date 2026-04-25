@@ -78,7 +78,7 @@ const RolesPage = async ({ searchParams }: PageProps) => {
         const currentPage = resolvedSearchParams?.page ? parseInt(resolvedSearchParams.page, 10) : 1;
         const pageParam = currentPage > 1 ? `&page=${currentPage}` : '';
         
-        const res = await getModel<RolesApiResponse>(`/rbac/roles?limit=10${pageParam}`).catch((error: any) => {
+        const rolesRequest = getModel<RolesApiResponse>(`/rbac/roles?limit=10${pageParam}`).catch((error: any) => {
             // Catch any errors from getModel, including auth/session errors
             // Suppress JSON parse errors and ClientFetchErrors as they're handled gracefully
             const errorMessage = error?.message || String(error || '');
@@ -91,6 +91,8 @@ const RolesPage = async ({ searchParams }: PageProps) => {
             // Don't log errors to avoid console noise
             return null;
         });
+        const permissionsRequest = getModel<PermissionsApiResponse>(`/rbac/permissions?limit=10${pageParam}`).catch(() => null);
+        const [res, permissionsRes] = await Promise.all([rolesRequest, permissionsRequest]);
         
         // Check if response is null or undefined
         if (!res) {
@@ -146,9 +148,6 @@ const RolesPage = async ({ searchParams }: PageProps) => {
             }
         }
 
-        // Fetch permissions
-        const permissionsRes = await getModel<PermissionsApiResponse>(`/rbac/permissions?limit=10${pageParam}`).catch(() => null);
-        
         if (permissionsRes && !isErrorResponse(permissionsRes)) {
             let backendPermissions: BackendPermissionData[] = [];
             

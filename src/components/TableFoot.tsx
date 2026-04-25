@@ -7,7 +7,7 @@ export interface TableFootProps {
     onPageChange: (page: number) => void
 }
 
-const TableFoot = ({ totalPages, currentPage = 1, onPageChange }: Partial<TableFootProps> & { totalPages: number }) => {
+const TableFoot = ({ totalPages, currentPage, onPageChange }: Partial<TableFootProps> & { totalPages: number }) => {
     const searchParams = useSearchParams()
     const route = useRouter()
     const pathname = usePathname()

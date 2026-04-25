@@ -15,6 +15,7 @@ import {
   ShieldCheckIcon,
   ChevronDownIcon,
   ChevronRightIcon,
+  ArrowPathIcon,
 } from '@heroicons/react/24/outline';
 import { Tooltip } from '@/components/UIKit/Tooltip';
 
@@ -50,6 +51,7 @@ const SidebarNavigation: React.FC<{ collapsed?: boolean }> = ({ collapsed }) => 
   const pathname = usePathname();
   const { data: session } = useSession();
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
+  const [pendingHref, setPendingHref] = useState<string | null>(null);
 
   const role = (session?.user?.role || '').toLowerCase();
   const navigation = useMemo(() => {
@@ -79,6 +81,10 @@ const SidebarNavigation: React.FC<{ collapsed?: boolean }> = ({ collapsed }) => 
 
     setExpandedItems(activeParents);
   }, [pathname, navigation]);
+
+  useEffect(() => {
+    setPendingHref(null);
+  }, [pathname]);
 
   const isItemActive = (item: NavigationItem) => {
     if (item.href) {
@@ -156,6 +162,11 @@ const SidebarNavigation: React.FC<{ collapsed?: boolean }> = ({ collapsed }) => 
           <Link
             key={item.name}
             href={item.href!}
+            onClick={() => {
+              if (pathname !== item.href) {
+                setPendingHref(item.href!);
+              }
+            }}
             className={`group flex text-gray-500 items-center ${collapsed ? 'justify-center' : 'px-3'} py-2 text-sm font-medium rounded-md transition-colors ${
               isActive
                 ? 'bg-primary-100 text-gray-900'
@@ -166,6 +177,9 @@ const SidebarNavigation: React.FC<{ collapsed?: boolean }> = ({ collapsed }) => 
               className={`${collapsed ? '' : 'mr-3'} h-5 w-5 flex-shrink-0`}
             />
             {!collapsed && item.name}
+            {!collapsed && pendingHref === item.href && (
+              <ArrowPathIcon className="ml-auto h-4 w-4 animate-spin text-primary-600" />
+            )}
           </Link>
         );
 
