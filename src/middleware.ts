@@ -21,13 +21,19 @@ const getRoleHome = (role?: string) => {
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  const hasSessionCookie =
-    req.cookies.has('authjs.session-token') ||
-    req.cookies.has('__Secure-authjs.session-token') ||
-    req.cookies.has('next-auth.session-token') ||
-    req.cookies.has('__Secure-next-auth.session-token');
+  const hasSessionCookie = req.cookies
+    .getAll()
+    .some(({ name }) =>
+      name.includes('authjs.session-token') ||
+      name.includes('next-auth.session-token')
+    );
   const token = hasSessionCookie
-    ? await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
+    ? await getToken({
+        req,
+        // Support both Auth.js v5 and legacy NextAuth env names.
+        // If neither is set, getToken falls back to its internal resolution.
+        secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
+      })
     : null;
   const isAuthenticated = Boolean(token);
   const roleHome = getRoleHome(token?.role as string | undefined);
