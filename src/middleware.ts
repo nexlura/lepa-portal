@@ -29,10 +29,11 @@ export async function middleware(req: NextRequest) {
   const token = hasSessionCookie
     ? await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
     : null;
+  const isAuthenticated = Boolean(token);
   const roleHome = getRoleHome(token?.role as string | undefined);
   // Skip middleware for /auth routes
   if (pathname.startsWith('/auth')) {
-    if (hasSessionCookie) {
+    if (isAuthenticated) {
       return NextResponse.redirect(new URL(roleHome, req.url));
     }
     return NextResponse.next();
@@ -40,7 +41,7 @@ export async function middleware(req: NextRequest) {
 
   // Redirect root based on presence of auth session cookie.
   if (pathname === '/') {
-    if (hasSessionCookie) {
+    if (isAuthenticated) {
       return NextResponse.redirect(new URL(roleHome, req.url));
     }
 
@@ -49,7 +50,7 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
-  if (!hasSessionCookie) {
+  if (!isAuthenticated) {
     const redirectUrl = new URL('/auth/verify', req.url);
     redirectUrl.searchParams.set('phone', '');
     return NextResponse.redirect(redirectUrl);
