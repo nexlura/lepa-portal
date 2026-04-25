@@ -35,7 +35,9 @@ export async function middleware(req: NextRequest) {
         secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
       })
     : null;
-  const isAuthenticated = Boolean(token);
+  // Treat a valid session cookie as authenticated even if token decode fails in middleware.
+  // This avoids production login loops caused by edge/runtime token decode inconsistencies.
+  const isAuthenticated = Boolean(token) || hasSessionCookie;
   const roleHome = getRoleHome(token?.role as string | undefined);
   // Skip middleware for /auth routes
   if (pathname.startsWith('/auth')) {
