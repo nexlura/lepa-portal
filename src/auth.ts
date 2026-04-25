@@ -197,26 +197,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return token as JWT;
     },
     async redirect({ url, baseUrl }) {
-      try {
-        const { headers } = await import('next/headers');
-        const h = await headers();
-        const host = h.get('x-forwarded-host') || h.get('host');
-        const proto = h.get('x-forwarded-proto') || 'https';
-        const dynamicBaseUrl = host ? `${proto}://${host}` : baseUrl;
-
-        if (url.startsWith('/')) {
-          return `${dynamicBaseUrl}${url}`;
-        }
-
-        const targetUrl = new URL(url);
-        if (targetUrl.origin === dynamicBaseUrl) {
-          return url;
-        }
-
-        return dynamicBaseUrl;
-      } catch {
-        return baseUrl;
+      if (url.startsWith('/')) {
+        return url;
       }
+
+      try {
+        const targetUrl = new URL(url);
+        if (targetUrl.origin === baseUrl) {
+          return `${targetUrl.pathname}${targetUrl.search}${targetUrl.hash}`;
+        }
+      } catch {
+        // Fall through to safe default.
+      }
+
+      return '/';
     },
     async session({ session, token }) {
       if (token) {
