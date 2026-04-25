@@ -10,12 +10,19 @@ const APP_HOST = process.env.NEXT_PUBLIC_APP_HOST || 'app.lepa.cc';
 const BASE_DOMAIN = process.env.NEXT_PUBLIC_BASE_DOMAIN || 'lepa.cc';
 
 const normalizeRole = (role?: string | null) => (role || '').toLowerCase();
+const isLocalHost = (host?: string | null) =>
+    host === 'localhost' || host === '127.0.0.1';
 const isSystemRole = (role?: string | null) => {
     const r = normalizeRole(role);
     return r.includes('system') || r.includes('super') || r.includes('platform');
 };
 const isAgencyRole = (role?: string | null) => normalizeRole(role).includes('agency');
 const isTenantRole = (role?: string | null) => !isSystemRole(role) && !isAgencyRole(role);
+const getRoleHomePath = (role?: string | null) => {
+    if (isSystemRole(role)) return '/system-admin/dashboard';
+    if (isAgencyRole(role)) return '/agency/dashboard';
+    return '/dashboard';
+};
 const slugifySubdomain = (value?: string | null) =>
     (value || '').toLowerCase().replace(/[^a-z0-9]+/g, '').replace(/^-+|-+$/g, '');
 
@@ -44,7 +51,10 @@ export default async function AdminLayout({
 
     // System/agency users should remain on the app host.
     if ((isSystemRole(role) || isAgencyRole(role)) && currentHost && currentHost !== APP_HOST) {
-        redirect(`${proto}://${APP_HOST}/dashboard`);
+        // Keep local development sessions on localhost instead of forcing app host.
+        if (!isLocalHost(currentHost)) {
+            redirect(`${proto}://${APP_HOST}${getRoleHomePath(role)}`);
+        }
     }
 
     return <DashboardLayout>{children}</DashboardLayout>;
