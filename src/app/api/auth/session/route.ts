@@ -1,5 +1,5 @@
 import { auth } from '@/auth';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { handlers } from '@/auth';
 
 export async function GET() {
@@ -54,6 +54,6 @@ export async function GET() {
   }
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   return handlers.POST(req);
 }
